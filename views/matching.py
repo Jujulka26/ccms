@@ -8,6 +8,323 @@ from utils.model import load_resources
 from utils.ui import render_hero, open_card, close_card
 
 
+# ── Custom CSS ────────────────────────────────────────────────────────────────
+def inject_styles():
+    st.markdown(
+        """
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+        /* ── Base reset ───────────────────────────────────────────────── */
+        html, body, [class*="css"] {
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .stApp {
+            background: #F7F5F0;
+        }
+
+        /* ── Hero section ─────────────────────────────────────────────── */
+        .hero-wrap {
+            background: #1A1A2E;
+            border-radius: 20px;
+            padding: 56px 52px 48px;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-wrap::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 320px; height: 320px;
+            background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-wrap::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; left: 40px;
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-eyebrow {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #A78BFA;
+            background: rgba(167,139,250,0.12);
+            border: 1px solid rgba(167,139,250,0.25);
+            border-radius: 20px;
+            padding: 4px 14px;
+            margin-bottom: 20px;
+        }
+        .hero-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 42px;
+            line-height: 1.15;
+            color: #FFFFFF;
+            margin: 0 0 16px;
+            letter-spacing: -0.5px;
+        }
+        .hero-subtitle {
+            font-size: 16px;
+            color: rgba(255,255,255,0.55);
+            max-width: 480px;
+            line-height: 1.65;
+            margin: 0;
+        }
+        .hero-stats {
+            display: flex;
+            gap: 32px;
+            margin-top: 36px;
+            padding-top: 28px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .hero-stat-num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 28px;
+            color: #FFFFFF;
+            line-height: 1;
+        }
+        .hero-stat-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── Form card ────────────────────────────────────────────────── */
+        .form-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 36px 40px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+        }
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #8B5CF6;
+            margin: 0 0 20px;
+        }
+        .section-divider {
+            border: none;
+            border-top: 1px solid #F0EDE8;
+            margin: 28px 0;
+        }
+
+        /* ── Streamlit input overrides ────────────────────────────────── */
+        div[data-testid="stNumberInput"] input,
+        div[data-testid="stSelectbox"] > div > div {
+            border-radius: 10px !important;
+            border: 1.5px solid #E5E2DC !important;
+            background: #FAFAF8 !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 14px !important;
+            transition: border-color 0.2s;
+        }
+        div[data-testid="stNumberInput"] input:focus,
+        div[data-testid="stSelectbox"] > div > div:focus-within {
+            border-color: #8B5CF6 !important;
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.1) !important;
+        }
+        label[data-testid="stWidgetLabel"] p {
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            color: #4A4A5A !important;
+            margin-bottom: 6px !important;
+        }
+
+        /* ── Submit button ────────────────────────────────────────────── */
+        div[data-testid="stFormSubmitButton"] button {
+            background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            padding: 14px 0 !important;
+            letter-spacing: 0.01em;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(124,58,237,0.35);
+        }
+        div[data-testid="stFormSubmitButton"] button:hover {
+            box-shadow: 0 6px 20px rgba(124,58,237,0.45) !important;
+            transform: translateY(-1px);
+        }
+
+        /* ── Result cards ─────────────────────────────────────────────── */
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        .result-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 28px;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+        .result-card.primary {
+            background: #1A1A2E;
+            border-color: transparent;
+        }
+        .result-card-badge {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-radius: 20px;
+            padding: 3px 10px;
+            display: inline-block;
+            margin-bottom: 18px;
+        }
+        .badge-primary { background: rgba(139,92,246,0.2); color: #A78BFA; }
+        .badge-secondary { background: #F0EDE8; color: #8B8B9A; }
+
+        .compat-score {
+            font-family: 'DM Serif Display', serif;
+            font-size: 52px;
+            line-height: 1;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+        }
+        .compat-score-secondary {
+            font-family: 'DM Serif Display', serif;
+            font-size: 52px;
+            line-height: 1;
+            color: #1A1A2E;
+            margin-bottom: 4px;
+        }
+        .compat-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.45);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 24px;
+        }
+        .compat-label-secondary {
+            font-size: 12px;
+            color: #A0A0B0;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 24px;
+        }
+        .counselor-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 16px;
+        }
+        .counselor-name-secondary {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1A1A2E;
+            margin-bottom: 16px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .info-row-secondary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #F0EDE8;
+        }
+        .info-key { font-size: 12px; color: rgba(255,255,255,0.4); }
+        .info-key-secondary { font-size: 12px; color: #A0A0B0; }
+        .info-val { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 500; }
+        .info-val-secondary { font-size: 13px; color: #2D2D3F; font-weight: 500; }
+
+        /* ── Explanation card ─────────────────────────────────────────── */
+        .explain-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 32px 36px;
+            border: 1px solid rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+        }
+        .explain-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px;
+            color: #1A1A2E;
+            margin: 0 0 24px;
+        }
+        .point-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 0;
+            border-bottom: 1px solid #F5F3EF;
+            font-size: 14px;
+        }
+        .dot-green {
+            width: 8px; height: 8px;
+            background: #10B981;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dot-amber {
+            width: 8px; height: 8px;
+            background: #F59E0B;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── Table ────────────────────────────────────────────────────── */
+        .ranking-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 28px 32px;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+        .ranking-card-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 20px;
+            color: #1A1A2E;
+            margin: 0 0 20px;
+        }
+
+        /* ── Tab overrides ────────────────────────────────────────────── */
+        div[data-testid="stTabs"] button {
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+        }
+
+        /* ── Misc utility ─────────────────────────────────────────────── */
+        .tag-pill {
+            display: inline-block;
+            background: #F0EDE8;
+            color: #5A5A6E;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 2px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# ── Domain helpers (unchanged logic) ─────────────────────────────────────────
 ISSUE_SIMILARITY = {
     "Anxiety": {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.5, "Depression": 0.6},
     "Stress": {"Stress": 1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.5},
@@ -36,34 +353,22 @@ def experience_years_value(counselor):
 
 
 def engineer_features_from_df(df):
-    """
-    Engineer model features from a dataframe for model prediction.
-    Expects columns: client_age, client_gender, client_ethnicity, client_issue, 
-    previous_counseling_experience, preferred_language, preferred_modality, 
-    preferred_counselor_gender, counselor_age, counselor_gender, counselor_ethnicity,
-    counselor_language, counselor_modality, experience_years, specialization
-    """
     rows = []
     for _, row in df.iterrows():
         try:
             client_age = float(row.get("client_age", 0))
-            client_gender = row.get("client_gender", "")
-            client_ethnicity = row.get("client_ethnicity", "")
             client_issue = row.get("client_issue", "")
             previous_exp = row.get("previous_counseling_experience", 2.0)
-            preferred_language = row.get("preferred_language", "")
             preferred_modality = row.get("preferred_modality", "")
             preferred_c_gender = row.get("preferred_counselor_gender", "No preference")
-            
             counselor_age = float(row.get("counselor_age", 0))
             counselor_gender = row.get("counselor_gender", "")
             counselor_ethnicity = row.get("counselor_ethnicity", "")
-            counselor_languages = [v.strip() for v in str(row.get("counselor_language", "")).split(",") if v.strip()]
+            client_ethnicity = row.get("client_ethnicity", "")
             counselor_modalities = [v.strip() for v in str(row.get("counselor_modality", "")).split(",") if v.strip()]
             exp_years = experience_years_value({"experience_years": row.get("experience_years", 0.0)})
             specialization = row.get("specialization", "")
-            
-            row_dict = {
+            rows.append({
                 "issue_score": issue_similarity_score(client_issue, specialization),
                 "modality_match": int(preferred_modality in counselor_modalities),
                 "gender_match": 1 if preferred_c_gender == "No preference" else int(preferred_c_gender == counselor_gender),
@@ -73,11 +378,9 @@ def engineer_features_from_df(df):
                 "counselor_age": counselor_age,
                 "exp_years": exp_years,
                 "prev_exp": previous_experience_value(previous_exp),
-            }
-            rows.append(row_dict)
+            })
         except Exception:
             continue
-    
     return pd.DataFrame(rows)
 
 
@@ -86,15 +389,10 @@ def get_shap_contributions(model_pipeline, background_data, x_row, feature_names
         import shap
     except ImportError:
         return None, None, None, "SHAP is not installed. Run: pip install shap"
-
     try:
         background_df = background_data[feature_names].copy() if isinstance(background_data, pd.DataFrame) else pd.DataFrame(background_data, columns=feature_names)
-        
-        # Ensure background has sufficient samples for KernelExplainer
         if len(background_df) < 10:
             return None, None, None, "Insufficient background data for SHAP explanation (need at least 10 samples)"
-        
-        # Use up to 100 samples for stable baseline estimation
         if len(background_df) > 100:
             background_df = background_df.sample(100, random_state=42)
 
@@ -104,18 +402,12 @@ def get_shap_contributions(model_pipeline, background_data, x_row, feature_names
 
         explainer = shap.KernelExplainer(predict_positive_class, background_df.values, link="identity")
         shap_values = explainer.shap_values(x_row[feature_names].values, nsamples=200)
-
-        # Ensure shap_values is properly extracted
         if isinstance(shap_values, list):
             row_contrib = np.array(shap_values[0])
         elif isinstance(shap_values, np.ndarray):
-            if shap_values.ndim == 2:
-                row_contrib = shap_values[0]  # Take first row if 2D
-            else:
-                row_contrib = shap_values  # Already 1D
+            row_contrib = shap_values[0] if shap_values.ndim == 2 else shap_values
         else:
             row_contrib = np.array(shap_values)
-
         expected = explainer.expected_value
         if isinstance(expected, list):
             base_value = float(expected[0])
@@ -123,7 +415,6 @@ def get_shap_contributions(model_pipeline, background_data, x_row, feature_names
             base_value = float(expected[0]) if expected.size > 0 else 0.0
         else:
             base_value = float(expected)
-
         shap_df = pd.DataFrame({"feature": feature_names, "shap_value": row_contrib})
         shap_df["abs_shap"] = shap_df["shap_value"].abs()
         shap_df = shap_df.sort_values("abs_shap", ascending=False)
@@ -138,20 +429,14 @@ def sorted_options(series):
 
 def modality_help_text(modality_options):
     descriptions = {
-         "CBT": "Helps you change negative thoughts and behaviors.",
+        "CBT": "Helps you change negative thoughts and behaviors.",
         "Humanistic": "Focuses on understanding your feelings in a supportive, non-judgmental way.",
         "Mindfulness": "Teaches you to stay calm and aware in the present moment.",
         "REBT": "Helps you challenge unhealthy beliefs and think more positively."
     }
-
     if not modality_options:
         return "Modality is the counseling approach used in sessions."
-
-    parts = []
-    for modality in modality_options:
-        detail = descriptions.get(str(modality), "approach used in counseling sessions")
-        parts.append(f"- {modality}: {detail}")
-
+    parts = [f"- {m}: {descriptions.get(str(m), 'approach used in counseling sessions')}" for m in modality_options]
     return "Modality is the counseling approach/style:\n\n" + "\n".join(parts)
 
 
@@ -165,47 +450,119 @@ def scroll_to_results(anchor_id="match-results-anchor"):
         }}
         </script>
         """,
-        height=0,
-        width=0,
+        height=0, width=0,
     )
 
 
+# ── UI helpers ────────────────────────────────────────────────────────────────
+def render_hero_new():
+    st.markdown(
+        """
+        <div class="hero-wrap">
+            <div class="hero-eyebrow">AI-Powered Matching</div>
+            <h1 class="hero-title">Find Your<br><em>Ideal Counselor</em></h1>
+            <p class="hero-subtitle">
+                Our model analyses compatibility across specialization, language,
+                modality and personal fit — ranked by predicted outcome.
+            </p>
+            <div class="hero-stats">
+                <div>
+                    <div class="hero-stat-num">9</div>
+                    <div class="hero-stat-label">Match factors</div>
+                </div>
+                <div>
+                    <div class="hero-stat-num">ML</div>
+                    <div class="hero-stat-label">Powered</div>
+                </div>
+                <div>
+                    <div class="hero-stat-num">SHAP</div>
+                    <div class="hero-stat-label">Explainability</div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_counselor_card(counselor_row, score, is_primary=True):
+    c = counselor_row
+    langs = c.get("counselor_language", "—")
+    mods = c.get("counselor_modality", "—")
+
+    if is_primary:
+        st.markdown(
+            f"""
+            <div class="result-card primary">
+                <span class="result-card-badge badge-primary">Top Match</span>
+                <div class="compat-score">{score:.1f}%</div>
+                <div class="compat-label">Compatibility score</div>
+                <div class="counselor-name">{c['name']}</div>
+                <div class="info-row"><span class="info-key">Age</span><span class="info-val">{c['age']}</span></div>
+                <div class="info-row"><span class="info-key">Gender</span><span class="info-val">{c['gender']}</span></div>
+                <div class="info-row"><span class="info-key">Specialization</span><span class="info-val">{c['specialization']}</span></div>
+                <div class="info-row"><span class="info-key">Experience</span><span class="info-val">{c['experience_years']} yrs</span></div>
+                <div class="info-row"><span class="info-key">Language</span><span class="info-val">{langs}</span></div>
+                <div class="info-row" style="border:none"><span class="info-key">Modality</span><span class="info-val">{mods}</span></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            f"""
+            <div class="result-card">
+                <span class="result-card-badge badge-secondary">2nd Option</span>
+                <div class="compat-score-secondary">{score:.1f}%</div>
+                <div class="compat-label-secondary">Compatibility score</div>
+                <div class="counselor-name-secondary">{c['name']}</div>
+                <div class="info-row-secondary"><span class="info-key-secondary">Age</span><span class="info-val-secondary">{c['age']}</span></div>
+                <div class="info-row-secondary"><span class="info-key-secondary">Gender</span><span class="info-val-secondary">{c['gender']}</span></div>
+                <div class="info-row-secondary"><span class="info-key-secondary">Specialization</span><span class="info-val-secondary">{c['specialization']}</span></div>
+                <div class="info-row-secondary"><span class="info-key-secondary">Experience</span><span class="info-val-secondary">{c['experience_years']} yrs</span></div>
+                <div class="info-row-secondary"><span class="info-key-secondary">Language</span><span class="info-val-secondary">{langs}</span></div>
+                <div class="info-row-secondary" style="border:none"><span class="info-key-secondary">Modality</span><span class="info-val-secondary">{mods}</span></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+# ── Main page ─────────────────────────────────────────────────────────────────
 def show_matching_page():
+    inject_styles()
+
     model, df_ref = load_resources()
     counselors = load_counselors()
 
-    render_hero(
-        "Client-Counselor Matching",
-        "",
-        eyebrow="Matching",
-    )
+    render_hero_new()
 
-    open_card(
-        "Client profile",
-        "Fill in details and preferences. The system compares all counselors and ranks the best fit.",
-    )
+    # ── Form ──────────────────────────────────────────────────────────────────
+    with st.container():
+        st.markdown('<div class="form-card">', unsafe_allow_html=True)
+        st.markdown('<p class="section-label">Client Profile</p>', unsafe_allow_html=True)
 
-    left, center, right = st.columns([1, 100, 1])
-    with center:
         with st.form("client_form"):
-            st.markdown("#### Client details")
-            info_col1, info_col2 = st.columns(2, gap="medium")
+            info_col1, info_col2, info_col3 = st.columns(3, gap="medium")
             with info_col1:
-                client_age = st.number_input("Client age", 18, 80, 25)
-                client_gender = st.selectbox("Client gender", sorted_options(df_ref["client_gender"]))
-                client_ethnicity = st.selectbox("Client ethnicity", sorted_options(df_ref["client_ethnicity"]))
+                client_age = st.number_input("Age", 18, 80, 25)
+                client_gender = st.selectbox("Gender", sorted_options(df_ref["client_gender"]))
             with info_col2:
+                client_ethnicity = st.selectbox("Ethnicity", sorted_options(df_ref["client_ethnicity"]))
                 client_issue = st.selectbox("Presenting issue", sorted_options(df_ref["client_issue"]))
+            with info_col3:
                 previous_exp = st.selectbox(
-                    "Previous counseling experience",
+                    "Prior counseling",
                     [0, 1],
-                    format_func=lambda value: "Yes" if int(value) == 1 else "No",
+                    format_func=lambda v: "Yes, I have" if int(v) == 1 else "No, first time",
                 )
-
-            st.markdown("#### Preferences")
-            pref_col1, pref_col2 = st.columns(2, gap="medium")
-            with pref_col1:
                 preferred_language = st.selectbox("Preferred language", sorted_options(df_ref["preferred_language"]))
+
+            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+            st.markdown('<p class="section-label">Counselor Preferences</p>', unsafe_allow_html=True)
+
+            pref_col1, pref_col2, pref_col3 = st.columns(3, gap="medium")
+            with pref_col1:
                 modality_options = sorted_options(df_ref["preferred_modality"])
                 preferred_modality = st.selectbox(
                     "Preferred modality",
@@ -217,9 +574,17 @@ def show_matching_page():
                     "Preferred counselor gender",
                     sorted_options(df_ref["preferred_counselor_gender"]),
                 )
+            with pref_col3:
+                st.write("")  # spacer
 
-            submitted = st.form_submit_button("Find best counselor", use_container_width=True, type="primary")
-    close_card()
+            st.write("")
+            submitted = st.form_submit_button(
+                "Find my best match →",
+                use_container_width=True,
+                type="primary",
+            )
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
     if not submitted:
         return
@@ -228,51 +593,38 @@ def show_matching_page():
         st.error("No counselors in database.")
         return
 
+    # ── Scoring ───────────────────────────────────────────────────────────────
     rows = []
     for _, counselor in counselors.iterrows():
         exp_years = experience_years_value(counselor)
-        counselor_languages = [value.strip() for value in str(counselor.get("counselor_language", "")).split(",") if value.strip()]
+        counselor_languages = [v.strip() for v in str(counselor.get("counselor_language", "")).split(",") if v.strip()]
         if preferred_language not in counselor_languages:
             continue
-        counselor_modalities = [value.strip() for value in str(counselor.get("counselor_modality", "")).split(",") if value.strip()]
-        counselor_age = counselor.get("age")
-        counselor_gender = counselor.get("gender")
-        counselor_ethnicity = counselor.get("ethnicity")
-        rows.append(
-            {
-                "issue_score": issue_similarity_score(client_issue, counselor.specialization),
-                "modality_match": int(preferred_modality in counselor_modalities),
-                "gender_match": 1 if preferred_c_gender == "No preference" else int(preferred_c_gender == counselor_gender),
-                "ethnicity_match": int(client_ethnicity == counselor_ethnicity),
-                "age_gap": abs(float(client_age) - float(counselor_age)),
-                "client_age": client_age,
-                "counselor_age": counselor_age,
-                "exp_years": exp_years,
-                "prev_exp": previous_experience_value(previous_exp),
-                "counselor_id": counselor.counselor_id,
-            }
-        )
+        counselor_modalities = [v.strip() for v in str(counselor.get("counselor_modality", "")).split(",") if v.strip()]
+        rows.append({
+            "issue_score": issue_similarity_score(client_issue, counselor.specialization),
+            "modality_match": int(preferred_modality in counselor_modalities),
+            "gender_match": 1 if preferred_c_gender == "No preference" else int(preferred_c_gender == counselor.get("gender")),
+            "ethnicity_match": int(client_ethnicity == counselor.get("ethnicity")),
+            "age_gap": abs(float(client_age) - float(counselor.get("age"))),
+            "client_age": client_age,
+            "counselor_age": counselor.get("age"),
+            "exp_years": exp_years,
+            "prev_exp": previous_experience_value(previous_exp),
+            "counselor_id": counselor.counselor_id,
+        })
 
     if not rows:
         st.warning(f"No counselors found who support {preferred_language}.")
         return
 
+    feature_order = ['issue_score', 'modality_match', 'gender_match', 'ethnicity_match',
+                     'age_gap', 'client_age', 'counselor_age', 'exp_years', 'prev_exp']
     input_df = pd.DataFrame(rows)
-    feature_order = [
-        'issue_score',
-        'modality_match',
-        'gender_match',
-        'ethnicity_match',
-        'age_gap',
-        'client_age',
-        'counselor_age',
-        'exp_years',
-        'prev_exp'
-    ]
     X = input_df[feature_order]
-
     input_df["compatibility"] = model.predict_proba(X)[:, 1] * 100
     ranked = input_df.sort_values("compatibility", ascending=False)
+
     best = ranked.iloc[0]
     best_c = counselors[counselors.counselor_id == best.counselor_id].iloc[0]
     second = ranked.iloc[1] if len(ranked) > 1 else None
@@ -281,100 +633,79 @@ def show_matching_page():
     st.markdown('<div id="match-results-anchor"></div>', unsafe_allow_html=True)
     scroll_to_results()
 
-    open_card("Top recommendation", "The best-ranked counselor based on the submitted profile.")
-    metric_col1, metric_col2 = st.columns([1, 1], gap="medium")
-    with metric_col1:
-        st.metric("Compatibility", f"{best.compatibility:.1f}%")
-        st.markdown(f"""
-        **Top counselor name:** {best_c['name']}  
-        **Age:** {best_c['age']}  
-        **Gender:** {best_c['gender']}  
-        **Specialization:** {best_c['specialization']}  
-        **Language:** {best_c['counselor_language']}  
-        **Modality:** {best_c['counselor_modality']}  
-        **Experience Years:** {best_c['experience_years']}
-        """)
-    with metric_col2:
-        second_score = f"{ranked.iloc[1].compatibility:.1f}%" if len(ranked) > 1 else "-"
-        st.metric("Second option", second_score)
+    # ── Result cards ──────────────────────────────────────────────────────────
+    st.markdown('<p class="section-label" style="margin-top:8px">Your Matches</p>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2, gap="large")
+    with col1:
+        render_counselor_card(best_c, best.compatibility, is_primary=True)
+    with col2:
         if second_c is not None:
-            st.markdown(f"""
-        **Second option name:** {second_c['name']}  
-        **Age:** {second_c['age']}  
-        **Gender:** {second_c['gender']}  
-        **Specialization:** {second_c['specialization']}  
-        **Language:** {second_c['counselor_language']}  
-        **Modality:** {second_c['counselor_modality']}  
-        **Experience Years:** {second_c['experience_years']}
-        """)
+            render_counselor_card(second_c, second.compatibility, is_primary=False)
         else:
-            st.caption("No second option available.")
-    close_card()
+            st.info("No second match available.")
 
-    tabs = st.tabs(["All matches", "Why this match"])
+    # ── Tabs ──────────────────────────────────────────────────────────────────
+    st.write("")
+    tab_all, tab_why = st.tabs(["All matches", "Why this match?"])
 
-    with tabs[0]:
-        open_card("Match ranking", "A quick comparison of all available counselors.")
+    with tab_all:
+        st.markdown('<div class="ranking-card">', unsafe_allow_html=True)
+        st.markdown('<p class="ranking-card-title">Full ranking</p>', unsafe_allow_html=True)
         ranked_view = ranked[["counselor_id", "compatibility"]].copy()
-        ranked_view["compatibility"] = ranked_view["compatibility"].map(lambda value: f"{value:.1f}%")
+        ranked_view["compatibility"] = ranked_view["compatibility"].map(lambda v: f"{v:.1f}%")
         st.dataframe(ranked_view, use_container_width=True, hide_index=True)
-        close_card()
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    with tabs[1]:
-        open_card("Explanation", "Simple summary first. Technical model details are optional below.")
-
-        positive_points = []
-        negative_points = []
-
-        positive_points.append(f"Supports preferred language ({preferred_language})")
-
+    with tab_why:
+        positive_points, negative_points = [], []
+        positive_points.append(f"Supports your preferred language ({preferred_language})")
         if int(best.modality_match) == 1:
-            positive_points.append(f"Modality matched ({preferred_modality})")
+            positive_points.append(f"Modality matches your preference ({preferred_modality})")
         else:
-            negative_points.append(f"Modality not matched ({preferred_modality})")
-
+            negative_points.append(f"Modality does not match ({preferred_modality})")
         if float(best.issue_score) >= 0.99:
-            positive_points.append(f"Specialization matched ({client_issue})")
+            positive_points.append(f"Direct specialization in {client_issue}")
         elif float(best.issue_score) >= 0.6:
-            positive_points.append(f"Related specialization support ({client_issue})")
+            positive_points.append(f"Related experience with {client_issue}")
         else:
-            negative_points.append(f"Specialization less aligned ({client_issue})")
-
+            negative_points.append(f"Specialization less aligned with {client_issue}")
         if preferred_c_gender != "No preference":
             if int(best.gender_match) == 1:
                 positive_points.append(f"Preferred gender matched ({preferred_c_gender})")
             else:
                 negative_points.append(f"Preferred gender not matched ({preferred_c_gender})")
 
-        explain_col1, explain_col2 = st.columns([1, 1], gap="large")
-
-        with explain_col1:
-            st.markdown("**Quick summary**")
-            if positive_points:
-                for item in positive_points[:3]:
-                    st.write(f"- {item}")
-            else:
-                st.write("- No strong positive driver detected.")
-
-        with explain_col2:
-            st.markdown("**Things to review**")
+        st.markdown('<div class="explain-card">', unsafe_allow_html=True)
+        st.markdown('<p class="explain-title">Match explanation</p>', unsafe_allow_html=True)
+        exp_col1, exp_col2 = st.columns(2, gap="large")
+        with exp_col1:
+            st.markdown("**Strengths**")
+            for item in positive_points[:4]:
+                st.markdown(
+                    f'<div class="point-row"><div class="dot-green"></div><span style="color:#2D2D3F;font-size:14px">{item}</span></div>',
+                    unsafe_allow_html=True,
+                )
+        with exp_col2:
+            st.markdown("**Things to note**")
             if negative_points:
-                for item in negative_points[:3]:
-                    st.write(f"- {item}")
+                for item in negative_points[:4]:
+                    st.markdown(
+                        f'<div class="point-row"><div class="dot-amber"></div><span style="color:#2D2D3F;font-size:14px">{item}</span></div>',
+                        unsafe_allow_html=True,
+                    )
             else:
-                st.write("- No major concern detected.")
+                st.markdown(
+                    '<div class="point-row"><div class="dot-green"></div><span style="color:#2D2D3F;font-size:14px">No major concerns detected</span></div>',
+                    unsafe_allow_html=True,
+                )
+        st.markdown("</div>", unsafe_allow_html=True)
 
-        with st.expander("Technical details (optional)", expanded=False):
+        # SHAP expander
+        with st.expander("Technical details — SHAP feature contributions", expanded=False):
             best_index = ranked.index[0]
             x_best = X.loc[[best_index]]
-            
-            # Use training data (df_ref) as background for proper SHAP baseline
             df_ref_engineered = engineer_features_from_df(df_ref)
-            if len(df_ref_engineered) > 0:
-                background_data = df_ref_engineered
-            else:
-                background_data = X.sample(min(25, len(X)), random_state=42)
-            
+            background_data = df_ref_engineered if len(df_ref_engineered) > 0 else X.sample(min(25, len(X)), random_state=42)
             shap_df, row_contrib, base_value, shap_error = get_shap_contributions(model, background_data, x_best, feature_order)
 
             if shap_error:
@@ -391,22 +722,19 @@ def show_matching_page():
                     "exp_years": "Counselor Experience (Years)",
                     "prev_exp": "Client Previous Experience",
                 }
-
-                shap_df["feature"] = shap_df["feature"].map(lambda value: readable_names.get(value, value))
-                st.caption("Positive SHAP values increase the predicted compatibility. Negative values decrease it.")
+                shap_df["feature"] = shap_df["feature"].map(lambda v: readable_names.get(v, v))
+                st.caption("Positive values increase predicted compatibility. Negative values decrease it.")
                 st.bar_chart(shap_df.set_index("feature")["shap_value"])
                 st.dataframe(
                     shap_df[["feature", "shap_value"]].rename(columns={"shap_value": "contribution"}),
                     use_container_width=True,
                     hide_index=True,
                 )
-
                 st.markdown("#### Detailed SHAP charts")
                 try:
                     import matplotlib.pyplot as plt
                     import shap
-
-                    feature_labels = [readable_names.get(feature, feature) for feature in feature_order]
+                    feature_labels = [readable_names.get(f, f) for f in feature_order]
                     row_data = x_best.iloc[0][feature_order].values
                     explanation = shap.Explanation(
                         values=row_contrib,
@@ -414,22 +742,11 @@ def show_matching_page():
                         data=row_data,
                         feature_names=feature_labels,
                     )
-
-                    fig_waterfall = plt.figure(figsize=(11, 5))
+                    fig_wf = plt.figure(figsize=(11, 5))
                     shap.plots.waterfall(explanation, max_display=10, show=False)
-                    st.pyplot(fig_waterfall, clear_figure=True)
-
-                    fig_force = plt.figure(figsize=(11, 3))
-                    shap.force_plot(
-                        base_value,
-                        row_contrib,
-                        row_data,
-                        feature_names=feature_labels,
-                        matplotlib=True,
-                        show=False,
-                    )
-                    st.pyplot(fig_force, clear_figure=True)
+                    st.pyplot(fig_wf, clear_figure=True)
+                    fig_f = plt.figure(figsize=(11, 3))
+                    shap.force_plot(base_value, row_contrib, row_data, feature_names=feature_labels, matplotlib=True, show=False)
+                    st.pyplot(fig_f, clear_figure=True)
                 except Exception as exc:
-                    st.info(f"Could not render SHAP waterfall/force chart: {exc}")
-
-        close_card()
+                    st.info(f"Could not render SHAP charts: {exc}")
