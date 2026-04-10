@@ -3,172 +3,210 @@ import streamlit as st
 from views.manage import show_manage_page
 from views.matching import show_matching_page
 from views.model_performance import show_model_performance_page
-from utils.db import verify_admin_credentials
+from views.login import show_login_page
+
+
+if "login" in st.query_params:
+    target = st.query_params["login"]
+    del st.query_params["login"]
+    
+    if target == "client":
+        st.session_state.role = "client"
+    elif target == "admin":
+        st.session_state.role = "admin_login"
+        
+    st.rerun()
 
 
 def inject_app_styles():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-        :root {
-            --bg-1: #f7f9fc;
-            --bg-2: #eef3f9;
-            --surface-strong: #ffffff;
-            --border: #dce4ee;
-            --text-main: #132033;
-            --text-muted: #5b6b7f;
-            --accent: #234e70;
-            --accent-soft: #d9e7f4;
-            --shadow: 0 18px 50px rgba(18, 32, 51, 0.09);
+        html, body, [class*="css"] {
+            font-family: 'DM Sans', sans-serif;
         }
 
-        html, body, [class*="css"]  {
-            font-family: 'Manrope', sans-serif;
-        }
         .stApp {
-            background:
-                radial-gradient(circle at top left, rgba(35, 78, 112, 0.08), transparent 28%),
-                radial-gradient(circle at top right, rgba(64, 120, 173, 0.08), transparent 24%),
-                linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+            background: #F7F5F0;
         }
+
         .block-container {
             max-width: 1200px;
-            padding-top: 1.5rem;
-            padding-bottom: 1.8rem;
         }
-        .app-hero, .soft-card, .stat-card {
-            background: var(--surface-strong);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: 0 10px 28px rgba(18, 32, 51, 0.06);
-        }
-        .app-hero {
-            padding: 1.1rem 1.2rem;
-            margin-bottom: 1.15rem;
-        }
-        .soft-card {
-            padding: 0.9rem 1rem 0.25rem 1rem;
-            margin-bottom: 1rem;
-        }
-        .stat-card {
-            padding: 0.75rem 0.9rem;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-        .eyebrow {
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-muted);
-            margin-bottom: 0.25rem;
-        }
-        .hero-title {
-            font-size: 1.72rem;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 0.3rem;
-            line-height: 1.1;
-        }
-        .hero-copy, .card-copy {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 0;
-            line-height: 1.55;
-        }
-        .card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 0.25rem;
-        }
-        .landing-card {
-            background: #ffffff;
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: 0 10px 28px rgba(18, 32, 51, 0.06);
-            padding: 1rem 1rem 0.95rem 1rem;
+
+        /* ── Strip default link formatting so it looks like a card ── */
+        a.clickable-card-link {
+            text-decoration: none !important;
+            color: inherit !important;
+            display: block; /* Makes the whole area clickable */
             height: 100%;
         }
-        .landing-card.admin {
-            background: linear-gradient(180deg, rgba(35, 78, 112, 0.04), rgba(255, 255, 255, 0.98));
+
+        /* ── Hero section ─────────────────────────────────────────────── */
+        .app-hero {
+            background: #1A1A2E;
+            border-radius: 20px;
+            padding: 56px 52px 48px;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
         }
-        .landing-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.28rem 0.62rem;
-            border-radius: 999px;
-            background: var(--accent-soft);
-            color: var(--accent);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
+        .app-hero::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 320px; height: 320px;
+            background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .app-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; left: 40px;
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .eyebrow {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            margin-bottom: 0.7rem;
+            color: #A78BFA;
+            background: rgba(167,139,250,0.12);
+            border: 1px solid rgba(167,139,250,0.25);
+            border-radius: 20px;
+            padding: 4px 14px;
+            margin-bottom: 20px;
+        }
+        .hero-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 42px;
+            line-height: 1.15;
+            color: #FFFFFF;
+            margin: 0 0 16px;
+            letter-spacing: -0.5px;
+        }
+        .hero-copy {
+            font-size: 16px;
+            color: rgba(255,255,255,0.55);
+            max-width: 480px;
+            line-height: 1.65;
+            margin: 0;
+        }
+
+        /* ── Card sections ────────────────────────────────────────────── */
+        .landing-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 36px 40px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            height: 100%;
+            min-height: 240px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+        .landing-card.admin {
+            background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(255,255,255,0.95) 100%);
+        }
+        
+        .landing-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-radius: 20px;
+            padding: 4px 12px;
+            margin-bottom: 20px;
+            background: rgba(139,92,246,0.15);
+            color: #8B5CF6;
+        }
+        .landing-badge.admin {
+            background: rgba(16,185,129,0.15);
+            color: #10B981;
         }
         .landing-title {
-            font-size: 1.08rem;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 0.35rem;
+            font-family: 'DM Serif Display', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 12px;
+            line-height: 1.2;
         }
         .landing-meta {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 0.8rem;
-            line-height: 1.5;
+            color: #5A5A6E;
+            font-size: 15px;
+            margin-bottom: 0;
+            line-height: 1.6;
         }
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 0.1rem;
+        
+        .landing-action {
+            font-size: 15px;
+            font-weight: 600;
+            color: #8B5CF6;
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
         }
-        .stat-value {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--text-main);
+        .landing-card.admin .landing-action {
+            color: #10B981;
         }
-        div[data-testid="stDataFrame"] {
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid var(--border);
+
+        /* ── Hover effects mapped directly to the link wrapper ── */
+        a.clickable-card-link:hover .landing-card {
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+            border-color: #8B5CF6;
         }
+        a.clickable-card-link:hover .landing-card.admin {
+            border-color: #10B981;
+        }
+
+        /* ── Form styling ─────────────────────────────────────────────── */
         div[data-testid="stForm"] {
             border: none;
             background: transparent;
             padding: 0;
         }
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 0.45rem;
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stNumberInput"] input,
+        div[data-testid="stSelectbox"] > div > div {
+            border-radius: 10px !important;
+            border: 1.5px solid #E5E2DC !important;
+            background: #FAFAF8 !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 14px !important;
+            transition: border-color 0.2s;
         }
-        .stTabs [data-baseweb="tab"] {
-            border-radius: 10px;
-            padding: 0.35rem 0.8rem;
+        div[data-testid="stTextInput"] input:focus,
+        div[data-testid="stNumberInput"] input:focus,
+        div[data-testid="stSelectbox"] > div > div:focus-within {
+            border-color: #8B5CF6 !important;
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.1) !important;
         }
+
+        div[data-testid="stModal"] > div > div {
+            border-radius: 20px !important;
+        }
+
+        /* ── Sidebar styling ──────────────────────────────────────────── */
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #17212f 0%, #223246 100%);
+            background: linear-gradient(180deg, #1A1A2E 0%, #2D2D45 100%);
         }
         section[data-testid="stSidebar"] * {
-            color: #f8fafc !important;
+            color: #FFFFFF !important;
         }
-        section[data-testid="stSidebar"] .stButton button {
-            border: 1px solid rgba(255, 255, 255, 0.22);
-        }
-        .stExpander {
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: #ffffff;
-        }
-        .stButton > button {
-            border-radius: 12px;
-            font-weight: 700;
-        }
+
         @media (max-width: 768px) {
-            .hero-title {
-                font-size: 1.5rem;
-            }
+            .hero-title { font-size: 32px; }
+            .landing-title { font-size: 22px; }
         }
         </style>
         """,
@@ -189,54 +227,11 @@ def render_hero(title, copy, eyebrow="Client-Counselor Matching System"):
     )
 
 
-@st.dialog("Sign in as Admin")
-def render_admin_login_dialog():
-    with st.form("admin_login_form"):
-        email = st.text_input("email")
-        password = st.text_input("Password", type="password")
-
-        submit_col, cancel_col = st.columns(2)
-        with submit_col:
-            submitted = st.form_submit_button("Sign in", use_container_width=True, type="primary")
-        with cancel_col:
-            cancelled = st.form_submit_button("Cancel", use_container_width=True)
-
-    if cancelled:
-        st.session_state.admin_login_open = False
-        st.rerun()
-
-    if submitted:
-        if verify_admin_credentials(email, password):
-            st.session_state.role = "admin"
-            st.session_state.admin_login_open = False
-            st.rerun()
-        st.error("Invalid email or password.")
-
-
 st.set_page_config(page_title="Client-Counselor Matching System", layout="wide")
 inject_app_styles()
 
 
-if "show_form" not in st.session_state:
-    st.session_state.show_form = False
-
-if "admin_login_open" not in st.session_state:
-    st.session_state.admin_login_open = False
-
-
 if "role" not in st.session_state:
-    st.markdown(
-        """
-        <style>
-        div.stButton > button {
-            min-height: 50px;
-            font-size: 16px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
     render_hero(
         "Client-Counselor Matching System",
         "Choose a path to continue.",
@@ -248,42 +243,50 @@ if "role" not in st.session_state:
     with left_col:
         st.markdown(
             """
-            <div class="landing-card">
-                <div class="landing-badge">Client</div>
-                <div class="landing-title">Find a counselor</div>
-                <div class="landing-meta">Get matched in a few simple steps.</div>
-            </div>
+            <a href="/?login=client" target="_self" class="clickable-card-link">
+                <div class="landing-card">
+                    <div>
+                        <div class="landing-badge">Client</div>
+                        <div class="landing-title">Find a counselor</div>
+                        <div class="landing-meta">Get matched in a few simple steps.</div>
+                    </div>
+                    <div class="landing-action">Continue as Client &rarr;</div>
+                </div>
+            </a>
             """,
             unsafe_allow_html=True,
         )
-        if st.button("Continue as Client", use_container_width=True, type="primary"):
-            st.session_state.admin_login_open = False
-            st.session_state.role = "client"
-            st.rerun()
 
     with right_col:
         st.markdown(
             """
-            <div class="landing-card admin">
-                <div class="landing-badge">Admin</div>
-                <div class="landing-title">Manage directory and models</div>
-                <div class="landing-meta">Sign in to manage records and review performance.</div>
-            </div>
+            <a href="/?login=admin" target="_self" class="clickable-card-link">
+                <div class="landing-card admin">
+                    <div>
+                        <div class="landing-badge admin">Admin</div>
+                        <div class="landing-title">Manage directory and models</div>
+                        <div class="landing-meta">Sign in to manage records and review performance.</div>
+                    </div>
+                    <div class="landing-action">Sign in as Admin &rarr;</div>
+                </div>
+            </a>
             """,
             unsafe_allow_html=True,
         )
-        if st.button("Admin", use_container_width=True):
-            st.session_state.admin_login_open = True
-            st.rerun()
-
-    if st.session_state.admin_login_open:
-        render_admin_login_dialog()
-        st.stop()
 
     st.stop()
 
 
-role = st.session_state.role
+if st.session_state.get("role") == "admin_login":
+    show_login_page()
+    st.stop()
+
+
+role = st.session_state.get("role")
+
+if role is None:
+    del st.session_state["role"]
+    st.rerun()
 
 if role == "admin":
     page = st.sidebar.radio("Navigation", ["Client-Counselor Matching", "Counselor Management", "Model Performance"])
@@ -293,7 +296,6 @@ else:
 st.sidebar.markdown(f"**Signed in as:** {role.title()}")
 
 if st.sidebar.button("Logout"):
-    st.session_state.admin_login_open = False
     del st.session_state["role"]
     st.rerun()
 
