@@ -137,10 +137,42 @@ def inject_styles():
             box-shadow: 0 0 0 3px rgba(139,92,246,0.1) !important;
         }
         label[data-testid="stWidgetLabel"] p {
-            font-size: 16px !important; /* Increased for conversational feel */
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            color: #1A1A2E !important;
+            margin-bottom: 10px !important;
+        }
+
+        /* ── Radio pill buttons (main content only, not sidebar) ─────── */
+        [data-testid="block-container"] [data-baseweb="radio"] > div:first-child {
+            display: none !important;
+        }
+        [data-testid="block-container"] [data-baseweb="radio"] {
+            padding: 9px 22px !important;
+            background: #F7F5F0 !important;
+            border: 1.5px solid #E5E2DC !important;
+            border-radius: 30px !important;
+            cursor: pointer !important;
+            transition: background 0.18s ease, border-color 0.18s ease !important;
+            margin-right: 2px !important;
+        }
+        [data-testid="block-container"] [data-baseweb="radio"]:hover {
+            border-color: #8B5CF6 !important;
+            background: rgba(139,92,246,0.06) !important;
+        }
+        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) {
+            background: rgba(139,92,246,0.12) !important;
+            border-color: #8B5CF6 !important;
+        }
+        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) p {
+            color: #6D28D9 !important;
+            font-weight: 700 !important;
+        }
+        [data-testid="block-container"] [data-baseweb="radio"] p {
+            font-size: 14px !important;
+            margin: 0 !important;
+            color: #4A4A5A !important;
             font-weight: 500 !important;
-            color: #2D2D3F !important;
-            margin-bottom: 8px !important;
         }
 
         /* ── Submit button ────────────────────────────────────────────── */
@@ -420,6 +452,36 @@ def modality_help_text(modality_options):
     parts = [f"- {m}: {descriptions.get(str(m), 'approach used in counseling sessions')}" for m in modality_options]
     return "Modality is the counseling approach/style:\n\n" + "\n".join(parts)
 
+def render_step_progress(step: int, total: int = 3):
+    step_names = ["About You", "Your Needs", "Preferences"]
+    pct = int(step / total * 100)
+    dots = ""
+    for i, name in enumerate(step_names, 1):
+        if i < step:
+            dot_color, text_color, weight = "#6D28D9", "#6D28D9", "500"
+        elif i == step:
+            dot_color, text_color, weight = "#8B5CF6", "#8B5CF6", "700"
+        else:
+            dot_color, text_color, weight = "#DDD8D0", "#C0BAB4", "400"
+        dots += (
+            f'<div style="flex:1;display:flex;align-items:center;gap:6px;">'
+            f'<div style="width:7px;height:7px;border-radius:50%;background:{dot_color};flex-shrink:0;"></div>'
+            f'<span style="font-size:11px;color:{text_color};font-weight:{weight};">{name}</span>'
+            f'</div>'
+        )
+    st.markdown(
+        f"""
+        <div style="margin-bottom: 28px;">
+            <div style="background:#EDE8E3;border-radius:99px;height:5px;overflow:hidden;margin-bottom:10px;">
+                <div style="background:linear-gradient(90deg,#8B5CF6,#6D28D9);width:{pct}%;height:5px;border-radius:99px;"></div>
+            </div>
+            <div style="display:flex;">{dots}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def scroll_to_results(anchor_id="match-results-anchor"):
     components.html(
         f"""
@@ -532,9 +594,8 @@ def show_matching_page():
 
     # ── WIZARD STEP 1: Demographics ─────────────────────────────────────────────
     elif st.session_state.quiz_step == 1:
-        st.progress(25)
-        st.markdown('<p class="section-label">Step 1 of 3: About You</p>', unsafe_allow_html=True)
-        st.write("To help us find the best fit, tell us a bit about yourself.")
+        render_step_progress(1)
+        st.markdown("<p style='color:#5A5A6E;margin-bottom:24px;'>To help us find the best fit, tell us a bit about yourself.</p>", unsafe_allow_html=True)
 
         gender_options = sorted_options(df_ref["client_gender"])
         ethnicity_options = sorted_options(df_ref["client_ethnicity"])
@@ -561,9 +622,8 @@ def show_matching_page():
 
     # ── WIZARD STEP 2: Clinical Needs ───────────────────────────────────────────
     elif st.session_state.quiz_step == 2:
-        st.progress(60)
-        st.markdown('<p class="section-label">Step 2 of 3: Your Needs</p>', unsafe_allow_html=True)
-        st.write("Thank you. What is the main challenge you'd like support with today?")
+        render_step_progress(2)
+        st.markdown("<p style='color:#5A5A6E;margin-bottom:24px;'>Thank you. What is the main challenge you'd like support with today?</p>", unsafe_allow_html=True)
 
         issue_options = sorted_options(df_ref["client_issue"])
 
@@ -593,9 +653,8 @@ def show_matching_page():
 
     # ── WIZARD STEP 3: Preferences ──────────────────────────────────────────────
     elif st.session_state.quiz_step == 3:
-        st.progress(90)
-        st.markdown('<p class="section-label">Step 3 of 3: Preferences</p>', unsafe_allow_html=True)
-        st.write("Almost done! Do you have any preferences for your counselor's approach?")
+        render_step_progress(3)
+        st.markdown("<p style='color:#5A5A6E;margin-bottom:24px;'>Almost done! Do you have any preferences for your counselor's approach?</p>", unsafe_allow_html=True)
 
         modality_options = sorted_options(df_ref["preferred_modality"])
         lang_options = sorted_options(df_ref["preferred_language"])
