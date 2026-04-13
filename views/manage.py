@@ -53,27 +53,37 @@ def inject_styles():
         /* ── Table card ───────────────────────────────────────────────── */
         .mg-card {
             background: #FFFFFF;
-            border-radius: 20px;
-            padding: 32px 36px 28px;
+            border-radius: 16px;
+            padding: 18px 24px;
             border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
             margin-bottom: 20px;
         }
         .mg-card-title {
             font-family: 'DM Serif Display', serif;
-            font-size: 22px;
+            font-size: 20px;
             color: #1A1A2E;
             margin: 0 0 4px;
         }
         .mg-card-copy {
             font-size: 14px;
             color: #8B8B9A;
-            margin: 0 0 20px;
+            margin: 0;
+        }
+
+        /* ── st.container(border=True) styled as action card ─────────── */
+        [data-testid="stVerticalBlockBorderWrapper"] {
+            background: #FFFFFF !important;
+            border-radius: 16px !important;
+            border: 1px solid rgba(0,0,0,0.06) !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+            padding: 8px 4px !important;
         }
 
         /* ── Button overrides (purple primary, ghost secondary) ───────── */
         /* Scope all button overrides to main content only — prevents leaking into sidebar */
-        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] {
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"],
+        div[data-testid="stButton"] button[kind="primary"] {
             background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
             color: #FFFFFF !important;
             border: none !important;
@@ -263,23 +273,21 @@ def show_manage_page():
         )
 
     with add_col:
-        st.markdown('<div class="mg-stat-card">', unsafe_allow_html=True)
-        st.markdown('<div class="mg-action-label">Quick action</div>', unsafe_allow_html=True)
-        if st.button("＋  Add counselor", use_container_width=True, type="primary"):
-            render_add_counselor_dialog()
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown('<div class="mg-action-label">Quick action</div>', unsafe_allow_html=True)
+            if st.button("＋  Add counselor", use_container_width=True, type="primary"):
+                render_add_counselor_dialog()
 
     with manage_col:
-        st.markdown('<div class="mg-stat-card">', unsafe_allow_html=True)
-        st.markdown('<div class="mg-action-label">Manage record</div>', unsafe_allow_html=True)
-        edit_col, delete_col = st.columns(2, gap="small")
-        with edit_col:
-            if st.button("✎  Edit", use_container_width=True, disabled=counselors_df.empty):
-                render_edit_counselor_dialog()
-        with delete_col:
-            if st.button("✕  Delete", use_container_width=True, disabled=counselors_df.empty):
-                render_delete_counselor_dialog()
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown('<div class="mg-action-label">Manage record</div>', unsafe_allow_html=True)
+            edit_col, delete_col = st.columns(2, gap="small")
+            with edit_col:
+                if st.button("✎  Edit", use_container_width=True, disabled=counselors_df.empty):
+                    render_edit_counselor_dialog()
+            with delete_col:
+                if st.button("✕  Delete", use_container_width=True, disabled=counselors_df.empty):
+                    render_delete_counselor_dialog()
 
     # ── Directory table card ──────────────────────────────────────────────────
     st.markdown(

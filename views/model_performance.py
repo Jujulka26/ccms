@@ -64,6 +64,35 @@ def inject_styles():
             margin: 0;
         }
 
+        /* ── Tab section card + styling ───────────────────────────────── */
+        [data-testid="block-container"] div[data-testid="stTabs"] {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 4px 20px 24px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            margin-bottom: 20px;
+        }
+        div[data-testid="stTabs"] button[role="tab"] {
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            padding: 12px 18px !important;
+            color: #8B8B9A !important;
+        }
+        div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+            font-weight: 700 !important;
+            color: #1A1A2E !important;
+        }
+        div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
+            background-color: #8B5CF6 !important;
+            height: 3px !important;
+            border-radius: 3px 3px 0 0 !important;
+        }
+        div[data-testid="stTabs"] [data-baseweb="tab-border"] {
+            background-color: #F0EDE8 !important;
+        }
+
         /* ── Recommendation banner ────────────────────────────────────── */
         .pm-recommend {
             background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, #FFFFFF 100%);
