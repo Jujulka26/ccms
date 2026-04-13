@@ -596,10 +596,12 @@ def render_counselor_card(counselor_row, score, is_primary=True):
                 <div class="compat-score">{score:.1f}%</div>
                 <div class="compat-label">Compatibility score</div>
                 <div class="counselor-name">{c['name']}</div>
-                <div class="info-row"><span class="info-key">Experience</span><span class="info-val">{c['experience_years']} yrs</span></div>
+                <div class="info-row"><span class="info-key">Age</span><span class="info-val">{c['age']}</span></div>
+                <div class="info-row"><span class="info-key">Gender</span><span class="info-val">{c['gender']}</span></div>
                 <div class="info-row"><span class="info-key">Specialization</span><span class="info-val">{c['specialization']}</span></div>
-                <div class="info-row"><span class="info-key">Modality</span><span class="info-val">{mods}</span></div>
-                <div class="info-row" style="border:none"><span class="info-key">Language</span><span class="info-val">{langs}</span></div>
+                <div class="info-row"><span class="info-key">Experience</span><span class="info-val">{c['experience_years']} yrs</span></div>
+                <div class="info-row"><span class="info-key">Language</span><span class="info-val">{langs}</span></div>
+                <div class="info-row" style="border:none"><span class="info-key">Modality</span><span class="info-val">{mods}</span></div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -612,10 +614,12 @@ def render_counselor_card(counselor_row, score, is_primary=True):
                 <div class="compat-score-secondary">{score:.1f}%</div>
                 <div class="compat-label-secondary">Compatibility score</div>
                 <div class="counselor-name-secondary">{c['name']}</div>
-                <div class="info-row-secondary"><span class="info-key-secondary">Experience</span><span class="info-val-secondary">{c['experience_years']} yrs</span></div>
+                <div class="info-row-secondary"><span class="info-key-secondary">Age</span><span class="info-val-secondary">{c['age']}</span></div>
+                <div class="info-row-secondary"><span class="info-key-secondary">Gender</span><span class="info-val-secondary">{c['gender']}</span></div>
                 <div class="info-row-secondary"><span class="info-key-secondary">Specialization</span><span class="info-val-secondary">{c['specialization']}</span></div>
-                <div class="info-row-secondary"><span class="info-key-secondary">Modality</span><span class="info-val-secondary">{mods}</span></div>
-                <div class="info-row-secondary" style="border:none"><span class="info-key-secondary">Language</span><span class="info-val-secondary">{langs}</span></div>
+                <div class="info-row-secondary"><span class="info-key-secondary">Experience</span><span class="info-val-secondary">{c['experience_years']} yrs</span></div>
+                <div class="info-row-secondary"><span class="info-key-secondary">Language</span><span class="info-val-secondary">{langs}</span></div>
+                <div class="info-row-secondary" style="border:none"><span class="info-key-secondary">Modality</span><span class="info-val-secondary">{mods}</span></div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -882,10 +886,14 @@ def show_matching_page():
                             data=row_data,
                             feature_names=feature_labels,
                         )
-                        # Render waterfall chart only
                         fig_wf = plt.figure(figsize=(11, 5))
                         shap.plots.waterfall(explanation, max_display=10, show=False)
                         st.pyplot(fig_wf, clear_figure=True)
+                        fig_f = plt.figure(figsize=(11, 3))
+                        fig_f.patch.set_facecolor("white")
+                        shap.force_plot(base_value, row_contrib, row_data, feature_names=feature_labels, matplotlib=True, show=False)
+                        plt.gca().set_facecolor("white")
+                        st.pyplot(fig_f, clear_figure=True)
                     except Exception as exc:
                         st.info(f"Could not render SHAP charts: {exc}")
 
