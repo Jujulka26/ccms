@@ -259,19 +259,55 @@ def inject_app_styles():
             color: #FFFFFF !important;
         }
 
-        /* ── Logout button ────────────────────────────────────────────── */
+        /* ── Absolute footer positioning to the bottom ────────────────── */
+        [data-testid="stSidebarUserContent"] {
+            display: flex !important;
+            flex-direction: column !important;
+            height: calc(100vh - 60px) !important; 
+        }
+        
+        /* The container block inside UserContent needs to be a flex column */
+        [data-testid="stSidebarUserContent"] > div {
+            display: flex !important;
+            flex-direction: column !important;
+            flex-grow: 1 !important;
+        }
+
+        /* The inner vertical block holding all the widgets */
+        [data-testid="stSidebarUserContent"] [data-testid="stVerticalBlock"] {
+            display: flex !important;
+            flex-direction: column !important;
+            flex-grow: 1 !important;
+        }
+        
+        /* The container wrapping the spacer pushes everything below it down */
+        div[data-testid="stElementContainer"]:has(.sidebar-spacer),
+        div.element-container:has(.sidebar-spacer) {
+            flex-grow: 1 !important;
+            display: flex !important;
+        }
+
+        /* The spacer itself */
+        .sidebar-spacer {
+            min-height: 20px;
+            width: 100%;
+        }
+
+        /* ── Logout — destructive ghost button ────────────────────────── */
         section[data-testid="stSidebar"] button[kind="secondary"] {
-            background: rgba(255,255,255,0.05) !important;
-            color: #FFFFFF !important;
-            border: 1px solid rgba(255,255,255,0.15) !important;
+            background: transparent !important;
+            color: rgba(239,68,68,0.85) !important;
+            border: 1.5px solid rgba(239,68,68,0.35) !important;
             border-radius: 10px !important;
             font-weight: 600 !important;
-            transition: all 0.2s ease !important;
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
             padding: 8px 0 !important;
+            margin-bottom: 16px !important;
         }
         section[data-testid="stSidebar"] button[kind="secondary"]:hover {
-            background: rgba(255,255,255,0.12) !important;
-            border-color: rgba(255,255,255,0.3) !important;
+            background: rgba(239,68,68,0.1) !important;
+            border-color: rgba(239,68,68,0.65) !important;
+            color: #EF4444 !important;
         }
 
         /* ── Sidebar collapse (<<) button inside sidebar ──────────────── */
@@ -401,21 +437,41 @@ if role is None:
     del st.session_state["role"]
     st.rerun()
 
+
+@st.dialog("Confirm logout")
+def _logout_dialog():
+    st.markdown("Are you sure you want to log out?")
+    st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Log out", type="primary", use_container_width=True):
+            del st.session_state["role"]
+            st.rerun()
+    with col2:
+        if st.button("Cancel", use_container_width=True):
+            st.rerun()
+
+
 if role == "admin":
     st.sidebar.markdown(
-        f'<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Admin Navigation</div>', 
+        '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Admin Navigation</div>',
         unsafe_allow_html=True
     )
     page = st.sidebar.radio("Navigation", ["Client-Counselor Matching", "Counselor Management", "Model Performance"], label_visibility="collapsed")
 else:
     page = "Client-Counselor Matching"
 
-st.sidebar.markdown("---")
-st.sidebar.markdown(f'<div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 16px;">Signed in as: <strong>{role.title()}</strong></div>', unsafe_allow_html=True)
+# Invisible spacer — pushes the footer to the bottom of the sidebar
+st.sidebar.markdown('<div class="sidebar-spacer" style="flex-grow: 1; min-height: 50px;"></div>', unsafe_allow_html=True)
 
-if st.sidebar.button("Logout", use_container_width=True):
-    del st.session_state["role"]
-    st.rerun()
+st.sidebar.markdown("---")
+st.sidebar.markdown(
+    f'<div style="font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 12px; padding: 0 2px;">Signed in as <strong style="color:rgba(255,255,255,0.9)">{role.title()}</strong></div>',
+    unsafe_allow_html=True
+)
+
+if st.sidebar.button("Log out", use_container_width=True):
+    _logout_dialog()
 
 
 if page == "Client-Counselor Matching":
