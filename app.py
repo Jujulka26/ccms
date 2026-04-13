@@ -199,9 +199,75 @@ def inject_app_styles():
         /* ── Sidebar styling ──────────────────────────────────────────── */
         section[data-testid="stSidebar"] {
             background: linear-gradient(180deg, #1A1A2E 0%, #2D2D45 100%);
+            border-right: 1px solid rgba(255,255,255,0.05);
         }
-        section[data-testid="stSidebar"] * {
+        
+        /* Apply font to text components but prevent icon override */
+        section[data-testid="stSidebar"] .stMarkdown p, 
+        section[data-testid="stSidebar"] .stMarkdown div, 
+        section[data-testid="stSidebar"] .stRadio p, 
+        section[data-testid="stSidebar"] strong {
+            color: rgba(255,255,255,0.95);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        /* Box Row styling for Navigation */
+        section[data-testid="stSidebar"] div[role="radiogroup"] {
+            gap: 10px;
+        }
+        
+        /* Hide the radio bullet circle to make it look like a box */
+        section[data-testid="stSidebar"] div[role="radio"] > div:first-child {
+            display: none !important;
+        }
+
+        /* Style the radio buttons as clickable box rows */
+        section[data-testid="stSidebar"] div[role="radio"] {
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            margin-bottom: 2px;
+            width: 100%;
+            cursor: pointer;
+        }
+        section[data-testid="stSidebar"] div[role="radio"]:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(139,92,246,0.4);
+            transform: translateY(-1px);
+        }
+        section[data-testid="stSidebar"] div[role="radio"][aria-checked="true"] {
+            background: rgba(139,92,246,0.15);
+            border-color: rgba(139,92,246,0.6);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        section[data-testid="stSidebar"] div[role="radio"] p {
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            margin: 0 !important;
+        }
+
+        /* Improved logout button */
+        section[data-testid="stSidebar"] button[kind="secondary"] {
+            background: rgba(255,255,255,0.05) !important;
             color: #FFFFFF !important;
+            border: 1px solid rgba(255,255,255,0.15) !important;
+            border-radius: 10px !important;
+            font-weight: 600 !important;
+            transition: all 0.2s ease !important;
+            padding: 8px 0 !important;
+        }
+        section[data-testid="stSidebar"] button:hover {
+            background: rgba(255,255,255,0.15) !important;
+            border-color: rgba(255,255,255,0.3) !important;
+            transform: translateY(-1px);
+        }
+        
+        /* Custom sidebar divider */
+        section[data-testid="stSidebar"] hr {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
         }
 
         @media (max-width: 768px) {
@@ -289,13 +355,18 @@ if role is None:
     st.rerun()
 
 if role == "admin":
-    page = st.sidebar.radio("Navigation", ["Client-Counselor Matching", "Counselor Management", "Model Performance"])
+    st.sidebar.markdown(
+        f'<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Admin Navigation</div>', 
+        unsafe_allow_html=True
+    )
+    page = st.sidebar.radio("Navigation", ["Client-Counselor Matching", "Counselor Management", "Model Performance"], label_visibility="collapsed")
 else:
     page = "Client-Counselor Matching"
 
-st.sidebar.markdown(f"**Signed in as:** {role.title()}")
+st.sidebar.markdown("---")
+st.sidebar.markdown(f'<div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 16px;">Signed in as: <strong>{role.title()}</strong></div>', unsafe_allow_html=True)
 
-if st.sidebar.button("Logout"):
+if st.sidebar.button("Logout", use_container_width=True):
     del st.session_state["role"]
     st.rerun()
 
