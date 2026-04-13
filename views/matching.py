@@ -1,3 +1,5 @@
+import base64
+import os
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -78,10 +80,12 @@ def inject_styles():
             margin: 0;
         }
         .hero-stats {
+            position: relative;
+            z-index: 2; /* Float above the image background */
             display: flex;
-            gap: 32px;
-            margin-top: 36px;
-            padding-top: 28px;
+            gap: 40px;
+            margin-top: 40px;
+            padding-top: 32px;
             border-top: 1px solid rgba(255,255,255,0.08);
         }
         .hero-stat-num {
@@ -96,6 +100,48 @@ def inject_styles():
             margin-top: 4px;
             text-transform: uppercase;
             letter-spacing: 0.06em;
+        }
+
+        /* ── Hero image blend ─────────────────────────────────────────── */
+        .hero-content {
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        .hero-text { 
+            flex: 1; 
+            min-width: 0; 
+            max-width: 60%; /* Prevent text from overlapping the image */
+        }
+        .hero-image-wrap {
+            position: absolute;
+            bottom: -48px; /* Anchor it to the bottom of the hero wrap */
+            right: -20px;
+            width: 50%; /* Let it take up the right half */
+            height: 130%; /* Give it plenty of height */
+            pointer-events: none; /* Make sure it doesn't block clicks */
+            z-index: 1;
+        }
+        .hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: right center;
+            opacity: 0.85; /* Make it brighter and clearer */
+            mix-blend-mode: lighten;
+            -webkit-mask-image: linear-gradient(
+                to right,
+                transparent 0%,
+                rgba(0,0,0,0.5) 30%,
+                black 60%
+            );
+            mask-image: linear-gradient(
+                to right,
+                transparent 0%,
+                rgba(0,0,0,0.5) 30%,
+                black 60%
+            );
         }
 
         /* ── Form card ────────────────────────────────────────────────── */
@@ -496,15 +542,28 @@ def scroll_to_results(anchor_id="match-results-anchor"):
     )
 
 def render_hero_new():
+    img_tag = ""
+    try:
+        with open(os.path.join("assets", "2.png"), "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        img_tag = f'<img src="data:image/png;base64,{b64}" class="hero-img" alt="" />'
+    except FileNotFoundError:
+        pass
+
     st.markdown(
-        """
+        f"""
         <div class="hero-wrap">
-            <div class="hero-eyebrow">AI-Powered Matching</div>
-            <h1 class="hero-title">Find Your<br><em>Ideal Counselor</em></h1>
-            <p class="hero-subtitle">
-                Our model analyses compatibility across specialization, language,
-                modality and personal fit — ranked by predicted outcome.
-            </p>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <div class="hero-eyebrow">AI-Powered Matching</div>
+                    <h1 class="hero-title">Find Your<br><em>Ideal Counselor</em></h1>
+                    <p class="hero-subtitle">
+                        Our model analyses compatibility across specialization, language,
+                        modality and personal fit — ranked by predicted outcome.
+                    </p>
+                </div>
+                <div class="hero-image-wrap">{img_tag}</div>
+            </div>
             <div class="hero-stats">
                 <div>
                     <div class="hero-stat-num">9</div>
