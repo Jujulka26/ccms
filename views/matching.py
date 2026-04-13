@@ -535,20 +535,26 @@ def show_matching_page():
         st.progress(25)
         st.markdown('<p class="section-label">Step 1 of 3: About You</p>', unsafe_allow_html=True)
         st.write("To help us find the best fit, tell us a bit about yourself.")
-        
-        # We assign directly to session_state so the value persists when the widget is hidden
-        st.session_state.client_age = st.number_input("What is your age?", 18, 80, st.session_state.get("client_age", 25))
-        st.write("")
-        
+
         gender_options = sorted_options(df_ref["client_gender"])
-        st.session_state.client_gender = st.radio("How do you identify?", gender_options, horizontal=True, index=gender_options.index(st.session_state.get("client_gender", gender_options[0])) if st.session_state.get("client_gender") in gender_options else 0)
-        st.write("")
-        
         ethnicity_options = sorted_options(df_ref["client_ethnicity"])
-        st.session_state.client_ethnicity = st.selectbox("What is your cultural background or ethnicity?", ethnicity_options, index=ethnicity_options.index(st.session_state.get("client_ethnicity", ethnicity_options[0])) if st.session_state.get("client_ethnicity") in ethnicity_options else 0)
+
+        # Seed defaults once — after this, key= keeps session_state in sync automatically
+        if "client_age" not in st.session_state:
+            st.session_state.client_age = 25
+        if "client_gender" not in st.session_state:
+            st.session_state.client_gender = gender_options[0]
+        if "client_ethnicity" not in st.session_state:
+            st.session_state.client_ethnicity = ethnicity_options[0]
+
+        st.number_input("What is your age?", min_value=18, max_value=80, key="client_age")
+        st.write("")
+        st.radio("How do you identify?", gender_options, horizontal=True, key="client_gender")
+        st.write("")
+        st.selectbox("What is your cultural background or ethnicity?", ethnicity_options, key="client_ethnicity")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        col1, col2 = st.columns([1, 1])
+        _, col2 = st.columns([1, 1])
         if col2.button("Next →", use_container_width=True, type="primary"):
             st.session_state.quiz_step = 2
             st.rerun()
@@ -558,17 +564,22 @@ def show_matching_page():
         st.progress(60)
         st.markdown('<p class="section-label">Step 2 of 3: Your Needs</p>', unsafe_allow_html=True)
         st.write("Thank you. What is the main challenge you'd like support with today?")
-        
+
         issue_options = sorted_options(df_ref["client_issue"])
-        st.session_state.client_issue = st.radio("Primary focus area", issue_options, horizontal=True, index=issue_options.index(st.session_state.get("client_issue", issue_options[0])) if st.session_state.get("client_issue") in issue_options else 0)
+
+        if "client_issue" not in st.session_state:
+            st.session_state.client_issue = issue_options[0]
+        if "previous_exp" not in st.session_state:
+            st.session_state.previous_exp = 0
+
+        st.radio("Primary focus area", issue_options, horizontal=True, key="client_issue")
         st.write("")
-        
-        st.session_state.previous_exp = st.radio(
-            "Have you ever tried counseling before?", 
-            [0, 1], 
-            format_func=lambda v: "Yes, I have" if int(v) == 1 else "No, this is my first time", 
+        st.radio(
+            "Have you ever tried counseling before?",
+            [0, 1],
+            format_func=lambda v: "Yes, I have" if int(v) == 1 else "No, this is my first time",
             horizontal=True,
-            index=[0, 1].index(st.session_state.get("previous_exp", 0))
+            key="previous_exp",
         )
 
         st.markdown("<br>", unsafe_allow_html=True)
@@ -587,20 +598,26 @@ def show_matching_page():
         st.write("Almost done! Do you have any preferences for your counselor's approach?")
 
         modality_options = sorted_options(df_ref["preferred_modality"])
-        st.session_state.preferred_modality = st.selectbox(
+        lang_options = sorted_options(df_ref["preferred_language"])
+        gender_options = sorted_options(df_ref["preferred_counselor_gender"])
+
+        if "preferred_modality" not in st.session_state:
+            st.session_state.preferred_modality = modality_options[0]
+        if "preferred_language" not in st.session_state:
+            st.session_state.preferred_language = lang_options[0]
+        if "preferred_c_gender" not in st.session_state:
+            st.session_state.preferred_c_gender = gender_options[0]
+
+        st.selectbox(
             "Preferred counseling approach (Modality)",
             modality_options,
             help=modality_help_text(modality_options),
-            index=modality_options.index(st.session_state.get("preferred_modality", modality_options[0])) if st.session_state.get("preferred_modality") in modality_options else 0
+            key="preferred_modality",
         )
         st.write("")
-        
-        lang_options = sorted_options(df_ref["preferred_language"])
-        st.session_state.preferred_language = st.radio("Preferred language for sessions", lang_options, horizontal=True, index=lang_options.index(st.session_state.get("preferred_language", lang_options[0])) if st.session_state.get("preferred_language") in lang_options else 0)
+        st.radio("Preferred language for sessions", lang_options, horizontal=True, key="preferred_language")
         st.write("")
-        
-        gender_options = sorted_options(df_ref["preferred_counselor_gender"])
-        st.session_state.preferred_c_gender = st.radio("Preferred counselor gender", gender_options, horizontal=True, index=gender_options.index(st.session_state.get("preferred_c_gender", gender_options[0])) if st.session_state.get("preferred_c_gender") in gender_options else 0)
+        st.radio("Preferred counselor gender", gender_options, horizontal=True, key="preferred_c_gender")
 
         st.markdown("<br>", unsafe_allow_html=True)
         col1, col2 = st.columns([1, 1])
