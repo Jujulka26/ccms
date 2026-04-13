@@ -42,31 +42,32 @@ def inject_styles():
             font-weight: 400;
         }
 
-        /* ── Section card ─────────────────────────────────────────────── */
+        /* ── Section Header / Subtle Card ─────────────────────────────── */
         .pm-card {
             background: #FFFFFF;
-            border-radius: 20px;
-            padding: 32px 36px;
+            border-radius: 16px;
+            padding: 18px 24px;
             border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
             margin-bottom: 20px;
         }
         .pm-card-title {
             font-family: 'DM Serif Display', serif;
-            font-size: 22px;
+            font-size: 20px;
             color: #1A1A2E;
-            margin: 0 0 6px;
+            text-shadow: none;
+            margin: 0 0 4px;
         }
         .pm-card-copy {
             font-size: 14px;
-            color: #8B8B9A;
-            margin: 0 0 24px;
+            color: #5A5A6E;
+            margin: 0;
         }
 
         /* ── Recommendation banner ────────────────────────────────────── */
         .pm-recommend {
-            background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, #FFFFFF 100%);
-            border: 1px solid rgba(16,185,129,0.25);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, #FFFFFF 100%);
+            border: 1px solid rgba(245, 158, 11, 0.25);
             border-radius: 16px;
             padding: 28px 32px;
             margin-top: 4px;
@@ -79,9 +80,9 @@ def inject_styles():
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #10B981;
-            background: rgba(16,185,129,0.1);
-            border: 1px solid rgba(16,185,129,0.2);
+            color: #F59E0B;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
             border-radius: 20px;
             padding: 4px 12px;
             margin-bottom: 14px;
@@ -156,7 +157,9 @@ def show_model_performance_page():
             unsafe_allow_html=True,
         )
 
-        # ── Model comparison card ─────────────────────────────────────────────
+        st.divider()
+
+        # ── Model comparison section ──────────────────────────────────────────
         st.markdown(
             """
             <div class="pm-card">

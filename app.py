@@ -259,37 +259,32 @@ def inject_app_styles():
             color: #FFFFFF !important;
         }
 
-        /* ── Absolute footer positioning to the bottom ────────────────── */
+        /* ── Pin footer to bottom of sidebar ─────────────────────────── */
         [data-testid="stSidebarUserContent"] {
             display: flex !important;
             flex-direction: column !important;
-            height: calc(100vh - 60px) !important; 
+            height: 100% !important;
         }
-        
-        /* The container block inside UserContent needs to be a flex column */
         [data-testid="stSidebarUserContent"] > div {
+            flex: 1 !important;
             display: flex !important;
             flex-direction: column !important;
-            flex-grow: 1 !important;
+            min-height: 0 !important;
         }
-
-        /* The inner vertical block holding all the widgets */
+        /* Make every stVerticalBlock in the sidebar a flex column */
         [data-testid="stSidebarUserContent"] [data-testid="stVerticalBlock"] {
+            flex: 1 !important;
             display: flex !important;
             flex-direction: column !important;
-            flex-grow: 1 !important;
         }
-        
-        /* The container wrapping the spacer pushes everything below it down */
-        div[data-testid="stElementContainer"]:has(.sidebar-spacer),
-        div.element-container:has(.sidebar-spacer) {
-            flex-grow: 1 !important;
-            display: flex !important;
+        /* The spacer element's Streamlit wrapper grows to fill remaining space */
+        [data-testid="stSidebarUserContent"] [data-testid="stElementContainer"]:has(.sidebar-spacer),
+        [data-testid="stSidebarUserContent"] .element-container:has(.sidebar-spacer) {
+            flex: 1 !important;
+            min-height: 0 !important;
         }
-
-        /* The spacer itself */
         .sidebar-spacer {
-            min-height: 20px;
+            display: block;
             width: 100%;
         }
 

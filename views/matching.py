@@ -600,19 +600,12 @@ def show_matching_page():
         gender_options = sorted_options(df_ref["client_gender"])
         ethnicity_options = sorted_options(df_ref["client_ethnicity"])
 
-        # Seed defaults once — after this, key= keeps session_state in sync automatically
-        if "client_age" not in st.session_state:
-            st.session_state.client_age = 25
-        if "client_gender" not in st.session_state:
-            st.session_state.client_gender = gender_options[0]
-        if "client_ethnicity" not in st.session_state:
-            st.session_state.client_ethnicity = ethnicity_options[0]
-
-        st.number_input("What is your age?", min_value=18, max_value=80, key="client_age")
+        # Secure values directly to session state
+        st.session_state.client_age = st.number_input("What is your age?", min_value=18, max_value=80, value=st.session_state.get("client_age", 25))
         st.write("")
-        st.radio("How do you identify?", gender_options, horizontal=True, key="client_gender")
+        st.session_state.client_gender = st.radio("How do you identify?", gender_options, horizontal=True, index=gender_options.index(st.session_state.get("client_gender", gender_options[0])) if st.session_state.get("client_gender") in gender_options else 0)
         st.write("")
-        st.selectbox("What is your cultural background or ethnicity?", ethnicity_options, key="client_ethnicity")
+        st.session_state.client_ethnicity = st.selectbox("What is your cultural background or ethnicity?", ethnicity_options, index=ethnicity_options.index(st.session_state.get("client_ethnicity", ethnicity_options[0])) if st.session_state.get("client_ethnicity") in ethnicity_options else 0)
 
         st.markdown("<br>", unsafe_allow_html=True)
         _, col2 = st.columns([1, 1])
@@ -627,19 +620,14 @@ def show_matching_page():
 
         issue_options = sorted_options(df_ref["client_issue"])
 
-        if "client_issue" not in st.session_state:
-            st.session_state.client_issue = issue_options[0]
-        if "previous_exp" not in st.session_state:
-            st.session_state.previous_exp = 0
-
-        st.radio("Primary focus area", issue_options, horizontal=True, key="client_issue")
+        st.session_state.client_issue = st.radio("Primary focus area", issue_options, horizontal=True, index=issue_options.index(st.session_state.get("client_issue", issue_options[0])) if st.session_state.get("client_issue") in issue_options else 0)
         st.write("")
-        st.radio(
+        st.session_state.previous_exp = st.radio(
             "Have you ever tried counseling before?",
             [0, 1],
             format_func=lambda v: "Yes, I have" if int(v) == 1 else "No, this is my first time",
             horizontal=True,
-            key="previous_exp",
+            index=[0, 1].index(st.session_state.get("previous_exp", 0))
         )
 
         st.markdown("<br>", unsafe_allow_html=True)
@@ -660,23 +648,16 @@ def show_matching_page():
         lang_options = sorted_options(df_ref["preferred_language"])
         gender_options = sorted_options(df_ref["preferred_counselor_gender"])
 
-        if "preferred_modality" not in st.session_state:
-            st.session_state.preferred_modality = modality_options[0]
-        if "preferred_language" not in st.session_state:
-            st.session_state.preferred_language = lang_options[0]
-        if "preferred_c_gender" not in st.session_state:
-            st.session_state.preferred_c_gender = gender_options[0]
-
-        st.selectbox(
+        st.session_state.preferred_modality = st.selectbox(
             "Preferred counseling approach (Modality)",
             modality_options,
             help=modality_help_text(modality_options),
-            key="preferred_modality",
+            index=modality_options.index(st.session_state.get("preferred_modality", modality_options[0])) if st.session_state.get("preferred_modality") in modality_options else 0
         )
         st.write("")
-        st.radio("Preferred language for sessions", lang_options, horizontal=True, key="preferred_language")
+        st.session_state.preferred_language = st.radio("Preferred language for sessions", lang_options, horizontal=True, index=lang_options.index(st.session_state.get("preferred_language", lang_options[0])) if st.session_state.get("preferred_language") in lang_options else 0)
         st.write("")
-        st.radio("Preferred counselor gender", gender_options, horizontal=True, key="preferred_c_gender")
+        st.session_state.preferred_c_gender = st.radio("Preferred counselor gender", gender_options, horizontal=True, index=gender_options.index(st.session_state.get("preferred_c_gender", gender_options[0])) if st.session_state.get("preferred_c_gender") in gender_options else 0)
 
         st.markdown("<br>", unsafe_allow_html=True)
         col1, col2 = st.columns([1, 1])

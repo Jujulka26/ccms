@@ -72,7 +72,8 @@ def inject_styles():
         }
 
         /* ── Button overrides (purple primary, ghost secondary) ───────── */
-        div[data-testid="stButton"] button[kind="primary"] {
+        /* Scope all button overrides to main content only — prevents leaking into sidebar */
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] {
             background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
             color: #FFFFFF !important;
             border: none !important;
@@ -81,11 +82,11 @@ def inject_styles():
             box-shadow: 0 4px 12px rgba(124,58,237,0.3) !important;
             transition: all 0.2s ease !important;
         }
-        div[data-testid="stButton"] button[kind="primary"]:hover {
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover {
             box-shadow: 0 6px 18px rgba(124,58,237,0.4) !important;
             transform: translateY(-1px) !important;
         }
-        div[data-testid="stButton"] button[kind="secondary"] {
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="secondary"] {
             border-radius: 10px !important;
             border: 1.5px solid #E5E2DC !important;
             background: #FFFFFF !important;
@@ -93,11 +94,11 @@ def inject_styles():
             font-weight: 600 !important;
             transition: all 0.18s ease !important;
         }
-        div[data-testid="stButton"] button[kind="secondary"]:hover {
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="secondary"]:hover {
             border-color: #8B5CF6 !important;
             color: #7C3AED !important;
         }
-        div[data-testid="stButton"] button:disabled {
+        [data-testid="block-container"] div[data-testid="stButton"] button:disabled {
             opacity: 0.4 !important;
         }
         </style>
