@@ -211,44 +211,55 @@ def inject_app_styles():
             font-family: 'DM Sans', sans-serif;
         }
 
-        /* Box Row styling for Navigation */
+        /* ── Nav radio group spacing ──────────────────────────────────── */
         section[data-testid="stSidebar"] div[role="radiogroup"] {
-            gap: 10px;
+            gap: 6px;
+            display: flex;
+            flex-direction: column;
         }
-        
-        /* Hide the radio bullet circle to make it look like a box */
-        section[data-testid="stSidebar"] div[role="radio"] > div:first-child {
+
+        /* Hide the radio bullet — Streamlit renders this as label[data-baseweb="radio"]
+           NOT div[role="radio"], so we target the correct element here */
+        section[data-testid="stSidebar"] [data-baseweb="radio"] > div:first-child {
             display: none !important;
         }
 
-        /* Style the radio buttons as clickable box rows */
-        section[data-testid="stSidebar"] div[role="radio"] {
-            padding: 12px 16px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            transition: all 0.2s ease;
-            margin-bottom: 2px;
-            width: 100%;
-            cursor: pointer;
+        /* Style each nav item as a clean row */
+        section[data-testid="stSidebar"] [data-baseweb="radio"] {
+            padding: 11px 16px !important;
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            border-radius: 10px !important;
+            transition: background 0.18s ease, border-color 0.18s ease !important;
+            margin-bottom: 0 !important;
+            width: 100% !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
         }
-        section[data-testid="stSidebar"] div[role="radio"]:hover {
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(139,92,246,0.4);
-            transform: translateY(-1px);
+        section[data-testid="stSidebar"] [data-baseweb="radio"]:hover {
+            background: rgba(255,255,255,0.09) !important;
+            border-color: rgba(139,92,246,0.45) !important;
         }
-        section[data-testid="stSidebar"] div[role="radio"][aria-checked="true"] {
-            background: rgba(139,92,246,0.15);
-            border-color: rgba(139,92,246,0.6);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        /* Active nav item — :has(input:checked) targets the selected radio */
+        section[data-testid="stSidebar"] [data-baseweb="radio"]:has(input:checked) {
+            background: rgba(139,92,246,0.18) !important;
+            border-color: rgba(139,92,246,0.65) !important;
+            box-shadow: 0 2px 10px rgba(139,92,246,0.15) !important;
         }
-        section[data-testid="stSidebar"] div[role="radio"] p {
+        section[data-testid="stSidebar"] [data-baseweb="radio"] p,
+        section[data-testid="stSidebar"] [data-baseweb="radio"] span {
             font-size: 14px !important;
             font-weight: 600 !important;
             margin: 0 !important;
+            color: rgba(255,255,255,0.9) !important;
+        }
+        section[data-testid="stSidebar"] [data-baseweb="radio"]:has(input:checked) p,
+        section[data-testid="stSidebar"] [data-baseweb="radio"]:has(input:checked) span {
+            color: #FFFFFF !important;
         }
 
-        /* Improved logout button */
+        /* ── Logout button ────────────────────────────────────────────── */
         section[data-testid="stSidebar"] button[kind="secondary"] {
             background: rgba(255,255,255,0.05) !important;
             color: #FFFFFF !important;
@@ -258,13 +269,49 @@ def inject_app_styles():
             transition: all 0.2s ease !important;
             padding: 8px 0 !important;
         }
-        section[data-testid="stSidebar"] button:hover {
-            background: rgba(255,255,255,0.15) !important;
+        section[data-testid="stSidebar"] button[kind="secondary"]:hover {
+            background: rgba(255,255,255,0.12) !important;
             border-color: rgba(255,255,255,0.3) !important;
-            transform: translateY(-1px);
         }
-        
-        /* Custom sidebar divider */
+
+        /* ── Sidebar collapse (<<) button inside sidebar ──────────────── */
+        button[aria-label="Collapse sidebar"],
+        section[data-testid="stSidebar"] button[data-testid="baseButton-headerNoPadding"] {
+            background: rgba(139,92,246,0.25) !important;
+            color: #FFFFFF !important;
+            border: 1.5px solid rgba(139,92,246,0.5) !important;
+            border-radius: 8px !important;
+            opacity: 1 !important;
+        }
+        button[aria-label="Collapse sidebar"]:hover,
+        section[data-testid="stSidebar"] button[data-testid="baseButton-headerNoPadding"]:hover {
+            background: rgba(139,92,246,0.45) !important;
+            border-color: #8B5CF6 !important;
+        }
+
+        /* ── Sidebar expand (>>) button shown when sidebar is closed ───── */
+        button[data-testid="collapsedControl"],
+        button[aria-label="Expand sidebar"] {
+            background: #8B5CF6 !important;
+            color: #FFFFFF !important;
+            border-radius: 0 10px 10px 0 !important;
+            border: none !important;
+            box-shadow: 2px 0 14px rgba(139,92,246,0.4) !important;
+            opacity: 1 !important;
+        }
+        button[data-testid="collapsedControl"]:hover,
+        button[aria-label="Expand sidebar"]:hover {
+            background: #7C3AED !important;
+            box-shadow: 2px 0 18px rgba(139,92,246,0.55) !important;
+        }
+        button[data-testid="collapsedControl"] svg,
+        button[aria-label="Collapse sidebar"] svg,
+        button[aria-label="Expand sidebar"] svg {
+            fill: #FFFFFF !important;
+            color: #FFFFFF !important;
+        }
+
+        /* ── Sidebar divider ──────────────────────────────────────────── */
         section[data-testid="stSidebar"] hr {
             border-bottom: 1px solid rgba(255,255,255,0.1);
             margin: 20px 0;
