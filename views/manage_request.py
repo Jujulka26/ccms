@@ -1,11 +1,78 @@
 import streamlit as st
 import pandas as pd
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from utils.db import get_all_requests, update_request_status
 
 def send_approval_email(name, email, counselor):
-    """Placeholder function for sending an approval email"""
-    # In a real application, this would integrate with an SMTP server or email API
-    pass
+    """Function for sending an approval email using Gmail SMTP"""
+    sender_email = "saltysmilesofficial@gmail.com" 
+    sender_password = st.secrets["EMAIL_PASSWORD"]
+
+    subject = "Counselor Match Request Approved!"
+    
+    # UPDATED TEXT: No more "log in" instructions
+    body = f"""Hello {name},
+
+Great news! Your request to match with our Licensed Counselor, {counselor}, has been reviewed and approved by the clinic coordinator. 
+
+Please wait for {counselor} to contact you directly via this email address to schedule your first introductory session. 
+
+If you have any immediate questions, feel free to reply to this email.
+
+Warm regards,
+Client-Counselor Matching System
+"""
+
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, email, msg.as_string())
+        server.quit()
+    except Exception as e:
+        print(f"Failed to send email to {email}: {e}")
+
+def send_rejection_email(name, email, counselor):
+    """Function for sending a gentle rejection/redirect email"""
+    sender_email = "saltysmilesofficial@gmail.com" 
+    sender_password = "nevt znrp xydy qavi" 
+
+    subject = "Update on your Counselor Match Request"
+    
+    body = f"""Hello {name},
+
+Thank you for using our Client-Counselor Matching System. 
+
+At this time, {counselor}'s schedule is currently at full capacity, so we are unable to proceed with this specific match. We highly encourage you to return to the system and try matching with your 2nd Option counselor.
+
+We are committed to helping you find the right support. 
+
+Warm regards,
+Client-Counselor Matching System
+"""
+
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, email, msg.as_string())
+        server.quit()
+    except Exception as e:
+        print(f"Failed to send email to {email}: {e}")
 
 @st.dialog("Confirm Approval")
 def confirm_approve_dialog(request_id, client_name, client_email, counselor_name):
@@ -24,15 +91,17 @@ def confirm_approve_dialog(request_id, client_name, client_email, counselor_name
             st.rerun()
 
 @st.dialog("Confirm Rejection")
-def confirm_reject_dialog(request_id, client_name):
+def confirm_reject_dialog(request_id, client_name, client_email, counselor_name):
     st.write(f"Are you sure you want to reject the request for **{client_name}**?")
-    st.warning("This action cannot be undone.")
+    st.warning("This action cannot be undone. An email will be sent to notify them.")
     st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Yes, Reject", type="primary", use_container_width=True):
             update_request_status(request_id, 'Rejected')
-            st.success("Request rejected.")
+            # Trigger the new rejection email!
+            send_rejection_email(client_name, client_email, counselor_name)
+            st.success("Request rejected!")
             st.rerun()
     with col2:
         if st.button("Cancel", use_container_width=True):
@@ -141,7 +210,7 @@ def render():
                             confirm_approve_dialog(row['request_id'], row['client_name'], row['client_email'], row['counselor_name'])
                             
                         if st.button("Reject", key=f"reject_{row['request_id']}", use_container_width=True):
-                            confirm_reject_dialog(row['request_id'], row['client_name'])
+                            confirm_reject_dialog(row['request_id'], row['client_name'], row['client_email'], row['counselor_name'])
 
     # --- APPROVED TAB ---
     with tab_approved:
