@@ -278,11 +278,15 @@ def show_manage_page():
     # ── Hero ──────────────────────────────────────────────────────────────────
     st.markdown(
         """
-        <div class="app-hero">
-            <div class="eyebrow">Directory</div>
-            <div class="hero-title">Counselor Management</div>
-            <p class="hero-copy">Review counselor records, add new entries, and update
-            existing profiles in one place.</p>
+        <div style="position: relative; overflow: hidden; background: linear-gradient(135deg, #F8F5FF 0%, #FFFFFF 100%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid #E9E1FF; display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 236px;">
+            <div style="position: relative; z-index: 2; max-width: 65%;">
+                <div style="color: #8B5CF6; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.25); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block;">Directory</div>
+                <div style="font-family: 'DM Serif Display', serif; font-size: 42px; color: #1A1A2E; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Counselor Management</div>
+                <p style="font-size: 16px; color: #4A4A5C; margin: 0; line-height: 1.65; max-width: 480px;">Review counselor records, add new entries, and update existing profiles in one place.</p>
+            </div>
+            <div style="font-size: 100px; line-height: 1; position: absolute; right: 20px; bottom: -15px; z-index: 1; opacity: 0.15; transform: rotate(-10deg); pointer-events: none;">
+                🗂️
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
