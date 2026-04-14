@@ -75,6 +75,72 @@ def show_chatbot_page():
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
+    # Scrolling Suggestion Pills (Only show on first message to help the user)
+    if len(st.session_state.messages) == 1:
+        st.markdown(
+            """
+            <style>
+            .suggestions-wrapper {
+                position: fixed;
+                bottom: 130px; /* Increased to hover cleanly above Streamlit's white chat container */
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 730px; /* Streamlit standard chat width */
+                overflow: hidden;
+                z-index: 999999;
+                pointer-events: none; /* Let users click through to chat history */
+                -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+                mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            }
+            .suggestions-track {
+                display: flex;
+                gap: 14px;
+                width: max-content;
+                animation: scroll-left 30s linear infinite;
+            }
+            .suggestion-pill {
+                background: #FFFFFF;
+                border: 1px solid #E9E1FF;
+                border-radius: 20px;
+                padding: 10px 18px;
+                font-size: 14px;
+                color: #5A5A6E;
+                white-space: nowrap;
+                box-shadow: 0 4px 12px rgba(124,58,237,0.06);
+            }
+            @keyframes scroll-left {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+            }
+            /* Media query for smaller displays */
+            @media (max-width: 768px) {
+                .suggestions-wrapper { bottom: 110px; }
+            }
+            </style>
+            
+            <div class="suggestions-wrapper">
+                <div class="suggestions-track">
+                    <!-- First Set -->
+                    <div class="suggestion-pill">I feel overwhelmed with work... 😔</div>
+                    <div class="suggestion-pill">How do I choose the right counselor? 🔍</div>
+                    <div class="suggestion-pill">Can we talk about relationship issues? 💔</div>
+                    <div class="suggestion-pill">What happens during an assessment? 📝</div>
+                    <div class="suggestion-pill">I want to develop a positive mindset ✨</div>
+                    <div class="suggestion-pill">How does the matching process work? 🤝</div>
+                    <!-- Second Set (Duplicate for seamless CSS loop) -->
+                    <div class="suggestion-pill">I feel overwhelmed with work... 😔</div>
+                    <div class="suggestion-pill">How do I choose the right counselor? 🔍</div>
+                    <div class="suggestion-pill">Can we talk about relationship issues? 💔</div>
+                    <div class="suggestion-pill">What happens during an assessment? 📝</div>
+                    <div class="suggestion-pill">I want to develop a positive mindset ✨</div>
+                    <div class="suggestion-pill">How does the matching process work? 🤝</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # Chat Input
     if prompt := st.chat_input("Ask a question..."):
         # Append user message
