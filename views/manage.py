@@ -57,6 +57,7 @@ def inject_styles():
             padding: 18px 24px;
             border: 1px solid rgba(0,0,0,0.06);
             box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            margin-top: 32px;
             margin-bottom: 20px;
         }
         .mg-card-title {
