@@ -149,3 +149,30 @@ def save_intro_request(client_name, client_email, counselor_id, compatibility_sc
     finally:
         cursor.close()
         conn.close()
+
+def get_all_requests():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        query = """
+        SELECT r.request_id, r.client_name, r.client_email, r.compatibility_score, r.status, c.name as counselor_name
+        FROM tbl_request r
+        JOIN tbl_counselor c ON r.counselor_id = c.counselor_id
+        ORDER BY r.request_id DESC
+        """
+        cursor.execute(query)
+        return pd.DataFrame(cursor.fetchall())
+    finally:
+        cursor.close()
+        conn.close()
+
+def update_request_status(request_id, status):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        query = "UPDATE tbl_request SET status = %s WHERE request_id = %s"
+        cursor.execute(query, (status, request_id))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()

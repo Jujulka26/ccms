@@ -6,6 +6,7 @@ from views.model_performance import show_model_performance_page
 from views.login import show_login_page
 from views.faq import show_faq_page
 from views.chatbot import show_chatbot_page
+from views.manage_request import render as show_manage_request_page
 
 
 if "login" in st.query_params:
@@ -454,7 +455,7 @@ if role == "admin":
         '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Admin Navigation</div>',
         unsafe_allow_html=True
     )
-    page = st.sidebar.radio("Navigation", ["Client-Counselor Matching", "Counselor Management", "Model Performance"], label_visibility="collapsed")
+    page = st.sidebar.radio("Navigation", ["Client-Counselor Matching", "Counselor Management", "Review Requests", "Model Performance"], label_visibility="collapsed")
 else:
     st.sidebar.markdown(
         '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Client Navigation</div>',
@@ -479,6 +480,8 @@ if page in ["Client-Counselor Matching", "Find a Counselor"]:
     show_matching_page()
 elif page == "Counselor Management":
     show_manage_page()
+elif page == "Review Requests":
+    show_manage_request_page()
 elif page == "Model Performance":
     show_model_performance_page()
 elif page == "Frequently Asked Questions":
