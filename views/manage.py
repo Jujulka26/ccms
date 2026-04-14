@@ -1,6 +1,6 @@
 import streamlit as st
+import pandas as pd
 from utils.db import add_counselor, delete_counselor, load_counselors, update_counselor
-
 
 def inject_styles():
     st.markdown(
@@ -81,7 +81,6 @@ def inject_styles():
         }
 
         /* ── Button overrides (purple primary, ghost secondary) ───────── */
-        /* Scope all button overrides to main content only — prevents leaking into sidebar */
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"],
         div[data-testid="stButton"] button[kind="primary"] {
             background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
@@ -116,28 +115,28 @@ def inject_styles():
         unsafe_allow_html=True,
     )
 
-
 GENDER_OPTIONS = ["Male", "Female"]
 ETHNICITY_OPTIONS = ["Malay", "Chinese", "Indian", "Other"]
 LANGUAGE_OPTIONS = ["English", "Malay", "Mandarin", "Tamil"]
 SPECIALIZATION_OPTIONS = ["Anxiety", "Depression", "Stress", "Trauma"]
 MODALITY_OPTIONS = ["CBT", "Humanistic", "Mindfulness", "REBT"]
 
-
 def _option_index(options, value, default=0):
     if value is None:
         return default
-
     normalized = str(value).strip()
     if "," in normalized:
         normalized = normalized.split(",")[0].strip()
-
     return options.index(normalized) if normalized in options else default
 
+# Helper to prevent pandas "NaN" from showing up in text boxes
+def safe_str(val):
+    return "" if pd.isna(val) else str(val)
 
 @st.dialog("Add new counselor")
 def render_add_counselor_dialog():
     with st.form("add_counselor_dialog_form"):
+        st.markdown("#### Basic Information")
         col1, col2 = st.columns(2, gap="medium")
 
         with col1:
@@ -147,18 +146,34 @@ def render_add_counselor_dialog():
             ethnicity = st.selectbox("Ethnicity", ETHNICITY_OPTIONS)
 
         with col2:
-            counselor_language = st.selectbox("Counselor language", LANGUAGE_OPTIONS, index=LANGUAGE_OPTIONS.index("Malay"))
+            counselor_language = st.multiselect("Counselor language", LANGUAGE_OPTIONS, default=["Malay"], max_selections=2)
             specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=SPECIALIZATION_OPTIONS.index("Stress"))
             counselor_modality = st.selectbox("Counselor modality", MODALITY_OPTIONS, index=MODALITY_OPTIONS.index("CBT"))
             experience_years = st.number_input("Years of Experience", 0, 30, 3)
 
+        st.divider()
+        st.markdown("#### Profile Display Details")
+        about_me = st.text_area("About Me", placeholder="I am a dedicated counseling professional...")
+        expertise_tags = st.text_input("Expertise Tags", placeholder="e.g., Anxiety, Overthinking, Self Growth")
+        
+        t_col1, t_col2 = st.columns(2)
+        with t_col1:
+            helpful_thought_1 = st.text_input("Helpful Thought 1", placeholder="e.g., Am I doing enough?")
+        with t_col2:
+            helpful_thought_2 = st.text_input("Helpful Thought 2", placeholder="e.g., Why do I feel so alone?")
+
         submitted = st.form_submit_button("Save counselor", use_container_width=True, type="primary")
 
     if submitted:
-        add_counselor(name, age, gender, ethnicity, specialization, counselor_language, counselor_modality, experience_years)
-        st.success("Counselor added successfully.")
-        st.rerun()
-
+        if not name.strip():
+            st.error("Name is required.")
+        elif not counselor_language:
+            st.error("Please select at least one language.")
+        else:
+            lang_str = ", ".join(counselor_language)
+            add_counselor(name, age, gender, ethnicity, specialization, lang_str, counselor_modality, experience_years, about_me, expertise_tags, helpful_thought_1, helpful_thought_2)
+            st.success("Counselor added successfully.")
+            st.rerun()
 
 @st.dialog("Edit counselor")
 def render_edit_counselor_dialog():
@@ -183,6 +198,7 @@ def render_edit_counselor_dialog():
     modality_index = _option_index(MODALITY_OPTIONS, row.get("counselor_modality"))
 
     with st.form("edit_counselor_dialog_form"):
+        st.markdown("#### Basic Information")
         edit_col1, edit_col2 = st.columns(2, gap="medium")
 
         with edit_col1:
@@ -192,28 +208,43 @@ def render_edit_counselor_dialog():
             edit_ethnicity = st.selectbox("Ethnicity", ETHNICITY_OPTIONS, index=ethnicity_index)
 
         with edit_col2:
-            edit_language = st.selectbox("Counselor language", LANGUAGE_OPTIONS, index=language_index)
+            current_langs = [l.strip() for l in str(row.get("counselor_language", "")).split(",") if l.strip() in LANGUAGE_OPTIONS]
+            if not current_langs and LANGUAGE_OPTIONS:
+                current_langs = [LANGUAGE_OPTIONS[0]]
+            
+            edit_language = st.multiselect("Counselor language", LANGUAGE_OPTIONS, default=current_langs, max_selections=2)
             edit_specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=specialization_index)
             edit_modality = st.selectbox("Counselor modality", MODALITY_OPTIONS, index=modality_index)
             edit_year_exp = st.number_input("Years of Experience", 0, 30, int(row["experience_years"]))
 
+        st.divider()
+        st.markdown("#### Profile Display Details (Mindpeers Style)")
+        edit_about_me = st.text_area("About Me", value=safe_str(row.get("about_me")))
+        edit_expertise_tags = st.text_input("Expertise Tags", value=safe_str(row.get("expertise_tags")))
+        
+        e_col1, e_col2 = st.columns(2)
+        with e_col1:
+            edit_thought_1 = st.text_input("Helpful Thought 1", value=safe_str(row.get("helpful_thought_1")))
+        with e_col2:
+            edit_thought_2 = st.text_input("Helpful Thought 2", value=safe_str(row.get("helpful_thought_2")))
+
         submitted = st.form_submit_button("Update counselor", use_container_width=True, type="primary")
 
     if submitted:
-        update_counselor(
-            int(selected_id),
-            edit_name,
-            edit_age,
-            edit_gender,
-            edit_ethnicity,
-            edit_specialization,
-            edit_language,
-            edit_modality,
-            edit_year_exp,
-        )
-        st.success(f"Counselor {int(selected_id)} updated successfully.")
-        st.rerun()
-
+        if not edit_name.strip():
+            st.error("Name is required.")
+        elif not edit_language:
+            st.error("Please select at least one language.")
+        else:
+            lang_str = ", ".join(edit_language)
+            update_counselor(
+                int(selected_id),
+                edit_name, edit_age, edit_gender, edit_ethnicity,
+                edit_specialization, lang_str, edit_modality, edit_year_exp,
+                edit_about_me, edit_expertise_tags, edit_thought_1, edit_thought_2
+            )
+            st.success(f"Counselor {int(selected_id)} updated successfully.")
+            st.rerun()
 
 @st.dialog("Delete counselor")
 def render_delete_counselor_dialog():
@@ -237,7 +268,6 @@ def render_delete_counselor_dialog():
         delete_counselor(int(selected_id))
         st.success(f"Counselor {int(selected_id)} deleted successfully.")
         st.rerun()
-
 
 def show_manage_page():
     inject_styles()
@@ -303,7 +333,6 @@ def show_manage_page():
     if counselors_df.empty:
         st.warning("No counselors found in the database.")
     else:
-        st.dataframe(counselors_df, use_container_width=True, hide_index=True)
-
-    if counselors_df.empty:
-        return
+        # We drop the big text columns from the display dataframe so the table isn't massively stretched out!
+        display_df = counselors_df.drop(columns=["about_me", "helpful_thought_1", "helpful_thought_2"], errors='ignore')
+        st.dataframe(display_df, use_container_width=True, hide_index=True)

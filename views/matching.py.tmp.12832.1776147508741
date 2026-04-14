@@ -249,11 +249,11 @@ def inject_styles():
             margin-bottom: 28px;
         }
         .result-card {
-            position: relative;
             background: #FFFFFF;
-            border-radius: 20px;
-            padding: 28px;
+            border-radius: 20px 20px 0 0;
+            padding: 28px 28px 20px;
             border: 1px solid rgba(0,0,0,0.06);
+            border-bottom: none;
         }
         .result-card.primary {
             background: #1A1A2E;
@@ -271,45 +271,6 @@ def inject_styles():
         }
         .badge-primary { background: rgba(139,92,246,0.2); color: #A78BFA; }
         .badge-secondary { background: #F0EDE8; color: #8B8B9A; }
-
-        .profile-btn {
-            position: absolute;
-            top: 28px;
-            right: 28px;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            text-decoration: none !important;
-            padding: 5px 12px;
-            border-radius: 20px;
-            transition: all 0.2s ease;
-            box-shadow: none !important;
-            cursor: pointer;
-        }
-        .profile-btn:hover {
-            transform: translateY(-2px);
-        }
-        .profile-btn-primary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #FFFFFF !important;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .profile-btn-primary:hover {
-            background: rgba(255, 255, 255, 0.25);
-            color: #FFFFFF !important;
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-        .profile-btn-secondary {
-            background: #F7F5F0;
-            color: #4A4A5A !important;
-            border: 1px solid #D5D2CC;
-        }
-        .profile-btn-secondary:hover {
-            background: #E5E2DC;
-            color: #1A1A2E !important;
-            border-color: #C5C2BC;
-        }
 
         .compat-score {
             font-family: 'DM Serif Display', serif;
@@ -632,7 +593,6 @@ def render_counselor_card(counselor_row, score, is_primary=True):
         st.markdown(
             f"""
             <div class="result-card primary">
-                <a href="#" class="profile-btn profile-btn-primary">View Profile</a>
                 <span class="result-card-badge badge-primary">Top Match</span>
                 <div class="compat-score">{score:.1f}%</div>
                 <div class="compat-label">Compatibility score</div>
@@ -649,7 +609,6 @@ def render_counselor_card(counselor_row, score, is_primary=True):
         st.markdown(
             f"""
             <div class="result-card">
-                <a href="#" class="profile-btn profile-btn-secondary">View Profile</a>
                 <span class="result-card-badge badge-secondary">2nd Option</span>
                 <div class="compat-score-secondary">{score:.1f}%</div>
                 <div class="compat-label-secondary">Compatibility score</div>
@@ -834,7 +793,7 @@ def show_matching_page():
         scroll_to_results()
 
         # ── EXACT ORIGINAL Result cards ───────────────────────────────────────────
-        st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">YOUR MATCHES</p>', unsafe_allow_html=True)
+        st.markdown('<p class="section-label" style="margin-top:8px">Your Matches</p>', unsafe_allow_html=True)
         col1, col2 = st.columns(2, gap="large")
         with col1:
             render_counselor_card(best_c, best.compatibility, is_primary=True)
@@ -846,7 +805,8 @@ def show_matching_page():
 
         # ── Match Explanation ─────────────────────────────────────────────────────
         st.write("")
-        
+        st.markdown('<p class="section-label" style="margin-top:24px">Why this match?</p>', unsafe_allow_html=True)
+
         positive_points, negative_points = [], []
         positive_points.append(f"Supports your preferred language ({preferred_language})")
         if int(best.modality_match) == 1:
@@ -866,7 +826,7 @@ def show_matching_page():
                 negative_points.append(f"Preferred gender not matched ({preferred_c_gender})")
 
         st.markdown('<div class="explain-card">', unsafe_allow_html=True)
-        st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THIS MATCH ?</p>', unsafe_allow_html=True)
+        st.markdown('<p class="explain-title">Match explanation</p>', unsafe_allow_html=True)
         exp_col1, exp_col2 = st.columns(2, gap="large")
         with exp_col1:
             st.markdown("**Strengths**")

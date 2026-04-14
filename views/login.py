@@ -46,8 +46,8 @@ def show_login_page():
             st.markdown('<div class="login-title">Admin Login</div>', unsafe_allow_html=True)
             st.markdown('<div class="login-subtitle">Sign in to manage directory and models.</div>', unsafe_allow_html=True)
             
-            email = st.text_input("Email", placeholder="admin@example.com")
-            password = st.text_input("Password", type="password", placeholder="••••••••")
+            email = st.text_input("Email")
+            password = st.text_input("Password", type="password")
             
             st.markdown("##### ")
             
