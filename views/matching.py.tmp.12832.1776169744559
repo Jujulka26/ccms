@@ -249,11 +249,11 @@ def inject_styles():
             margin-bottom: 28px;
         }
         .result-card {
+            position: relative;
             background: #FFFFFF;
-            border-radius: 20px 20px 0 0;
-            padding: 28px 28px 20px;
+            border-radius: 20px;
+            padding: 28px;
             border: 1px solid rgba(0,0,0,0.06);
-            border-bottom: none;
         }
         .result-card.primary {
             background: #1A1A2E;
@@ -271,6 +271,45 @@ def inject_styles():
         }
         .badge-primary { background: rgba(139,92,246,0.2); color: #A78BFA; }
         .badge-secondary { background: #F0EDE8; color: #8B8B9A; }
+
+        .profile-btn {
+            position: absolute;
+            top: 28px;
+            right: 28px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            text-decoration: none !important;
+            padding: 5px 12px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+            box-shadow: none !important;
+            cursor: pointer;
+        }
+        .profile-btn:hover {
+            transform: translateY(-2px);
+        }
+        .profile-btn-primary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .profile-btn-primary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: #FFFFFF !important;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .profile-btn-secondary {
+            background: #F7F5F0;
+            color: #4A4A5A !important;
+            border: 1px solid #D5D2CC;
+        }
+        .profile-btn-secondary:hover {
+            background: #E5E2DC;
+            color: #1A1A2E !important;
+            border-color: #C5C2BC;
+        }
 
         .compat-score {
             font-family: 'DM Serif Display', serif;
@@ -385,6 +424,18 @@ def inject_styles():
             font-family: 'DM Sans', sans-serif !important;
             font-size: 14px !important;
             font-weight: 500 !important;
+        }
+
+        /* ── Stash the Streamlit trigger button out of sight ─────────── */
+        [data-testid="column"]:has(.result-card) [data-testid="stButton"] {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            overflow: hidden !important;
+            opacity: 0 !important;
+            top: -999px !important;
+            left: -999px !important;
+            pointer-events: none !important;
         }
         </style>
         """,
@@ -593,6 +644,7 @@ def render_counselor_card(counselor_row, score, is_primary=True):
         st.markdown(
             f"""
             <div class="result-card primary">
+                <a href="#" class="profile-btn profile-btn-primary" onclick="var vb=this.closest('[data-testid=stVerticalBlock]');if(vb){{var b=vb.querySelector('[data-testid=stButton] button');if(b)b.click();}}return false;">View Profile</a>
                 <span class="result-card-badge badge-primary">Top Match</span>
                 <div class="compat-score">{score:.1f}%</div>
                 <div class="compat-label">Compatibility score</div>
@@ -609,6 +661,7 @@ def render_counselor_card(counselor_row, score, is_primary=True):
         st.markdown(
             f"""
             <div class="result-card">
+                <a href="#" class="profile-btn profile-btn-secondary" onclick="var vb=this.closest('[data-testid=stVerticalBlock]');if(vb){{var b=vb.querySelector('[data-testid=stButton] button');if(b)b.click();}}return false;">View Profile</a>
                 <span class="result-card-badge badge-secondary">2nd Option</span>
                 <div class="compat-score-secondary">{score:.1f}%</div>
                 <div class="compat-label-secondary">Compatibility score</div>
@@ -621,6 +674,168 @@ def render_counselor_card(counselor_row, score, is_primary=True):
             """,
             unsafe_allow_html=True,
         )
+
+    card_id = f"{int(c.get('counselor_id', 0))}_{'p' if is_primary else 's'}"
+    if st.button("View Profile", key=f"vp_{card_id}"):
+        show_profile_dialog(c, score)
+
+
+# ── Profile dialog helpers ────────────────────────────────────────────────────
+_EXPERTISE_MAP = {
+    "Anxiety":    ["Anxiety Management", "Panic Attacks", "Worry Reduction", "Stress Relief", "Cognitive Reframing"],
+    "Depression": ["Low Mood Support", "Motivation Building", "Emotional Regulation", "Self-Esteem", "Behavioral Activation"],
+    "Stress":     ["Work-Life Balance", "Stress Coping", "Burnout Recovery", "Mindfulness", "Relaxation Techniques"],
+    "Trauma":     ["Trauma Processing", "PTSD Support", "Emotional Healing", "Resilience Building", "Safety Planning"],
+}
+_MODALITY_TAGS = {
+    "CBT":         ["Cognitive Restructuring", "Thought Records"],
+    "Mindfulness": ["Present-Moment Awareness", "Breathing Techniques"],
+    "Humanistic":  ["Person-Centered Growth", "Empathetic Support"],
+    "REBT":        ["Belief Challenging", "Rational Thinking"],
+}
+
+def _expertise_tags(spec, modality):
+    tags = list(_EXPERTISE_MAP.get(spec, ["Counseling Support", "Mental Wellness"]))
+    for t in _MODALITY_TAGS.get(modality, []):
+        if t not in tags:
+            tags.append(t)
+    return tags[:5]
+
+def _helpful_thoughts(spec):
+    mapping = {
+        "Anxiety":    ("Am I doing enough?",             "Why do I always worry so much?"),
+        "Depression": ("Why do I feel so empty inside?", "Will things ever get better?"),
+        "Stress":     ("I can't keep up with everything.", "Why am I always so tired?"),
+        "Trauma":     ("Why can't I just move on?",      "Will I ever feel safe again?"),
+    }
+    return mapping.get(spec, ("How do I move forward?", "Why do I feel this way?"))
+
+_MODALITY_DESC = {
+    "CBT":         "Cognitive Behavioural Therapy helps you identify and reframe unhelpful thought patterns. We work together to break negative cycles of thinking and behaviour into healthier, more balanced ones.",
+    "Mindfulness": "Mindfulness-Based therapy teaches you to observe your thoughts without judgment, staying grounded in the present moment. It is effective for stress, anxiety, and emotional regulation.",
+    "Humanistic":  "The Humanistic approach is person-centered, focusing on your strengths and potential. Sessions are non-judgmental and empathetic — you set the pace, and I support your self-discovery.",
+    "REBT":        "Rational Emotive Behaviour Therapy helps you identify irrational beliefs that cause distress and replace them with rational, constructive ways of thinking. It is practical and goal-oriented.",
+}
+
+
+@st.dialog("Counselor Profile", width="large")
+def show_profile_dialog(counselor, score=None):
+    c = counselor
+    name     = str(c.get("name", "Counselor"))
+    spec     = str(c.get("specialization", ""))
+    modality = str(c.get("counselor_modality", ""))
+    exp      = c.get("experience_years", 0)
+    langs    = str(c.get("counselor_language", ""))
+    about_raw     = str(c.get("about_me", "") or "").strip()
+    expertise_raw = str(c.get("expertise_tags", "") or "").strip()
+    ht1 = str(c.get("helpful_thought_1", "") or "").strip()
+    ht2 = str(c.get("helpful_thought_2", "") or "").strip()
+
+    tags = [t.strip() for t in expertise_raw.split(",") if t.strip()] or _expertise_tags(spec, modality)
+    t1 = ht1 or _helpful_thoughts(spec)[0]
+    t2 = ht2 or _helpful_thoughts(spec)[1]
+    if not about_raw:
+        about_raw = (
+            f"{name} is a licensed counselor with {exp} years of experience specialising in {spec}. "
+            f"Using {modality}, they create a safe, non-judgmental space tailored to your unique needs. "
+            f"Their sessions focus on practical strategies to help you build resilience and regain clarity."
+        )
+
+    avatar_url = (
+        f"https://api.dicebear.com/7.x/initials/svg?seed={name.replace(' ', '%20')}"
+        f"&backgroundColor=6d28d9&fontFamily=Arial&fontSize=40&fontWeight=700"
+        f"&textColor=ffffff&radius=12&size=120"
+    )
+    score_html = f'<div class="pd-score-badge">{score:.1f}% Match</div>' if score is not None else ""
+
+    st.markdown(
+        f"""
+        <style>
+        .pd-header {{
+            display: flex; align-items: center; gap: 20px;
+            padding: 4px 0 24px; border-bottom: 1px solid #F0EDE8; margin-bottom: 20px;
+        }}
+        .pd-avatar {{ width:80px; height:80px; border-radius:14px; object-fit:cover; flex-shrink:0; }}
+        .pd-info {{ flex:1; min-width:0; }}
+        .pd-name {{
+            font-family:'DM Serif Display',serif; font-size:22px;
+            color:#1A1A2E; margin:0 0 4px; line-height:1.2;
+        }}
+        .pd-title {{ font-size:13px; color:#8B5CF6; font-weight:600; margin:0 0 10px; }}
+        .pd-stats {{ display:flex; gap:16px; flex-wrap:wrap; }}
+        .pd-stat {{ font-size:12px; color:#5A5A6E; display:flex; align-items:center; gap:5px; }}
+        .pd-score-badge {{
+            background:linear-gradient(135deg,#7C3AED,#5B21B6); color:#fff;
+            font-size:12px; font-weight:700; padding:5px 14px;
+            border-radius:20px; white-space:nowrap; flex-shrink:0;
+        }}
+        .pd-section-title {{
+            font-size:11px; font-weight:700; letter-spacing:0.1em;
+            text-transform:uppercase; color:#8B8B9A; margin-bottom:8px;
+        }}
+        .pd-tags {{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }}
+        .pd-tag {{
+            background:#F3F0FF; color:#6D28D9; font-size:12px; font-weight:600;
+            padding:4px 12px; border-radius:20px; border:1px solid rgba(109,40,217,0.15);
+        }}
+        .pd-thoughts {{
+            background:linear-gradient(135deg,rgba(109,40,217,0.08) 0%,rgba(139,92,246,0.04) 100%);
+            border:1px solid rgba(109,40,217,0.15); border-radius:14px;
+            padding:20px 22px; margin-bottom:20px;
+        }}
+        .pd-thoughts-title {{
+            font-size:11px; font-weight:700; letter-spacing:0.1em;
+            text-transform:uppercase; color:#8B5CF6; margin-bottom:12px;
+        }}
+        .pd-thought {{
+            display:flex; align-items:flex-start; gap:10px;
+            padding:6px 0; font-size:14px; color:#2D2D3F; line-height:1.5;
+        }}
+        .pd-dot {{ width:6px; height:6px; border-radius:50%; background:#8B5CF6; margin-top:6px; flex-shrink:0; }}
+        .pd-about {{ font-size:14px; color:#3D3D4F; line-height:1.7; margin-bottom:20px; }}
+        </style>
+
+        <div class="pd-header">
+            <img src="{avatar_url}" class="pd-avatar" alt="{name}" />
+            <div class="pd-info">
+                <div class="pd-name">{name}</div>
+                <div class="pd-title">Licensed Counselor</div>
+                <div class="pd-stats">
+                    <span class="pd-stat">💼 {exp} yrs experience</span>
+                    <span class="pd-stat">🗣️ {langs}</span>
+                </div>
+            </div>
+            {score_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    tags_html = "".join(f'<span class="pd-tag">{t}</span>' for t in tags)
+    st.markdown(
+        f'<div class="pd-section-title">Expertise</div><div class="pd-tags">{tags_html}</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        f"""
+        <div class="pd-thoughts">
+            <div class="pd-thoughts-title">Thoughts I can help you with</div>
+            <div class="pd-thought"><div class="pd-dot"></div><span>"{t1}"</span></div>
+            <div class="pd-thought"><div class="pd-dot"></div><span>"{t2}"</span></div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        f'<div class="pd-section-title">About Me</div><div class="pd-about">{about_raw}</div>',
+        unsafe_allow_html=True,
+    )
+
+    with st.expander("What approaches do I use?"):
+        mod_desc = _MODALITY_DESC.get(modality, f"This counselor uses {modality} as their primary therapeutic approach.")
+        st.markdown(f"**{modality}** — {mod_desc}")
 
 
 # ── Main page ─────────────────────────────────────────────────────────────────
@@ -793,7 +1008,7 @@ def show_matching_page():
         scroll_to_results()
 
         # ── EXACT ORIGINAL Result cards ───────────────────────────────────────────
-        st.markdown('<p class="section-label" style="margin-top:8px">Your Matches</p>', unsafe_allow_html=True)
+        st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">YOUR MATCHES</p>', unsafe_allow_html=True)
         col1, col2 = st.columns(2, gap="large")
         with col1:
             render_counselor_card(best_c, best.compatibility, is_primary=True)
@@ -805,8 +1020,7 @@ def show_matching_page():
 
         # ── Match Explanation ─────────────────────────────────────────────────────
         st.write("")
-        st.markdown('<p class="section-label" style="margin-top:24px">Why this match?</p>', unsafe_allow_html=True)
-
+        
         positive_points, negative_points = [], []
         positive_points.append(f"Supports your preferred language ({preferred_language})")
         if int(best.modality_match) == 1:
@@ -826,7 +1040,7 @@ def show_matching_page():
                 negative_points.append(f"Preferred gender not matched ({preferred_c_gender})")
 
         st.markdown('<div class="explain-card">', unsafe_allow_html=True)
-        st.markdown('<p class="explain-title">Match explanation</p>', unsafe_allow_html=True)
+        st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THIS MATCH ?</p>', unsafe_allow_html=True)
         exp_col1, exp_col2 = st.columns(2, gap="large")
         with exp_col1:
             st.markdown("**Strengths**")

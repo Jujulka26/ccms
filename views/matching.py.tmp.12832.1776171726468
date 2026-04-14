@@ -6,7 +6,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import time
 
-from utils.db import load_counselors, save_intro_request
+from utils.db import load_counselors
 from utils.model import load_resources
 from utils.ui import render_hero, open_card, close_card
 
@@ -229,7 +229,6 @@ def inject_styles():
             font-weight: 600 !important;
             padding: 10px 24px !important;
             transition: all 0.2s;
-            width: 100% !important;
         }
         div[data-testid="stButton"] button[kind="primary"] {
             background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
@@ -252,10 +251,10 @@ def inject_styles():
         .result-card {
             position: relative;
             background: #FFFFFF;
-            border-radius: 20px;
+            border-radius: 20px 20px 0 0;
             padding: 28px;
             border: 1px solid rgba(0,0,0,0.06);
-            margin-bottom: 0px;
+            border-bottom: none;
         }
         .result-card.primary {
             background: #1A1A2E;
@@ -386,53 +385,26 @@ def inject_styles():
             color: #1A1A2E;
             margin: 0 0 24px;
         }
-        .point-row-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 12px;
-        }
         .point-row {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 14px 18px;
-            border-radius: 14px;
-            font-size: 14.5px;
-            font-weight: 500;
-            transition: all 0.2s ease;
+            gap: 12px;
+            padding: 11px 0;
+            border-bottom: 1px solid #F5F3EF;
+            font-size: 14px;
         }
-        .point-row-green {
-            background: rgba(16, 185, 129, 0.06);
-            border: 1px solid rgba(16, 185, 129, 0.15);
-            color: #065F46;
-        }
-        .point-row-green:hover {
-            background: rgba(16, 185, 129, 0.1);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
-        }
-        .point-row-amber {
-            background: rgba(245, 158, 11, 0.06);
-            border: 1px solid rgba(245, 158, 11, 0.15);
-            color: #92400E;
-        }
-        .point-row-amber:hover {
-            background: rgba(245, 158, 11, 0.1);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
-        }
-        .icon-circle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 26px;
-            height: 26px;
+        .dot-green {
+            width: 8px; height: 8px;
+            background: #10B981;
             border-radius: 50%;
             flex-shrink: 0;
         }
-        .icon-circle.green { background: #10B981; color: #fff; }
-        .icon-circle.amber { background: #F59E0B; color: #fff; }
+        .dot-amber {
+            width: 8px; height: 8px;
+            background: #F59E0B;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
 
         /* ── Table ────────────────────────────────────────────────────── */
         .ranking-card {
@@ -661,6 +633,7 @@ def render_counselor_card(counselor_row, score, is_primary=True):
         st.markdown(
             f"""
             <div class="result-card primary">
+                <a href="#" class="profile-btn profile-btn-primary">View Profile</a>
                 <span class="result-card-badge badge-primary">Top Match</span>
                 <div class="compat-score">{score:.1f}%</div>
                 <div class="compat-label">Compatibility score</div>
@@ -677,6 +650,7 @@ def render_counselor_card(counselor_row, score, is_primary=True):
         st.markdown(
             f"""
             <div class="result-card">
+                <a href="#" class="profile-btn profile-btn-secondary">View Profile</a>
                 <span class="result-card-badge badge-secondary">2nd Option</span>
                 <div class="compat-score-secondary">{score:.1f}%</div>
                 <div class="compat-label-secondary">Compatibility score</div>
@@ -690,179 +664,6 @@ def render_counselor_card(counselor_row, score, is_primary=True):
             unsafe_allow_html=True,
         )
 
-    card_id = f"{int(c.get('counselor_id', 0))}_{'p' if is_primary else 's'}"
-    if st.button("View Full Profile", key=f"vp_{card_id}", use_container_width=True, type="primary" if is_primary else "secondary"):
-        show_profile_dialog(c, score)
-
-
-# ── Profile dialog helpers ────────────────────────────────────────────────────
-_EXPERTISE_MAP = {
-    "Anxiety": ["Anxiety Management", "Panic Attacks", "Worry Reduction", "Stress Relief", "Cognitive Reframing"],
-    "Depression": ["Low Mood Support", "Motivation Building", "Emotional Regulation", "Self-Esteem", "Behavioral Activation"],
-    "Stress": ["Work-Life Balance", "Stress Coping", "Burnout Recovery", "Mindfulness", "Relaxation Techniques"],
-    "Trauma": ["Trauma Processing", "PTSD Support", "Emotional Healing", "Resilience Building", "Safety Planning"],
-}
-_MODALITY_TAGS = {
-    "CBT": ["Cognitive Restructuring", "Thought Records"],
-    "Mindfulness": ["Present-Moment Awareness", "Breathing Techniques"],
-    "Humanistic": ["Person-Centered Growth", "Empathetic Support"],
-    "REBT": ["Belief Challenging", "Rational Thinking"],
-}
-_MODALITY_DESC = {
-    "CBT": "Cognitive Behavioral Therapy (CBT) helps you identify and change unhelpful thought patterns and behaviors. Through structured sessions, you'll learn to reframe negative thoughts and build healthier coping strategies.",
-    "Mindfulness": "Mindfulness-Based approaches teach you to observe your thoughts and feelings without judgment. You'll develop present-moment awareness and breathing techniques that reduce stress and increase emotional clarity.",
-    "Humanistic": "Humanistic counseling is a person-centered approach that focuses on your unique strengths and potential. Sessions are warm, empathetic, and non-judgmental — built around understanding your personal experience.",
-    "REBT": "Rational Emotive Behavior Therapy (REBT) helps you challenge irrational beliefs and replace them with healthier, rational thinking patterns, leading to more positive emotional outcomes.",
-}
-
-def _expertise_tags(spec, modality):
-    tags = list(_EXPERTISE_MAP.get(spec, []))
-    for tag in _MODALITY_TAGS.get(modality, []):
-        if tag not in tags:
-            tags.append(tag)
-    return tags[:6]
-
-def _helpful_thoughts(spec):
-    defaults = {
-        "Anxiety": ["Am I doing enough?", "What if things go wrong?"],
-        "Depression": ["Why do I feel so empty?", "Will I ever feel better?"],
-        "Stress": ["I can't keep up with everything.", "Why do I feel so overwhelmed?"],
-        "Trauma": ["Why do I keep reliving this?", "Will I ever feel safe again?"],
-    }
-    return defaults.get(spec, ["How do I move forward?", "Is it okay to ask for help?"])
-
-@st.dialog("Counselor Profile")
-def show_profile_dialog(counselor, score=None):
-    c = counselor
-    name = c.get("name", "Counselor")
-    spec = c.get("specialization", "")
-    modality = c.get("counselor_modality", "")
-    exp = c.get("experience_years", "—")
-    lang = c.get("counselor_language", "—")
-    about = c.get("about_me", "") or ""
-    ht1 = c.get("helpful_thought_1", "") or ""
-    ht2 = c.get("helpful_thought_2", "") or ""
-    ext = c.get("expertise_tags", "") or ""
-
-    # Use stored expertise_tags if available, else auto-generate
-    if ext.strip():
-        pills = [t.strip() for t in ext.split(",") if t.strip()][:6]
-    else:
-        pills = _expertise_tags(spec, modality)
-
-    # Use stored helpful thoughts if available, else defaults
-    thoughts = [ht1, ht2]
-    if not any(t.strip() for t in thoughts):
-        thoughts = _helpful_thoughts(spec)
-    thoughts = [t for t in thoughts if t.strip()]
-
-    # ── Header row ────────────────────────────────────────────────────────────
-    avatar_url = f"https://api.dicebear.com/7.x/avataaars/svg?seed={name.replace(' ', '')}&backgroundColor=b6e3f4,c0aede,d1d4f9"
-    st.markdown(
-        f"""
-        <div style="display:flex;align-items:center;gap:24px;margin-bottom:20px;">
-            <img src="{avatar_url}" width="90" height="90"
-                 style="border-radius:16px;border:2px solid #EDE8E3;flex-shrink:0;" />
-            <div style="flex:1;">
-                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
-                    <span style="font-family:'DM Serif Display',serif;font-size:22px;color:#1A1A2E;">{name}</span>
-                </div>
-                <div style="font-size:13px;color:#8B5CF6;font-weight:600;margin-bottom:8px;">Licensed Counselor</div>
-                <div style="display:flex;gap:16px;flex-wrap:wrap;">
-                    <span style="font-size:12px;color:#5A5A6E;">&#128188; {exp} yrs exp</span>
-                    <span style="font-size:12px;color:#5A5A6E;">&#128172; {lang}</span>
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.divider()
-
-    # ── About Me ──────────────────────────────────────────────────────────────
-    if about.strip():
-        st.markdown('<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 8px;">About Me</p>', unsafe_allow_html=True)
-        st.markdown(f'<p style="font-size:14px;color:#2D2D3F;line-height:1.7;margin-bottom:16px;">{about}</p>', unsafe_allow_html=True)
-
-    # ── Expertise pills ───────────────────────────────────────────────────────
-    st.markdown('<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 10px;">Areas of Expertise</p>', unsafe_allow_html=True)
-    pill_html = "".join(
-        f'<span style="display:inline-block;background:#F3F0FF;color:#6D28D9;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin:0 6px 6px 0;">{p}</span>'
-        for p in pills
-    )
-    st.markdown(f'<div style="margin-bottom:16px;">{pill_html}</div>', unsafe_allow_html=True)
-
-    # ── Helpful thoughts box ──────────────────────────────────────────────────
-    thought_items = "".join(
-        f'<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">'
-        f'<span style="color:#8B5CF6;font-size:14px;flex-shrink:0;">&#10024;</span>'
-        f'<span style="font-size:14px;color:#2D2D3F;font-style:italic;font-weight:500;">"{t}"</span>'
-        f'</div>'
-        for t in thoughts
-    )
-    st.markdown(
-        f"""
-        <div style="background:#F8F5FF; border:1px solid #E9E1FF;
-                    border-radius:14px;padding:20px 22px;margin-bottom:16px;">
-            <p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
-                      color:#8B5CF6;margin:0 0 12px;">Thoughts I can help you with</p>
-            {thought_items}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # ── Modality expander ─────────────────────────────────────────────────────
-    with st.expander("What approaches do I use?"):
-        desc = _MODALITY_DESC.get(modality, f"This counselor uses {modality} as their primary approach.")
-        st.markdown(f'<p style="font-size:14px;color:#2D2D3F;line-height:1.7;">{desc}</p>', unsafe_allow_html=True)
-
-    st.write("")
-    
-    # ── Intro Request Logic ───────────────────────────────────────────────────
-    req_state_key = f"req_{c.get('counselor_id')}"
-    if req_state_key not in st.session_state:
-        st.session_state[req_state_key] = False
-
-    def toggle_req(val):
-        st.session_state[req_state_key] = val
-
-    if not st.session_state[req_state_key]:
-        st.button(f"✉️ Get to know {name}", use_container_width=True, type="primary", on_click=toggle_req, args=(True,))
-    else:
-        st.markdown(
-            f"""
-            <div style="border:1px solid #E5E2DC; border-radius:14px; padding:20px; background:#F7F5F0; margin-bottom:12px;">
-                <p style="font-size:14px; color:#4A4A5A; margin-bottom:16px;">
-                    <b>Leave your details below.</b> The clinic coordinator will review your match and connect you with {name} via email.
-                </p>
-            </div>
-            """, 
-            unsafe_allow_html=True
-        )
-        
-        client_name = st.text_input("Your Full Name")
-        client_email = st.text_input("Your Email Address")
-        
-        col1, col2 = st.columns(2)
-        col1.button("Cancel", use_container_width=True, on_click=toggle_req, args=(False,))
-            
-        if col2.button("Send Request", use_container_width=True, type="primary"):
-            if not client_name.strip() or not client_email.strip():
-                st.error("Please fill in both your name and email.")
-            else:
-                save_intro_request(
-                    client_name.strip(), 
-                    client_email.strip(), 
-                    int(c.get('counselor_id')), 
-                    float(score) if score else 0.0
-                )
-                st.success(f"Request sent! We will connect you with {name} soon.")
-                time.sleep(2)
-                st.session_state.quiz_step = 0
-                st.session_state[req_state_key] = False
-                st.rerun()
 
 # ── Main page ─────────────────────────────────────────────────────────────────
 def show_matching_page():
@@ -1044,74 +845,6 @@ def show_matching_page():
             else:
                 st.info("No second match available.")
 
-        # ── Style "View Profile" buttons to fuse with cards ───────────────────────
-        components.html(
-            """
-            <script>
-            function sp(el, prop, val) {
-                el.style.setProperty(prop, val, 'important');
-            }
-            function styleVPButtons() {
-                var doc = window.parent.document;
-                var cols = doc.querySelectorAll('[data-testid="column"]');
-                cols.forEach(function(col) {
-                    var card = col.querySelector('.result-card');
-                    if (!card) return;
-                    var isPrimary = card.classList.contains('primary');
-                    var bg     = isPrimary ? '#22223D' : '#FAFAF8';
-                    var color  = isPrimary ? '#A78BFA' : '#6D28D9';
-                    var hoverBg    = isPrimary ? '#2A2A4A' : '#F0EDE8';
-                    var hoverColor = isPrimary ? '#C4B5FD' : '#5B21B6';
-
-                    // Zero out Streamlit spacing between card and button
-                    col.querySelectorAll('[data-testid="element-container"]').forEach(function(ec) {
-                        sp(ec, 'margin-top', '0');
-                        sp(ec, 'padding-top', '0');
-                        sp(ec, 'margin-bottom', '0');
-                        sp(ec, 'padding-bottom', '0');
-                    });
-                    col.querySelectorAll('[data-testid="stVerticalBlock"]').forEach(function(vb) {
-                        sp(vb, 'gap', '0');
-                    });
-
-                    col.querySelectorAll('[data-testid="stButton"]').forEach(function(wrapper) {
-                        sp(wrapper, 'width', '100%');
-                        sp(wrapper, 'margin', '0');
-                        sp(wrapper, 'padding', '0');
-                        var btn = wrapper.querySelector('button');
-                        if (!btn) return;
-                        sp(btn, 'background', bg);
-                        sp(btn, 'color', color);
-                        sp(btn, 'border-radius', '14px');
-                        sp(btn, 'border', 'none');
-                        sp(btn, 'width', '100%');
-                        sp(btn, 'padding', '13px 24px');
-                        sp(btn, 'font-size', '12px');
-                        sp(btn, 'font-weight', '600');
-                        sp(btn, 'letter-spacing', '0.05em');
-                        sp(btn, 'text-transform', 'uppercase');
-                        sp(btn, 'box-shadow', 'none');
-                        sp(btn, 'transform', 'none');
-                        btn.onmouseenter = function() {
-                            sp(btn, 'background', hoverBg);
-                            sp(btn, 'color', hoverColor);
-                        };
-                        btn.onmouseleave = function() {
-                            sp(btn, 'background', bg);
-                            sp(btn, 'color', color);
-                        };
-                    });
-                });
-            }
-            styleVPButtons();
-            setTimeout(styleVPButtons, 150);
-            setTimeout(styleVPButtons, 500);
-            </script>
-            """,
-            height=0,
-            width=0,
-        )
-
         # ── Match Explanation ─────────────────────────────────────────────────────
         st.write("")
         
@@ -1137,29 +870,25 @@ def show_matching_page():
         st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THIS MATCH ?</p>', unsafe_allow_html=True)
         exp_col1, exp_col2 = st.columns(2, gap="large")
         with exp_col1:
-            st.markdown("<p style='font-size:15px; font-weight:600; color:#10B981; margin-bottom:0;'>Strengths</p>", unsafe_allow_html=True)
-            st.markdown('<div class="point-row-wrap">', unsafe_allow_html=True)
+            st.markdown("**Strengths**")
             for item in positive_points[:4]:
                 st.markdown(
-                    f'<div class="point-row point-row-green"><div class="icon-circle green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>{item}</span></div>',
+                    f'<div class="point-row"><div class="dot-green"></div><span style="color:#2D2D3F;font-size:14px">{item}</span></div>',
                     unsafe_allow_html=True,
                 )
-            st.markdown('</div>', unsafe_allow_html=True)
         with exp_col2:
-            st.markdown("<p style='font-size:15px; font-weight:600; color:#F59E0B; margin-bottom:0;'>Things to note</p>", unsafe_allow_html=True)
-            st.markdown('<div class="point-row-wrap">', unsafe_allow_html=True)
+            st.markdown("**Things to note**")
             if negative_points:
                 for item in negative_points[:4]:
                     st.markdown(
-                        f'<div class="point-row point-row-amber"><div class="icon-circle amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span>{item}</span></div>',
+                        f'<div class="point-row"><div class="dot-amber"></div><span style="color:#2D2D3F;font-size:14px">{item}</span></div>',
                         unsafe_allow_html=True,
                     )
             else:
                 st.markdown(
-                    '<div class="point-row point-row-green"><div class="icon-circle green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>No major concerns detected</span></div>',
+                    '<div class="point-row"><div class="dot-green"></div><span style="color:#2D2D3F;font-size:14px">No major concerns detected</span></div>',
                     unsafe_allow_html=True,
                 )
-            st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
         # SHAP expander

@@ -135,3 +135,17 @@ def delete_counselor(counselor_id):
     finally:
         cursor.close()
         conn.close()
+
+def save_intro_request(client_name, client_email, counselor_id, compatibility_score):
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = """
+    INSERT INTO tbl_request (client_name, client_email, counselor_id, compatibility_score, status)
+    VALUES (%s, %s, %s, %s, 'Pending')
+    """
+    try:
+        cursor.execute(query, (client_name, client_email, counselor_id, compatibility_score))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()

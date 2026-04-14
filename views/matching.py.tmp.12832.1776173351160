@@ -249,10 +249,12 @@ def inject_styles():
             margin-bottom: 28px;
         }
         .result-card {
+            position: relative;
             background: #FFFFFF;
-            border-radius: 20px;
+            border-radius: 20px 20px 0 0;
             padding: 28px;
             border: 1px solid rgba(0,0,0,0.06);
+            border-bottom: none;
         }
         .result-card.primary {
             background: #1A1A2E;
@@ -270,6 +272,45 @@ def inject_styles():
         }
         .badge-primary { background: rgba(139,92,246,0.2); color: #A78BFA; }
         .badge-secondary { background: #F0EDE8; color: #8B8B9A; }
+
+        .profile-btn {
+            position: absolute;
+            top: 28px;
+            right: 28px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            text-decoration: none !important;
+            padding: 5px 12px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+            box-shadow: none !important;
+            cursor: pointer;
+        }
+        .profile-btn:hover {
+            transform: translateY(-2px);
+        }
+        .profile-btn-primary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .profile-btn-primary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: #FFFFFF !important;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .profile-btn-secondary {
+            background: #F7F5F0;
+            color: #4A4A5A !important;
+            border: 1px solid #D5D2CC;
+        }
+        .profile-btn-secondary:hover {
+            background: #E5E2DC;
+            color: #1A1A2E !important;
+            border-color: #C5C2BC;
+        }
 
         .compat-score {
             font-family: 'DM Serif Display', serif;
@@ -384,52 +425,6 @@ def inject_styles():
             font-family: 'DM Sans', sans-serif !important;
             font-size: 14px !important;
             font-weight: 500 !important;
-        }
-
-        /* ── Result card columns (replaces .result-card HTML wrapper) ─ */
-        [data-testid="column"]:has(.primary-card-marker) {
-            background: #1A1A2E !important;
-            border-radius: 20px !important;
-            padding: 28px !important;
-            border: none !important;
-        }
-        [data-testid="column"]:has(.secondary-card-marker) {
-            background: #FFFFFF !important;
-            border-radius: 20px !important;
-            border: 1px solid rgba(0,0,0,0.06) !important;
-            padding: 28px !important;
-        }
-
-        /* ── View Profile button — ghost white (primary card) ─────── */
-        [data-testid="column"]:has(.primary-card-marker) button {
-            background: transparent !important;
-            border: 1px solid rgba(255,255,255,0.22) !important;
-            color: rgba(255,255,255,0.65) !important;
-            border-radius: 8px !important;
-            font-size: 12px !important;
-            font-weight: 500 !important;
-            box-shadow: none !important;
-        }
-        [data-testid="column"]:has(.primary-card-marker) button:hover {
-            border-color: rgba(255,255,255,0.55) !important;
-            color: #FFFFFF !important;
-            background: rgba(255,255,255,0.07) !important;
-        }
-
-        /* ── View Profile button — ghost dark (secondary card) ──────── */
-        [data-testid="column"]:has(.secondary-card-marker) button {
-            background: transparent !important;
-            border: 1px solid rgba(0,0,0,0.14) !important;
-            color: #6B6B80 !important;
-            border-radius: 8px !important;
-            font-size: 12px !important;
-            font-weight: 500 !important;
-            box-shadow: none !important;
-        }
-        [data-testid="column"]:has(.secondary-card-marker) button:hover {
-            border-color: #8B5CF6 !important;
-            color: #7C3AED !important;
-            background: rgba(139,92,246,0.05) !important;
         }
         </style>
         """,
@@ -629,40 +624,6 @@ def render_hero_new():
         unsafe_allow_html=True,
     )
 
-@st.dialog("Counselor Profile")
-def show_profile_dialog(counselor):
-    c = counselor
-    st.markdown(
-        f"""
-        <div style="margin-bottom:20px;">
-            <div style="font-family:'DM Serif Display',serif;font-size:26px;color:#1A1A2E;margin-bottom:4px;">{c['name']}</div>
-            <div style="font-size:13px;color:#8B8B9A;">{c.get('specialization','—')} &nbsp;·&nbsp; {c.get('experience_years','—')} yrs experience</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    details = [
-        ("Age", c.get("age", "—")),
-        ("Gender", c.get("gender", "—")),
-        ("Ethnicity", c.get("ethnicity", "—")),
-        ("Specialization", c.get("specialization", "—")),
-        ("Language", c.get("counselor_language", "—")),
-        ("Modality", c.get("counselor_modality", "—")),
-        ("Experience", f"{c.get('experience_years','—')} years"),
-    ]
-    for label, value in details:
-        st.markdown(
-            f"""
-            <div style="display:flex;justify-content:space-between;align-items:center;
-                        padding:10px 0;border-bottom:1px solid #F0EDE8;">
-                <span style="font-size:13px;color:#8B8B9A;">{label}</span>
-                <span style="font-size:14px;color:#1A1A2E;font-weight:500;">{value}</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-
 def render_counselor_card(counselor_row, score, is_primary=True):
     c = counselor_row
     langs = c.get("counselor_language", "—")
@@ -672,6 +633,7 @@ def render_counselor_card(counselor_row, score, is_primary=True):
         st.markdown(
             f"""
             <div class="result-card primary">
+                <a href="#" class="profile-btn profile-btn-primary">View Profile</a>
                 <span class="result-card-badge badge-primary">Top Match</span>
                 <div class="compat-score">{score:.1f}%</div>
                 <div class="compat-label">Compatibility score</div>
@@ -688,6 +650,7 @@ def render_counselor_card(counselor_row, score, is_primary=True):
         st.markdown(
             f"""
             <div class="result-card">
+                <a href="#" class="profile-btn profile-btn-secondary">View Profile</a>
                 <span class="result-card-badge badge-secondary">2nd Option</span>
                 <div class="compat-score-secondary">{score:.1f}%</div>
                 <div class="compat-label-secondary">Compatibility score</div>
@@ -700,6 +663,137 @@ def render_counselor_card(counselor_row, score, is_primary=True):
             """,
             unsafe_allow_html=True,
         )
+
+    card_id = f"{int(c.get('counselor_id', 0))}_{'p' if is_primary else 's'}"
+    if st.button("View Profile", key=f"vp_{card_id}", use_container_width=True):
+        show_profile_dialog(c, score)
+
+
+# ── Profile dialog helpers ────────────────────────────────────────────────────
+_EXPERTISE_MAP = {
+    "Anxiety": ["Anxiety Management", "Panic Attacks", "Worry Reduction", "Stress Relief", "Cognitive Reframing"],
+    "Depression": ["Low Mood Support", "Motivation Building", "Emotional Regulation", "Self-Esteem", "Behavioral Activation"],
+    "Stress": ["Work-Life Balance", "Stress Coping", "Burnout Recovery", "Mindfulness", "Relaxation Techniques"],
+    "Trauma": ["Trauma Processing", "PTSD Support", "Emotional Healing", "Resilience Building", "Safety Planning"],
+}
+_MODALITY_TAGS = {
+    "CBT": ["Cognitive Restructuring", "Thought Records"],
+    "Mindfulness": ["Present-Moment Awareness", "Breathing Techniques"],
+    "Humanistic": ["Person-Centered Growth", "Empathetic Support"],
+    "REBT": ["Belief Challenging", "Rational Thinking"],
+}
+_MODALITY_DESC = {
+    "CBT": "Cognitive Behavioral Therapy (CBT) helps you identify and change unhelpful thought patterns and behaviors. Through structured sessions, you'll learn to reframe negative thoughts and build healthier coping strategies.",
+    "Mindfulness": "Mindfulness-Based approaches teach you to observe your thoughts and feelings without judgment. You'll develop present-moment awareness and breathing techniques that reduce stress and increase emotional clarity.",
+    "Humanistic": "Humanistic counseling is a person-centered approach that focuses on your unique strengths and potential. Sessions are warm, empathetic, and non-judgmental — built around understanding your personal experience.",
+    "REBT": "Rational Emotive Behavior Therapy (REBT) helps you challenge irrational beliefs and replace them with healthier, rational thinking patterns, leading to more positive emotional outcomes.",
+}
+
+def _expertise_tags(spec, modality):
+    tags = list(_EXPERTISE_MAP.get(spec, []))
+    for tag in _MODALITY_TAGS.get(modality, []):
+        if tag not in tags:
+            tags.append(tag)
+    return tags[:6]
+
+def _helpful_thoughts(spec):
+    defaults = {
+        "Anxiety": ["Am I doing enough?", "What if things go wrong?"],
+        "Depression": ["Why do I feel so empty?", "Will I ever feel better?"],
+        "Stress": ["I can't keep up with everything.", "Why do I feel so overwhelmed?"],
+        "Trauma": ["Why do I keep reliving this?", "Will I ever feel safe again?"],
+    }
+    return defaults.get(spec, ["How do I move forward?", "Is it okay to ask for help?"])
+
+@st.dialog("Counselor Profile", width="large")
+def show_profile_dialog(counselor, score=None):
+    c = counselor
+    name = c.get("name", "Counselor")
+    spec = c.get("specialization", "")
+    modality = c.get("counselor_modality", "")
+    exp = c.get("experience_years", "—")
+    lang = c.get("counselor_language", "—")
+    about = c.get("about_me", "") or ""
+    ht1 = c.get("helpful_thought_1", "") or ""
+    ht2 = c.get("helpful_thought_2", "") or ""
+    ext = c.get("expertise_tags", "") or ""
+
+    # Use stored expertise_tags if available, else auto-generate
+    if ext.strip():
+        pills = [t.strip() for t in ext.split(",") if t.strip()][:6]
+    else:
+        pills = _expertise_tags(spec, modality)
+
+    # Use stored helpful thoughts if available, else defaults
+    thoughts = [ht1, ht2]
+    if not any(t.strip() for t in thoughts):
+        thoughts = _helpful_thoughts(spec)
+    thoughts = [t for t in thoughts if t.strip()]
+
+    score_badge = f'<span style="background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;">{score:.1f}% Match</span>' if score is not None else ""
+
+    # ── Header row ────────────────────────────────────────────────────────────
+    avatar_url = f"https://api.dicebear.com/7.x/avataaars/svg?seed={name.replace(' ', '')}&backgroundColor=b6e3f4,c0aede,d1d4f9"
+    st.markdown(
+        f"""
+        <div style="display:flex;align-items:center;gap:24px;margin-bottom:20px;">
+            <img src="{avatar_url}" width="90" height="90"
+                 style="border-radius:16px;border:2px solid #EDE8E3;flex-shrink:0;" />
+            <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+                    <span style="font-family:'DM Serif Display',serif;font-size:22px;color:#1A1A2E;">{name}</span>
+                    {score_badge}
+                </div>
+                <div style="font-size:13px;color:#8B5CF6;font-weight:600;margin-bottom:8px;">Licensed Counselor</div>
+                <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                    <span style="font-size:12px;color:#5A5A6E;">&#128188; {exp} yrs exp</span>
+                    <span style="font-size:12px;color:#5A5A6E;">&#128172; {lang}</span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+
+    # ── Expertise pills ───────────────────────────────────────────────────────
+    st.markdown('<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 10px;">Areas of Expertise</p>', unsafe_allow_html=True)
+    pill_html = "".join(
+        f'<span style="display:inline-block;background:#F3F0FF;color:#6D28D9;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin:0 6px 6px 0;">{p}</span>'
+        for p in pills
+    )
+    st.markdown(f'<div style="margin-bottom:16px;">{pill_html}</div>', unsafe_allow_html=True)
+
+    # ── Helpful thoughts box ──────────────────────────────────────────────────
+    thought_items = "".join(
+        f'<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">'
+        f'<span style="color:#A78BFA;font-size:14px;flex-shrink:0;">&#9889;</span>'
+        f'<span style="font-size:13px;color:rgba(255,255,255,0.88);font-style:italic;">"{t}"</span>'
+        f'</div>'
+        for t in thoughts
+    )
+    st.markdown(
+        f"""
+        <div style="background:linear-gradient(135deg,#4C1D95 0%,#5B21B6 60%,#7C3AED 100%);
+                    border-radius:14px;padding:20px 22px;margin-bottom:16px;">
+            <p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+                      color:#A78BFA;margin:0 0 12px;">Thoughts I can help you with</p>
+            {thought_items}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # ── About Me ──────────────────────────────────────────────────────────────
+    if about.strip():
+        st.markdown('<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B8B9A;margin:0 0 8px;">About Me</p>', unsafe_allow_html=True)
+        st.markdown(f'<p style="font-size:14px;color:#2D2D3F;line-height:1.7;margin-bottom:16px;">{about}</p>', unsafe_allow_html=True)
+
+    # ── Modality expander ─────────────────────────────────────────────────────
+    with st.expander("What approaches do I use?"):
+        desc = _MODALITY_DESC.get(modality, f"This counselor uses {modality} as their primary approach.")
+        st.markdown(f'<p style="font-size:14px;color:#2D2D3F;line-height:1.7;">{desc}</p>', unsafe_allow_html=True)
 
 
 # ── Main page ─────────────────────────────────────────────────────────────────
@@ -872,7 +966,7 @@ def show_matching_page():
         scroll_to_results()
 
         # ── EXACT ORIGINAL Result cards ───────────────────────────────────────────
-        st.markdown('<p class="section-label" style="margin-top:8px">Your Matches</p>', unsafe_allow_html=True)
+        st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">YOUR MATCHES</p>', unsafe_allow_html=True)
         col1, col2 = st.columns(2, gap="large")
         with col1:
             render_counselor_card(best_c, best.compatibility, is_primary=True)
@@ -884,8 +978,7 @@ def show_matching_page():
 
         # ── Match Explanation ─────────────────────────────────────────────────────
         st.write("")
-        st.markdown('<p class="section-label" style="margin-top:24px">Why this match?</p>', unsafe_allow_html=True)
-
+        
         positive_points, negative_points = [], []
         positive_points.append(f"Supports your preferred language ({preferred_language})")
         if int(best.modality_match) == 1:
@@ -905,7 +998,7 @@ def show_matching_page():
                 negative_points.append(f"Preferred gender not matched ({preferred_c_gender})")
 
         st.markdown('<div class="explain-card">', unsafe_allow_html=True)
-        st.markdown('<p class="explain-title">Match explanation</p>', unsafe_allow_html=True)
+        st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THIS MATCH ?</p>', unsafe_allow_html=True)
         exp_col1, exp_col2 = st.columns(2, gap="large")
         with exp_col1:
             st.markdown("**Strengths**")

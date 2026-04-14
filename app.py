@@ -4,6 +4,7 @@ from views.manage import show_manage_page
 from views.matching import show_matching_page
 from views.model_performance import show_model_performance_page
 from views.login import show_login_page
+from views.faq import show_faq_page
 
 
 if "login" in st.query_params:
@@ -454,7 +455,11 @@ if role == "admin":
     )
     page = st.sidebar.radio("Navigation", ["Client-Counselor Matching", "Counselor Management", "Model Performance"], label_visibility="collapsed")
 else:
-    page = "Client-Counselor Matching"
+    st.sidebar.markdown(
+        '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Client Navigation</div>',
+        unsafe_allow_html=True
+    )
+    page = st.sidebar.radio("Navigation", ["Find a Counselor", "Frequently Asked Questions"], label_visibility="collapsed")
 
 # Invisible spacer — pushes the footer to the bottom of the sidebar
 st.sidebar.markdown('<div class="sidebar-spacer" style="flex-grow: 1; min-height: 50px;"></div>', unsafe_allow_html=True)
@@ -469,9 +474,11 @@ if st.sidebar.button("Log out", use_container_width=True):
     _logout_dialog()
 
 
-if page == "Client-Counselor Matching":
+if page in ["Client-Counselor Matching", "Find a Counselor"]:
     show_matching_page()
 elif page == "Counselor Management":
     show_manage_page()
 elif page == "Model Performance":
     show_model_performance_page()
+elif page == "Frequently Asked Questions":
+    show_faq_page()
