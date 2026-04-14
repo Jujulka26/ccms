@@ -140,11 +140,15 @@ def show_model_performance_page():
     # ── Hero ──────────────────────────────────────────────────────────────────
     st.markdown(
         """
-        <div class="app-hero">
-            <div class="eyebrow">Analytics</div>
-            <div class="hero-title">Model Performance</div>
-            <p class="hero-copy">Compare and analyse model metrics at a glance. Track accuracy,
-            F1 scores and ROC-AUC to make informed decisions.</p>
+        <div style="position: relative; overflow: hidden; background-color: #FAFDFC; background-image: radial-gradient(at 0% 0%, #D1FAE5 0px, transparent 60%), radial-gradient(at 100% 100%, #ECFDF5 0px, transparent 60%), radial-gradient(at 100% 0%, #FFFFFF 0px, transparent 50%), url('data:image/svg+xml,%3Csvg width=\\'20\\' height=\\'20\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Ccircle cx=\\'2\\' cy=\\'2\\' r=\\'1.5\\' fill=\\'%2310B981\\' fill-opacity=\\'0.15\\'/%3E%3C/svg%3E'); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(16,185,129,0.2); box-shadow: 0 16px 32px -8px rgba(16,185,129,0.12), inset 0 1px 0 rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 236px;">
+            <div style="position: relative; z-index: 2; max-width: 65%;">
+                <div style="color: #10B981; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block;">Analytics</div>
+                <div style="font-family: 'DM Serif Display', serif; font-size: 42px; color: #1A1A2E; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Model Performance</div>
+                <p style="font-size: 16px; color: #4A4A5C; margin: 0; line-height: 1.65; max-width: 480px;">Compare and analyse model metrics at a glance. Track accuracy, F1 scores and ROC-AUC to make informed decisions.</p>
+            </div>
+            <div style="font-size: 110px; line-height: 1; position: absolute; right: 28px; bottom: -20px; z-index: 1; opacity: 0.15; transform: rotate(-5deg); pointer-events: none;">
+                📊
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -186,7 +190,7 @@ def show_model_performance_page():
             unsafe_allow_html=True,
         )
 
-        st.divider()
+        st.markdown('<hr style="margin: 32px 0 32px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);" />', unsafe_allow_html=True)
 
         # ── Model comparison section ──────────────────────────────────────────
         st.markdown(
