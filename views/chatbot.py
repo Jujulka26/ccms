@@ -24,7 +24,24 @@ def show_chatbot_page():
         unsafe_allow_html=True
     )
 
-    st.markdown('<div class="chat-header">Chat Support</div>', unsafe_allow_html=True)
+    st.markdown(
+        '''
+        <div class="chat-header" style="display: flex; align-items: center; gap: 12px;">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="ai-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#4285F4"/>
+                        <stop offset="50%" stop-color="#9B72CB"/>
+                        <stop offset="100%" stop-color="#D96570"/>
+                    </linearGradient>
+                </defs>
+                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#ai-gradient)"/>
+            </svg>
+            Chat Support
+        </div>
+        ''', 
+        unsafe_allow_html=True
+    )
     st.markdown('<div class="chat-subheader">Ask any general questions or receive guidance about counseling, mental health, and the process. Powered by Gemini AI.</div>', unsafe_allow_html=True)
 
     # API Key Configuration
@@ -39,12 +56,13 @@ def show_chatbot_page():
     
     # Give the model a personality and context specific to your app
     app_context_prompt = """
-    You are a compassionate, professional AI assistant for a Client-Counselor Matching System.
-    Your main goal is to help clients understand mental health, guide them through the process of finding a counselor, and answer questions about the matching system platform.
-    If they ask about getting a counselor, encourage them to fill out the assessment form on the 'Find Your Match' page.
-    Remember to be empathetic, clear, and never provide medical diagnosis. You are a guide, not a therapist.
+    You are a compassionate, warm, and supportive AI mental health guide for our Client-Counselor Matching System.
+    You have two main roles:
+    1. Be an empathetic listener: Offer emotional support, active listening, and gentle coping strategies for everyday mental health struggles, similar to a supportive therapeutic AI. Create a safe, non-judgmental space for clients to vent.
+    2. Be a platform guide: Help users navigate the system. If they ask about getting a counselor or need long-term support, actively guide them to fill out the assessment form on the 'Find Your Match' page to connect with a professional human counselor.
+    Always be conversational, empathetic, and clear. Remind users you are an AI guide, not a medical doctor.
     """
-    model = genai.GenerativeModel("gemini-1.5-flash", system_instruction=app_context_prompt)
+    model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=app_context_prompt)
 
     # Initialize Chat History
     if "messages" not in st.session_state:
