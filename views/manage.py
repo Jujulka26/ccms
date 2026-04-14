@@ -278,7 +278,7 @@ def show_manage_page():
     # ── Hero ──────────────────────────────────────────────────────────────────
     st.markdown(
         """
-        <div style="position: relative; overflow: hidden; background: linear-gradient(135deg, #F8F5FF 0%, #FFFFFF 100%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid #E9E1FF; display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 236px;">
+        <div style="position: relative; overflow: hidden; background-color: #FAFAFF; background-image: radial-gradient(at 0% 0%, #E9DFFF 0px, transparent 60%), radial-gradient(at 100% 100%, #F0E6FF 0px, transparent 60%), radial-gradient(at 100% 0%, #FFFFFF 0px, transparent 50%), url('data:image/svg+xml,%3Csvg width=\\'40\\' height=\\'40\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cpath d=\\'M0 39.5h40M39.5 0v40\\' stroke=\\'%238B5CF6\\' stroke-width=\\'1\\' stroke-opacity=\\'0.07\\' fill=\\'none\\'/%3E%3C/svg%3E'); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(124,58,237,0.15); box-shadow: 0 16px 32px -8px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 236px;">
             <div style="position: relative; z-index: 2; max-width: 65%;">
                 <div style="color: #8B5CF6; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.25); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block;">Directory</div>
                 <div style="font-family: 'DM Serif Display', serif; font-size: 42px; color: #1A1A2E; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Counselor Management</div>
@@ -327,6 +327,7 @@ def show_manage_page():
     # ── Directory table card ──────────────────────────────────────────────────
     st.markdown(
         """
+        <hr style="margin: 32px 0 32px 0; border: none; border-top: 1px solid rgba(0,0,0,0.06);" />
         <div class="mg-card">
             <div class="mg-card-title">Current directory</div>
             <p class="mg-card-copy">Review all counselors registered in the system.</p>
