@@ -87,41 +87,29 @@ def show_chatbot_page():
             <script>
             (function() {
                 var doc = window.parent.document;
-                var win = window.parent;
 
-                // Clean up any leftover strip AND prior watcher from a previous render
-                ['sugg-wrap', 'sugg-style', 'sugg-watcher'].forEach(function(id) {
+                // Clean up any leftover strip from a previous render
+                ['sugg-wrap', 'sugg-style'].forEach(function(id) {
                     var el = doc.getElementById(id);
                     if (el) el.remove();
                 });
-                if (win.__suggWatcher) {
-                    win.clearInterval(win.__suggWatcher);
-                    win.__suggWatcher = null;
-                }
 
                 var pills = [
-                    'I feel overwhelmed with work... 😔',
-                    'How do I choose the right counselor? 🔍',
-                    'Can we talk about relationship issues? 💔',
-                    'What happens during an assessment? 📝',
-                    'I want to develop a positive mindset ✨',
-                    'How does the matching process work? 🤝'
+                    'I feel overwhelmed with work... \u{1F614}',
+                    'How do I choose the right counselor? \u{1F50D}',
+                    'Can we talk about relationship issues? \u{1F494}',
+                    'What happens during an assessment? \u{1F4DD}',
+                    'I want to develop a positive mindset \u2728',
+                    'How does the matching process work? \u{1F91D}'
                 ];
 
-                function findChatBox() {
-                    return doc.querySelector('[data-testid="stChatInputContainer"]')
-                        || doc.querySelector('[data-testid="stChatInput"]')
-                        || doc.querySelector('[data-testid="stBottomBlockContainer"]')
-                        || doc.querySelector('div[class*="stChatInput"]');
-                }
-
                 function build() {
-                    // Match the chat input box width; fall back to a safe fixed position
-                    var chatBox = findChatBox();
-                    var rect = chatBox ? chatBox.getBoundingClientRect() : null;
-                    var leftPx   = rect ? rect.left  : 390;
-                    var widthPx  = rect && rect.width > 100 ? rect.width : 850;
-                    var bottomPx = 140;
+                    // Wait until the chat input container is in the DOM
+                    var chatBox = doc.querySelector('[data-testid="stChatInputContainer"]');
+                    if (!chatBox) { setTimeout(build, 150); return; }
+
+                    var r = chatBox.getBoundingClientRect();
+                    var bottomPx = window.parent.innerHeight - r.top + 6;
 
                     var style = doc.createElement('style');
                     style.id = 'sugg-style';
@@ -129,8 +117,8 @@ def show_chatbot_page():
                         '#sugg-wrap{' +
                             'position:fixed;' +
                             'bottom:' + bottomPx + 'px;' +
-                            'left:' + leftPx + 'px;' +
-                            'width:' + widthPx + 'px;' +
+                            'left:' + r.left + 'px;' +
+                            'width:' + r.width + 'px;' +
                             'overflow:hidden;' +
                             'z-index:999999;' +
                             'pointer-events:none;' +
@@ -204,73 +192,14 @@ def show_chatbot_page():
 
                     wrap.appendChild(track);
                     doc.body.appendChild(wrap);
-
-                    // Discard pills for any reason (pill click, manual send, navigation)
-                    function dismiss() {
-                        wrap.remove();
-                        style.remove();
-                        if (win.__suggWatcher) {
-                            win.clearInterval(win.__suggWatcher);
-                            win.__suggWatcher = null;
-                        }
-                    }
-
-                    // Dismiss when user sends manually via send button
-                    var sendBtn = doc.querySelector('button[data-testid="stChatInputSubmitButton"]');
-                    if (sendBtn) sendBtn.addEventListener('click', dismiss);
-
-                    // Dismiss when user presses Enter in the textarea
-                    var ta = doc.querySelector('textarea[data-testid="stChatInputTextArea"]');
-                    if (ta) {
-                        ta.addEventListener('keydown', function(e) {
-                            if (e.key === 'Enter' && !e.shiftKey) dismiss();
-                        });
-                    }
-
-                    // Dismiss when user navigates away (e.g. logout) — chat input leaves the DOM.
-                    // Inject the watcher as a <script> tag into parent document so it runs in
-                    // parent's own scope; closures defined in this iframe die when Streamlit
-                    // tears the iframe down on logout, leaving pills orphaned.
-                    var oldWatcher = doc.getElementById('sugg-watcher');
-                    if (oldWatcher) oldWatcher.remove();
-                    var watcher = doc.createElement('script');
-                    watcher.id = 'sugg-watcher';
-                    watcher.textContent =
-                        '(function(){' +
-                            'if(window.__suggWatcher){clearInterval(window.__suggWatcher);}' +
-                            'window.__suggWatcher=setInterval(function(){' +
-                                'var cb=document.querySelector(\\'[data-testid="stChatInputContainer"]\\')' +
-                                    '||document.querySelector(\\'[data-testid="stChatInput"]\\')' +
-                                    '||document.querySelector(\\'[data-testid="stBottomBlockContainer"]\\')' +
-                                    '||document.querySelector(\\'div[class*="stChatInput"]\\');' +
-                                'if(!cb){' +
-                                    'var w=document.getElementById("sugg-wrap");' +
-                                    'var s=document.getElementById("sugg-style");' +
-                                    'if(w)w.remove();if(s)s.remove();' +
-                                    'clearInterval(window.__suggWatcher);' +
-                                    'window.__suggWatcher=null;' +
-                                    'var self=document.getElementById("sugg-watcher");' +
-                                    'if(self)self.remove();' +
-                                '}' +
-                            '},100);' +
-                        '})();';
-                    doc.head.appendChild(watcher);
                 }
 
-                // Retry up to 10 times (3s total) until chat input is in DOM
-                var tries = 0;
-                function attempt() {
-                    if (findChatBox()) {
-                        build();
-                    } else if (tries++ < 10) {
-                        setTimeout(attempt, 300);
-                    }
-                }
-                attempt();
+                build();
             })();
             </script>
             """,
-            height=1,
+            height=0,
+            width=0,
         )
 
     # Chat Input

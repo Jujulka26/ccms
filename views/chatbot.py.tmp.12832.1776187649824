@@ -87,17 +87,12 @@ def show_chatbot_page():
             <script>
             (function() {
                 var doc = window.parent.document;
-                var win = window.parent;
 
-                // Clean up any leftover strip AND prior watcher from a previous render
-                ['sugg-wrap', 'sugg-style', 'sugg-watcher'].forEach(function(id) {
+                // Clean up any leftover strip from a previous render
+                ['sugg-wrap', 'sugg-style'].forEach(function(id) {
                     var el = doc.getElementById(id);
                     if (el) el.remove();
                 });
-                if (win.__suggWatcher) {
-                    win.clearInterval(win.__suggWatcher);
-                    win.__suggWatcher = null;
-                }
 
                 var pills = [
                     'I feel overwhelmed with work... 😔',
@@ -108,19 +103,11 @@ def show_chatbot_page():
                     'How does the matching process work? 🤝'
                 ];
 
-                function findChatBox() {
-                    return doc.querySelector('[data-testid="stChatInputContainer"]')
-                        || doc.querySelector('[data-testid="stChatInput"]')
-                        || doc.querySelector('[data-testid="stBottomBlockContainer"]')
-                        || doc.querySelector('div[class*="stChatInput"]');
-                }
-
                 function build() {
                     // Match the chat input box width; fall back to a safe fixed position
-                    var chatBox = findChatBox();
-                    var rect = chatBox ? chatBox.getBoundingClientRect() : null;
-                    var leftPx   = rect ? rect.left  : 390;
-                    var widthPx  = rect && rect.width > 100 ? rect.width : 850;
+                    var chatBox = doc.querySelector('[data-testid="stChatInputContainer"]');
+                    var leftPx   = chatBox ? chatBox.getBoundingClientRect().left  : 390;
+                    var widthPx  = chatBox ? chatBox.getBoundingClientRect().width : 850;
                     var bottomPx = 140;
 
                     var style = doc.createElement('style');
@@ -205,68 +192,30 @@ def show_chatbot_page():
                     wrap.appendChild(track);
                     doc.body.appendChild(wrap);
 
-                    // Discard pills for any reason (pill click, manual send, navigation)
+                    // Also discard pills when the user sends a message manually
                     function dismiss() {
                         wrap.remove();
                         style.remove();
-                        if (win.__suggWatcher) {
-                            win.clearInterval(win.__suggWatcher);
-                            win.__suggWatcher = null;
-                        }
                     }
 
-                    // Dismiss when user sends manually via send button
                     var sendBtn = doc.querySelector('button[data-testid="stChatInputSubmitButton"]');
                     if (sendBtn) sendBtn.addEventListener('click', dismiss);
 
-                    // Dismiss when user presses Enter in the textarea
                     var ta = doc.querySelector('textarea[data-testid="stChatInputTextArea"]');
                     if (ta) {
                         ta.addEventListener('keydown', function(e) {
+                            // Enter without Shift submits the chat
                             if (e.key === 'Enter' && !e.shiftKey) dismiss();
                         });
                     }
-
-                    // Dismiss when user navigates away (e.g. logout) — chat input leaves the DOM.
-                    // Inject the watcher as a <script> tag into parent document so it runs in
-                    // parent's own scope; closures defined in this iframe die when Streamlit
-                    // tears the iframe down on logout, leaving pills orphaned.
-                    var oldWatcher = doc.getElementById('sugg-watcher');
-                    if (oldWatcher) oldWatcher.remove();
-                    var watcher = doc.createElement('script');
-                    watcher.id = 'sugg-watcher';
-                    watcher.textContent =
-                        '(function(){' +
-                            'if(window.__suggWatcher){clearInterval(window.__suggWatcher);}' +
-                            'window.__suggWatcher=setInterval(function(){' +
-                                'var cb=document.querySelector(\\'[data-testid="stChatInputContainer"]\\')' +
-                                    '||document.querySelector(\\'[data-testid="stChatInput"]\\')' +
-                                    '||document.querySelector(\\'[data-testid="stBottomBlockContainer"]\\')' +
-                                    '||document.querySelector(\\'div[class*="stChatInput"]\\');' +
-                                'if(!cb){' +
-                                    'var w=document.getElementById("sugg-wrap");' +
-                                    'var s=document.getElementById("sugg-style");' +
-                                    'if(w)w.remove();if(s)s.remove();' +
-                                    'clearInterval(window.__suggWatcher);' +
-                                    'window.__suggWatcher=null;' +
-                                    'var self=document.getElementById("sugg-watcher");' +
-                                    'if(self)self.remove();' +
-                                '}' +
-                            '},100);' +
-                        '})();';
-                    doc.head.appendChild(watcher);
                 }
 
-                // Retry up to 10 times (3s total) until chat input is in DOM
-                var tries = 0;
-                function attempt() {
-                    if (findChatBox()) {
-                        build();
-                    } else if (tries++ < 10) {
-                        setTimeout(attempt, 300);
-                    }
+                // Run immediately; if chat input not found yet, retry once after 300ms
+                if (doc.querySelector('[data-testid="stChatInputContainer"]')) {
+                    build();
+                } else {
+                    setTimeout(build, 300);
                 }
-                attempt();
             })();
             </script>
             """,
