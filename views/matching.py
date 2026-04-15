@@ -1009,14 +1009,14 @@ def show_matching_page():
             <style>
             @keyframes bq-rock {
                 0%   { transform: rotate(0deg);  }
-                7%   { transform: rotate(-4deg); }
-                14%  { transform: rotate(0deg);  }
-                21%  { transform: rotate(4deg);  }
-                28%  { transform: rotate(0deg);  }
-                28.01%, 100% { transform: rotate(0deg); }
+                5%   { transform: rotate(-4deg); }
+                11%  { transform: rotate(0deg);  }
+                16%  { transform: rotate(4deg);  }
+                21%  { transform: rotate(0deg);  }
+                21.01%, 100% { transform: rotate(0deg); }
             }
             div[data-testid="stButton"] button[kind="primary"] {
-                animation: bq-rock 2.8s ease-in-out infinite !important;
+                animation: bq-rock 3.8s ease-in-out infinite !important;
                 transform-origin: center center !important;
                 font-size: 16px !important;
                 letter-spacing: 0.03em !important;
