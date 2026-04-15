@@ -28,28 +28,17 @@ def inject_styles():
 
         /* ── Hero section ─────────────────────────────────────────────── */
         .hero-wrap {
-            background: #1A1A2E;
+            background-color: #FAFAFF;
+            background-image:
+                radial-gradient(at 0% 0%, #E9DFFF 0px, transparent 60%),
+                radial-gradient(at 100% 100%, #F0E6FF 0px, transparent 60%);
             border-radius: 20px;
             padding: 56px 52px 48px;
             margin-bottom: 32px;
             position: relative;
             overflow: hidden;
-        }
-        .hero-wrap::before {
-            content: '';
-            position: absolute;
-            top: -80px; right: -80px;
-            width: 320px; height: 320px;
-            background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .hero-wrap::after {
-            content: '';
-            position: absolute;
-            bottom: -60px; left: 40px;
-            width: 220px; height: 220px;
-            background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%);
-            pointer-events: none;
+            border: 1px solid rgba(124,58,237,0.15);
+            box-shadow: 0 16px 32px -8px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
         }
         .hero-eyebrow {
             display: inline-block;
@@ -57,7 +46,7 @@ def inject_styles():
             font-weight: 600;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: #A78BFA;
+            color: #8B5CF6;
             background: rgba(167,139,250,0.12);
             border: 1px solid rgba(167,139,250,0.25);
             border-radius: 20px;
@@ -68,35 +57,35 @@ def inject_styles():
             font-family: 'DM Serif Display', serif;
             font-size: 42px;
             line-height: 1.15;
-            color: #FFFFFF;
+            color: #1A1A2E;
             margin: 0 0 16px;
             letter-spacing: -0.5px;
         }
         .hero-subtitle {
             font-size: 16px;
-            color: rgba(255,255,255,0.55);
+            color: #4A4A5C;
             max-width: 480px;
             line-height: 1.65;
             margin: 0;
         }
         .hero-stats {
             position: relative;
-            z-index: 2; /* Float above the image background */
+            z-index: 2;
             display: flex;
             gap: 40px;
             margin-top: 40px;
             padding-top: 32px;
-            border-top: 1px solid rgba(255,255,255,0.08);
+            border-top: 1px solid rgba(0,0,0,0.08);
         }
         .hero-stat-num {
             font-family: 'DM Serif Display', serif;
             font-size: 28px;
-            color: #FFFFFF;
+            color: #1A1A2E;
             line-height: 1;
         }
         .hero-stat-label {
             font-size: 12px;
-            color: rgba(255,255,255,0.4);
+            color: #8B8B9A;
             margin-top: 4px;
             text-transform: uppercase;
             letter-spacing: 0.06em;
@@ -128,8 +117,8 @@ def inject_styles():
             height: 100%;
             object-fit: contain;
             object-position: right center;
-            opacity: 0.85; /* Make it brighter and clearer */
-            mix-blend-mode: lighten;
+            opacity: 0.9;
+            mix-blend-mode: multiply;
             -webkit-mask-image: linear-gradient(
                 to right,
                 transparent 0%,
