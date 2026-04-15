@@ -8,6 +8,8 @@ from views.faq import show_faq_page
 from views.chatbot import show_chatbot_page
 from views.manage_request import render as show_manage_request_page
 from views.aboutus import show_aboutus_page
+from views.contactus import show_contactus_page
+from views.privacypolicy import show_privacypolicy_page
 
 
 if "login" in st.query_params:
@@ -462,7 +464,7 @@ else:
         '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Client Navigation</div>',
         unsafe_allow_html=True
     )
-    page = st.sidebar.radio("Navigation", ["Find a Counselor", "Frequently Asked Questions", "Chat with Bot", "About Us"], label_visibility="collapsed")
+    page = st.sidebar.radio("Navigation", ["Find a Counselor", "Frequently Asked Questions", "Chat with Bot", "About Us", "Contact Us", "Privacy Policy"], label_visibility="collapsed")
 
 # Invisible spacer — pushes the footer to the bottom of the sidebar
 st.sidebar.markdown('<div class="sidebar-spacer" style="flex-grow: 1; min-height: 50px;"></div>', unsafe_allow_html=True)
@@ -491,3 +493,7 @@ elif page == "Chat with Bot":
     show_chatbot_page()
 elif page == "About Us":
     show_aboutus_page()
+elif page == "Contact Us":
+    show_contactus_page()
+elif page == "Privacy Policy":
+    show_privacypolicy_page()
