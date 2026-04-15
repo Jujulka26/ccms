@@ -303,6 +303,7 @@ def inject_styles():
             transform: translateY(-1px);
         }
 
+
         /* ── Result cards ─────────────────────────────────────────────── */
         .result-grid {
             display: grid;
@@ -1003,6 +1004,35 @@ def show_matching_page():
         st.markdown("<h3 style='color: #1A1A2E; text-align: center; margin-bottom: 10px; font-family: \"DM Serif Display\", serif;'>Let's find someone who truly gets you.</h3>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; color: #5A5A6E; margin-bottom: 30px;'>Take a short, guided questionnaire so we can match you with the right counselor based on your unique needs and preferences.</p>", unsafe_allow_html=True)
         
+        st.markdown(
+            """
+            <style>
+            @keyframes bq-rock {
+                0%   { transform: rotate(0deg);  }
+                7%   { transform: rotate(-4deg); }
+                14%  { transform: rotate(0deg);  }
+                21%  { transform: rotate(4deg);  }
+                28%  { transform: rotate(0deg);  }
+                28.01%, 100% { transform: rotate(0deg); }
+            }
+            div[data-testid="stButton"] button[kind="primary"] {
+                animation: bq-rock 2.8s ease-in-out infinite !important;
+                transform-origin: center center !important;
+                font-size: 16px !important;
+                letter-spacing: 0.03em !important;
+                padding: 14px 28px !important;
+                font-weight: 700 !important;
+                box-shadow: 0 4px 20px rgba(109,40,217,0.35) !important;
+            }
+            div[data-testid="stButton"] button[kind="primary"]:hover {
+                animation-play-state: paused !important;
+                transform: rotate(0deg) scale(1.03) !important;
+                box-shadow: 0 10px 30px rgba(109,40,217,0.5) !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
         _, col_btn, _ = st.columns([1, 2, 1])
         if col_btn.button("Begin Questionnaire", use_container_width=True, type="primary"):
             st.session_state.quiz_step = 1
