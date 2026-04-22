@@ -13,6 +13,7 @@ from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
+from xgboost import XGBClassifier
 
 # ============================================================
 # 1. LOAD DATA
@@ -90,7 +91,8 @@ X_train, X_test, y_train, y_test = train_test_split(
 models = {
     "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
     "KNN": KNeighborsClassifier(n_neighbors=5),
-    "Neural Network": MLPClassifier(hidden_layer_sizes=(64,32), max_iter=500, random_state=42)
+    "Neural Network": MLPClassifier(hidden_layer_sizes=(64,32), max_iter=500, random_state=42),
+    "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
 }
 
 results = []

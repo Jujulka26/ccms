@@ -1,15 +1,15 @@
 import streamlit as st
 
-from views.manage import show_manage_page
-from views.matching import show_matching_page
-from views.model_performance import show_model_performance_page
-from views.login import show_login_page
-from views.faq import show_faq_page
-from views.chatbot import show_chatbot_page
-from views.manage_request import render as show_manage_request_page
-from views.aboutus import show_aboutus_page
-from views.contactus import show_contactus_page
-from views.privacypolicy import show_privacypolicy_page
+from frontend.views.manage import show_manage_page
+from frontend.views.matching import show_matching_page
+from frontend.views.model_performance import show_model_performance_page
+from frontend.views.login import show_login_page
+from frontend.views.faq import show_faq_page
+from frontend.views.chatbot import show_chatbot_page
+from frontend.views.manage_request import render as show_manage_request_page
+from frontend.views.aboutus import show_aboutus_page
+from frontend.views.contactus import show_contactus_page
+from frontend.views.privacypolicy import show_privacypolicy_page
 
 
 if "login" in st.query_params:
