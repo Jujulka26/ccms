@@ -121,10 +121,63 @@ def inject_styles():
         .icon-circle.amber { background: #F59E0B; color: #fff; }
 
         .ai-explanation-box { background: linear-gradient(135deg, #F8F5FF 0%, #FDF9FF 100%); border: 1px solid rgba(139,92,246,0.15); border-left: 3px solid #8B5CF6; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
+        .ai-explanation-box-alt { background: #FAFAF8; border: 1px solid rgba(0,0,0,0.06); border-left: 3px solid #A0A0B0; border-radius: 0 16px 16px 0; padding: 20px 24px; margin-top: 4px; }
         .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; }
+        .ai-badge-alt { display: inline-flex; align-items: center; gap: 6px; background: #6B7280; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
         .ai-explanation-text { font-size: 15.5px; color: #2D2D3F; line-height: 1.85; font-weight: 400; margin: 0; font-style: italic; }
+        .ai-explanation-text-alt { font-size: 14.5px; color: #4A4A5A; line-height: 1.8; font-weight: 400; margin: 0; font-style: italic; }
 
         div[data-testid="stTabs"] button { font-family: 'DM Sans', sans-serif !important; font-size: 14px !important; font-weight: 500 !important; }
+
+        div[data-testid="stButton"] button:not([kind="primary"]) {
+            background: transparent !important;
+            border: 1.5px solid rgba(109,40,217,0.25) !important;
+            color: #6D28D9 !important;
+            border-radius: 12px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.03em !important;
+            padding: 10px 20px !important;
+            transition: all 0.2s ease !important;
+            box-shadow: none !important;
+        }
+        div[data-testid="stButton"] button:not([kind="primary"]):hover {
+            background: rgba(109,40,217,0.06) !important;
+            border-color: #6D28D9 !important;
+            color: #5B21B6 !important;
+        }
+
+        div[data-testid="stExpander"] {
+            background: #FFFFFF;
+            border: 1px solid rgba(109,40,217,0.15) !important;
+            border-radius: 16px !important;
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: none !important;
+        }
+        div[data-testid="stExpander"] summary {
+            padding: 12px 20px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.07em !important;
+            text-transform: uppercase !important;
+            color: #6D28D9 !important;
+            background: linear-gradient(135deg, #F8F5FF 0%, #FDF9FF 100%) !important;
+            border-radius: 16px !important;
+            border-bottom: 1px solid rgba(109,40,217,0.10);
+            list-style: none;
+        }
+        div[data-testid="stExpander"] summary:hover {
+            background: linear-gradient(135deg, #F0EBFF 0%, #F8F5FF 100%) !important;
+            color: #5B21B6 !important;
+        }
+        div[data-testid="stExpander"] summary svg { color: #8B5CF6 !important; }
+        div[data-testid="stExpander"] > details > div[data-testid="stExpanderDetails"] {
+            padding: 24px !important;
+            background: #FFFFFF;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -316,7 +369,7 @@ def _helpful_thoughts(spec):
     return defaults.get(spec, ["How do I move forward?", "Is it okay to ask for help?"])
 
 
-@st.dialog("Counselor Profile")
+@st.dialog("Counselor Profile", width="large")
 def show_profile_dialog(c: dict, score=None):
     name = c.get("name", "Counselor")
     spec = c.get("specialization", "")
@@ -427,21 +480,40 @@ def show_profile_dialog(c: dict, score=None):
 
 
 # ── Gemini match explanation ──────────────────────────────────────────────────
-def get_gemini_explanation(best_c, client_issue, preferred_language, preferred_modality, preferred_c_gender, client_age, previous_exp):
+def _counselor_summary(c) -> str:
+    gender = c.get("gender", "").lower()
+    pronoun = "she/her" if gender in ["female", "woman"] else ("he/him" if gender in ["male", "man"] else "they/them")
+    modality_match = "Yes" if c.get("modality_match") == 1 else "No"
+    gender_match = "Yes" if c.get("gender_match") == 1 else "No"
+    return (
+        f"- Name: {c.get('name')}, {pronoun}, {c.get('experience_years')} years experience\n"
+        f"- Specialization: {c.get('specialization')}\n"
+        f"- Session modality: {c.get('counselor_modality')} (matches client preference: {modality_match})\n"
+        f"- Language: {c.get('counselor_language')}\n"
+        f"- About: {c.get('about_me') or 'N/A'}\n"
+        f"- Gender preference matched: {gender_match}"
+    )
+
+
+def get_gemini_explanations(best_c, second_c, client_issue, preferred_language, preferred_modality, preferred_c_gender, client_age, previous_exp):
+    import json
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        return None
+        return None, None
 
-    gender = best_c.get("gender", "").lower()
-    pronoun = "she/her" if gender in ["female", "woman"] else ("he/him" if gender in ["male", "man"] else "they/them")
     prev_text = "has previously tried counseling" if previous_exp else "is new to counseling"
     gender_pref_text = (
         f"prefers a {preferred_c_gender} counselor"
         if preferred_c_gender not in ["No preference", ""]
         else "has no gender preference"
     )
-    modality_match = "Yes" if best_c.get("modality_match") == 1 else "No"
-    gender_match = "Yes" if best_c.get("gender_match") == 1 else "No"
+
+    second_block = f"\nAlternative counselor:\n{_counselor_summary(second_c)}" if second_c else ""
+    alt_instruction = (
+        '\n- "alternative": A concise 2-sentence paragraph comparing this counselor to the top match '
+        'and explaining what makes them worth considering if the client wants a different option.'
+        if second_c else '\n- "alternative": null'
+    )
 
     prompt = f"""You are a warm, empathetic counseling match assistant for a mental health platform in Malaysia.
 
@@ -451,27 +523,24 @@ Client profile:
 - Preferred language: {preferred_language}
 - Preferred session modality: {preferred_modality}
 
-Their top matched counselor:
-- Name: {best_c.get("name")}, {pronoun}, {best_c.get("experience_years")} years experience
-- Specialization: {best_c.get("specialization")}
-- Session modality: {best_c.get("counselor_modality")} (matches client preference: {modality_match})
-- Language: {best_c.get("counselor_language")}
-- About: {best_c.get("about_me") or "N/A"}
-- Gender preference matched: {gender_match}
+Top matched counselor:
+{_counselor_summary(best_c)}
+{second_block}
 
-Write a warm, personal 3–4 sentence paragraph explaining why this counselor is a great match for the client.
-Speak directly to the client using "you" and "your". Do not mention numbers, percentages, or scores.
-Focus on the human and practical fit — what makes this counselor right for them.
-If there is a mismatch (modality or gender preference), acknowledge it briefly in a reassuring, non-dismissive way.
-Write ONLY the paragraph. No bullet points, headers, or markdown formatting."""
+Return a JSON object with exactly these keys:
+- "top": A warm, personal 3–4 sentence paragraph explaining why the top counselor is a great match. Speak directly to the client using "you"/"your". Do not mention numbers or scores. If there is a mismatch (modality or gender), acknowledge it briefly in a reassuring way.{alt_instruction}
+
+Respond with valid JSON only. No markdown, no code fences."""
 
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-2.5-flash-lite")
         response = model.generate_content(prompt)
-        return response.text.strip()
+        text = response.text.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        data = json.loads(text)
+        return data.get("top"), data.get("alternative")
     except Exception:
-        return None
+        return None, None
 
 
 # ── Main page ─────────────────────────────────────────────────────────────────
@@ -585,7 +654,64 @@ def show_matching_page():
 
     # ── STEP 4: Results ──────────────────────────────────────────────────────
     elif st.session_state.quiz_step == 4:
-        st.progress(100)
+        prog_col, btn_col = st.columns([20, 1])
+        with prog_col:
+            st.markdown(
+                """
+                <div style="margin-bottom:28px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="font-size:12px; font-weight:600; color:#6D28D9; letter-spacing:0.06em; text-transform:uppercase;">Match Complete</span>
+                        <span style="font-size:12px; font-weight:700; color:#6D28D9;">100%</span>
+                    </div>
+                    <div style="height:8px; background:#EDE8FF; border-radius:99px; overflow:hidden;">
+                        <div style="height:100%; width:100%; background:linear-gradient(90deg,#8B5CF6,#6D28D9); border-radius:99px;"></div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with btn_col:
+            st.button("↺", key="start_over_btn", use_container_width=True,
+                      on_click=lambda: st.session_state.update(quiz_step=0))
+
+        components.html(
+            """
+            <script>
+            (function styleStartOver() {
+                var doc = window.parent.document;
+                var btns = doc.querySelectorAll('button');
+                btns.forEach(function(btn) {
+                    if (btn.innerText.trim() === '↺') {
+                        btn.style.setProperty('width', '40px', 'important');
+                        btn.style.setProperty('height', '40px', 'important');
+                        btn.style.setProperty('min-width', 'unset', 'important');
+                        btn.style.setProperty('padding', '0', 'important');
+                        btn.style.setProperty('border-radius', '10px', 'important');
+                        btn.style.setProperty('font-size', '18px', 'important');
+                        btn.style.setProperty('display', 'flex', 'important');
+                        btn.style.setProperty('align-items', 'center', 'important');
+                        btn.style.setProperty('justify-content', 'center', 'important');
+                    }
+                });
+            })();
+            setTimeout(function(){
+                var doc = window.parent.document;
+                var btns = doc.querySelectorAll('button');
+                btns.forEach(function(btn) {
+                    if (btn.innerText.trim() === '↺') {
+                        btn.style.setProperty('width', '40px', 'important');
+                        btn.style.setProperty('height', '40px', 'important');
+                        btn.style.setProperty('min-width', 'unset', 'important');
+                        btn.style.setProperty('padding', '0', 'important');
+                        btn.style.setProperty('border-radius', '10px', 'important');
+                        btn.style.setProperty('font-size', '18px', 'important');
+                    }
+                });
+            }, 300);
+            </script>
+            """,
+            height=0, width=0,
+        )
 
         client_age = st.session_state.client_age
         client_gender = st.session_state.client_gender
@@ -595,10 +721,6 @@ def show_matching_page():
         preferred_language = st.session_state.preferred_language
         preferred_modality = st.session_state.preferred_modality
         preferred_c_gender = st.session_state.preferred_c_gender
-
-        _, btn_col = st.columns([3, 1])
-        btn_col.button("↺ Start Over", use_container_width=True,
-                       on_click=lambda: st.session_state.update(quiz_step=0))
 
         with st.spinner("Analyzing compatibility factors to find your ideal match..."):
             time.sleep(1.2)
@@ -682,15 +804,17 @@ def show_matching_page():
         st.write("")
 
         # ── Match Explanation (Gemini AI) ─────────────────────────────────────
-        cache_key = f"gemini_exp_{best_c.get('counselor_id')}"
+        second_id = second_c.get("counselor_id") if second_c else "none"
+        cache_key = f"gemini_exp_{best_c.get('counselor_id')}_{second_id}"
         if cache_key not in st.session_state:
             with st.spinner("Generating your personalised match insight..."):
-                st.session_state[cache_key] = get_gemini_explanation(
-                    best_c, client_issue, preferred_language,
+                top_exp, alt_exp = get_gemini_explanations(
+                    best_c, second_c, client_issue, preferred_language,
                     preferred_modality, preferred_c_gender,
                     client_age, int(previous_exp),
                 )
-        explanation = st.session_state[cache_key]
+                st.session_state[cache_key] = (top_exp, alt_exp)
+        explanation, explanation_2 = st.session_state[cache_key]
 
         st.markdown('<div class="explain-card">', unsafe_allow_html=True)
         st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THIS MATCH ?</p>', unsafe_allow_html=True)
@@ -778,5 +902,18 @@ def show_matching_page():
                     st.pyplot(fig_wf, clear_figure=True)
                 except Exception as exc:
                     st.info(f"Could not render SHAP charts: {exc}")
+
+        # ── Second Match Explanation ──────────────────────────────────────────
+        if second_c and explanation_2:
+            st.markdown('<div class="explain-card">', unsafe_allow_html=True)
+            st.markdown('<p class="explain-title" style="color:#6B7280; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THE ALTERNATIVE ?</p>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="ai-explanation-box-alt">'
+                f'<div class="ai-badge-alt">✦ AI Insight</div>'
+                f'<p class="ai-explanation-text-alt">{explanation_2}</p>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+            st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
