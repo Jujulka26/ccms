@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import smtplib
 from email.mime.text import MIMEText
@@ -6,7 +7,7 @@ from email.mime.multipart import MIMEMultipart
 
 def send_enquiry_email(name, email, subject, message):
     sender_email = "saltysmilesofficial@gmail.com"
-    sender_password = st.secrets["EMAIL_PASSWORD"]
+    sender_password = os.environ.get("EMAIL_PASSWORD", "")
 
     msg = MIMEMultipart()
     msg['From'] = sender_email
