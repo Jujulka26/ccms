@@ -88,7 +88,7 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
     # Initialize Chat History
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            {"role": "assistant", "content": "Hi, I'm Mira 👋 I'm here to help you find the right counselor through our matching system — or just to listen if you need someone to talk to. What's on your mind?"}
+            {"role": "assistant", "content": "Hi, I'm Mira 👋 How can I help you today?"}
         ]
 
     # Render Chat History
