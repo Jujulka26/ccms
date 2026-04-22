@@ -63,7 +63,7 @@ def show_chatbot_page():
     2. Be a platform guide: Help users navigate the system. If they ask about getting a counselor or need long-term support, actively guide them to fill out the assessment form on the 'Find Your Match' page to connect with a professional human counselor.
     Always be conversational, empathetic, and clear. Remind users you are an AI guide, not a medical doctor.
     """
-    model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=app_context_prompt)
+    model = genai.GenerativeModel("gemini-2.5-flash-lite", system_instruction=app_context_prompt)
 
     # Initialize Chat History
     if "messages" not in st.session_state:
