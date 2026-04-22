@@ -7,159 +7,86 @@ def show_privacypolicy_page():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-        /* ── Hero ─────────────────────────────────────────────────────── */
-        .pp-hero {
-            position: relative;
-            overflow: hidden;
-            background-color: #FAFAFF;
-            background-image:
-                radial-gradient(at 0% 0%, #E9DFFF 0px, transparent 60%),
-                radial-gradient(at 100% 100%, #F0E6FF 0px, transparent 60%);
-            border-radius: 20px;
-            padding: 48px 52px;
-            margin-bottom: 32px;
-            border: 1px solid rgba(124,58,237,0.15);
-            box-shadow: 0 16px 32px -8px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
-        }
-        .pp-eyebrow {
-            color: #8B5CF6;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            background: rgba(167,139,250,0.12);
-            border: 1px solid rgba(167,139,250,0.25);
-            border-radius: 20px;
-            padding: 4px 14px;
-            margin-bottom: 20px;
-            display: inline-block;
-        }
-        .pp-hero-title {
+        .pp-title {
             font-family: 'DM Serif Display', serif;
-            font-size: 42px;
-            color: #1A1A2E;
-            margin-bottom: 16px;
-            line-height: 1.15;
-            letter-spacing: -0.5px;
+            font-size: 38px; color: #1A1A2E;
+            margin: 0 0 14px; line-height: 1.15; letter-spacing: -0.5px;
         }
-        .pp-hero-copy {
-            font-size: 15px;
-            color: #4A4A5C;
-            margin: 0;
-            line-height: 1.65;
-            max-width: 520px;
+        .pp-intro {
+            font-size: 15px; color: #5A5A6E;
+            line-height: 1.7; margin: 0 0 10px; max-width: 640px;
         }
-        .pp-hero-emoji {
-            font-size: 90px;
-            line-height: 1;
-            position: absolute;
-            right: 48px;
-            bottom: -10px;
-            opacity: 0.18;
-            transform: rotate(-8deg);
-            pointer-events: none;
+        .pp-meta {
+            font-size: 12px; color: #ABABBB; margin: 0;
         }
-        .pp-updated {
-            display: inline-block;
-            margin-top: 18px;
-            font-size: 12px;
-            color: #8B8B9A;
+        .pp-divider {
+            border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 28px 0 32px;
         }
 
-        /* ── Section card ─────────────────────────────────────────────── */
         .pp-card {
             background: #FFFFFF;
-            border-radius: 16px;
-            padding: 32px 36px;
+            border-radius: 16px; padding: 28px 32px;
             border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            margin-bottom: 16px;
+        }
+        .pp-card-header {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+        }
+        .pp-card-num {
+            flex-shrink: 0;
+            width: 30px; height: 30px;
+            background: rgba(139,92,246,0.1);
+            color: #7C3AED; font-size: 13px; font-weight: 700;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
         }
         .pp-card-title {
             font-family: 'DM Serif Display', serif;
-            font-size: 20px;
-            color: #1A1A2E;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 19px; color: #1A1A2E; margin: 0;
         }
         .pp-card-body {
-            font-size: 14px;
-            color: #4A4A5C;
-            line-height: 1.75;
-            margin: 0;
+            font-size: 14px; color: #4A4A5C; line-height: 1.8; margin: 0;
         }
         .pp-card-body ul {
-            margin: 10px 0 0 0;
-            padding-left: 20px;
+            margin: 10px 0 0; padding-left: 20px;
         }
-        .pp-card-body li {
-            margin-bottom: 6px;
-        }
+        .pp-card-body li { margin-bottom: 8px; }
 
-        /* ── Highlight note ───────────────────────────────────────────── */
         .pp-note {
-            background: rgba(139,92,246,0.06);
-            border-left: 4px solid #8B5CF6;
-            border-radius: 0 12px 12px 0;
-            padding: 16px 20px;
-            margin-top: 14px;
-            font-size: 14px;
-            color: #4A4A5C;
-            line-height: 1.65;
+            background: rgba(139,92,246,0.05);
+            border-left: 3px solid #8B5CF6;
+            border-radius: 0 8px 8px 0;
+            padding: 14px 18px; margin-top: 16px;
+            font-size: 14px; color: #4A4A5C; line-height: 1.65;
         }
 
-        /* ── Footer banner ────────────────────────────────────────────── */
-        .pp-footer {
-            background: linear-gradient(135deg, #1A1A2E 0%, #2D1B6E 100%);
-            border-radius: 20px;
-            padding: 36px 44px;
-            margin-top: 12px;
-            position: relative;
-            overflow: hidden;
-            text-align: center;
+        .pp-contact-box {
+            background: #FAFAFF;
+            border: 1px solid rgba(139,92,246,0.15);
+            border-radius: 16px; padding: 32px 36px;
+            margin-top: 8px; text-align: center;
         }
-        .pp-footer::before {
-            content: '';
-            position: absolute;
-            top: -50px; right: -50px;
-            width: 200px; height: 200px;
-            background: radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .pp-footer-title {
+        .pp-contact-title {
             font-family: 'DM Serif Display', serif;
-            font-size: 22px;
-            color: #FFFFFF;
-            margin-bottom: 8px;
+            font-size: 22px; color: #1A1A2E; margin-bottom: 10px;
         }
-        .pp-footer-body {
-            font-size: 14px;
-            color: rgba(255,255,255,0.6);
-            margin: 0;
+        .pp-contact-body {
+            font-size: 14px; color: #5A5A6E; margin: 0; line-height: 1.6;
         }
-        .pp-footer-email {
-            color: #A78BFA;
-            font-weight: 600;
-        }
+        .pp-contact-email { color: #7C3AED; font-weight: 600; }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
-    # ── Hero ──────────────────────────────────────────────────────────────────
+    # ── Clean page header ─────────────────────────────────────────────────────
     st.markdown(
         """
-        <div class="pp-hero">
-            <div style="position: relative; z-index: 2;">
-                <div class="pp-eyebrow">Privacy Policy</div>
-                <div class="pp-hero-title">Your privacy matters to us.</div>
-                <p class="pp-hero-copy">We are committed to protecting the personal information you share with us. This policy explains what we collect, how we use it, and your rights.</p>
-                <span class="pp-updated">Last updated: April 2026</span>
-            </div>
-            <div class="pp-hero-emoji">🔒</div>
-        </div>
+        <div class="pp-title">Privacy Policy</div>
+        <p class="pp-intro">We are committed to protecting the personal information you share with us. This policy explains what we collect, how we use it, and your rights as a user of this platform.</p>
+        <p class="pp-meta">Last updated: April 2026</p>
+        <hr class="pp-divider">
         """,
         unsafe_allow_html=True,
     )
@@ -167,7 +94,7 @@ def show_privacypolicy_page():
     # ── Sections ──────────────────────────────────────────────────────────────
     sections = [
         (
-            "📋", "What Information We Collect",
+            "What Information We Collect",
             """When you use our platform, we may collect the following information:
             <ul>
                 <li><strong>Personal details</strong> — your name and email address when you submit a counselor match request or contact us.</li>
@@ -177,7 +104,7 @@ def show_privacypolicy_page():
             None,
         ),
         (
-            "🎯", "How We Use Your Information",
+            "How We Use Your Information",
             """Your information is used solely for the following purposes:
             <ul>
                 <li>To generate a personalised counselor compatibility score and recommend suitable matches.</li>
@@ -188,7 +115,7 @@ def show_privacypolicy_page():
             "We do <strong>not</strong> use your data for advertising, profiling beyond matching, or any commercial purposes.",
         ),
         (
-            "🤝", "Who We Share Your Data With",
+            "Who We Share Your Data With",
             """We treat your data with strict confidentiality. Your information is only shared with:
             <ul>
                 <li><strong>Your matched counselor</strong> — only after your request is approved by our clinic coordinator.</li>
@@ -197,7 +124,7 @@ def show_privacypolicy_page():
             "We do <strong>not</strong> sell, rent, or share your personal information with any third parties outside of the above.",
         ),
         (
-            "🗄️", "Data Storage & Security",
+            "Data Storage & Security",
             """Your data is stored securely in our database hosted on a local server. We take reasonable steps to protect your information from unauthorised access, including:
             <ul>
                 <li>Password-protected admin access with hashed credentials.</li>
@@ -207,7 +134,7 @@ def show_privacypolicy_page():
             None,
         ),
         (
-            "📅", "How Long We Keep Your Data",
+            "How Long We Keep Your Data",
             """We retain your information only for as long as necessary:
             <ul>
                 <li>Match request records are kept for administrative and counseling coordination purposes.</li>
@@ -217,7 +144,7 @@ def show_privacypolicy_page():
             None,
         ),
         (
-            "✅", "Your Rights",
+            "Your Rights",
             """As a user of this platform, you have the right to:
             <ul>
                 <li><strong>Access</strong> — request a copy of the personal data we hold about you.</li>
@@ -228,30 +155,33 @@ def show_privacypolicy_page():
             "To exercise any of these rights, please reach out via our <strong>Contact Us</strong> page or email us directly.",
         ),
         (
-            "🔄", "Changes to This Policy",
+            "Changes to This Policy",
             """We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. When we do, the "Last updated" date at the top of this page will be revised. We encourage you to review this page periodically.""",
             None,
         ),
     ]
 
-    for icon, title, body, note in sections:
+    for i, (title, body, note) in enumerate(sections, 1):
         note_html = f'<div class="pp-note">{note}</div>' if note else ""
         st.markdown(
             f"""
             <div class="pp-card">
-                <div class="pp-card-title">{icon} {title}</div>
+                <div class="pp-card-header">
+                    <div class="pp-card-num">{i}</div>
+                    <div class="pp-card-title">{title}</div>
+                </div>
                 <div class="pp-card-body">{body}{note_html}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-    # ── Footer ─────────────────────────────────────────────────────────────────
+    # ── Contact note ──────────────────────────────────────────────────────────
     st.markdown(
         """
-        <div class="pp-footer">
-            <div class="pp-footer-title">Questions about your privacy?</div>
-            <p class="pp-footer-body">Contact us at <span class="pp-footer-email">saltysmilesofficial@gmail.com</span> and we will respond within 24–48 hours.</p>
+        <div class="pp-contact-box">
+            <div class="pp-contact-title">Questions about your privacy?</div>
+            <p class="pp-contact-body">Contact us at <span class="pp-contact-email">saltysmilesofficial@gmail.com</span><br>and we will respond within 24–48 hours.</p>
         </div>
         """,
         unsafe_allow_html=True,

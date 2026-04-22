@@ -63,6 +63,7 @@ def _delete(path: str) -> dict:
 
 # ── Counselors ─────────────────────────────────────────────────────────────────
 
+@st.cache_data(ttl=300)
 def get_counselors() -> list[dict]:
     return _get("/counselors/")
 
@@ -124,6 +125,7 @@ def send_approval_email(request_id: int, client_name: str, client_email: str, co
 
 # ── Matching ───────────────────────────────────────────────────────────────────
 
+@st.cache_data(ttl=300)
 def get_reference_data() -> dict:
     return _get("/matching/reference-data")
 
@@ -138,5 +140,6 @@ def post_shap(features: dict) -> dict:
 
 # ── Model Performance ──────────────────────────────────────────────────────────
 
+@st.cache_data(ttl=600)
 def get_model_performance() -> dict:
     return _get("/model-performance/")

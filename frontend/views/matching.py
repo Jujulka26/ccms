@@ -86,9 +86,9 @@ def inject_styles():
         [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) p { color: #6D28D9 !important; font-weight: 700 !important; }
         [data-testid="block-container"] [data-baseweb="radio"] p { font-size: 14px !important; margin: 0 !important; color: #4A4A5A !important; font-weight: 500 !important; }
 
-        div[data-testid="stButton"] button { border-radius: 12px !important; font-family: 'DM Sans', sans-serif !important; font-size: 15px !important; font-weight: 600 !important; padding: 10px 24px !important; transition: all 0.2s; width: 100% !important; }
-        div[data-testid="stButton"] button[kind="primary"] { background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; color: #FFFFFF !important; border: none !important; box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
-        div[data-testid="stButton"] button[kind="primary"]:hover { box-shadow: 0 6px 20px rgba(124,58,237,0.45) !important; transform: translateY(-1px); }
+        [data-testid="block-container"] div[data-testid="stButton"] button { border-radius: 12px !important; font-family: 'DM Sans', sans-serif !important; font-size: 15px !important; font-weight: 600 !important; padding: 10px 24px !important; transition: all 0.2s; width: 100% !important; }
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] { background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; color: #FFFFFF !important; border: none !important; box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover { box-shadow: 0 6px 20px rgba(124,58,237,0.45) !important; transform: translateY(-1px); }
 
         .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
         .result-card { position: relative; background: #FFFFFF; border-radius: 20px; padding: 28px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; }
@@ -129,7 +129,7 @@ def inject_styles():
 
         div[data-testid="stTabs"] button { font-family: 'DM Sans', sans-serif !important; font-size: 14px !important; font-weight: 500 !important; }
 
-        div[data-testid="stButton"] button:not([kind="primary"]) {
+        [data-testid="block-container"] div[data-testid="stButton"] button:not([kind="primary"]) {
             background: transparent !important;
             border: 1.5px solid rgba(109,40,217,0.25) !important;
             color: #6D28D9 !important;
@@ -142,7 +142,7 @@ def inject_styles():
             transition: all 0.2s ease !important;
             box-shadow: none !important;
         }
-        div[data-testid="stButton"] button:not([kind="primary"]):hover {
+        [data-testid="block-container"] div[data-testid="stButton"] button:not([kind="primary"]):hover {
             background: rgba(109,40,217,0.06) !important;
             border-color: #6D28D9 !important;
             color: #5B21B6 !important;
