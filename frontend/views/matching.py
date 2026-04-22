@@ -449,28 +449,31 @@ def show_matching_page():
         st.markdown(
             """
             <style>
-            @keyframes bq-rock {
-                0% { transform: rotate(0deg); } 5% { transform: rotate(-4deg); } 11% { transform: rotate(0deg); }
-                16% { transform: rotate(4deg); } 21% { transform: rotate(0deg); } 21.01%, 100% { transform: rotate(0deg); }
-            }
             div[data-testid="stButton"] button[kind="primary"] {
-                animation: bq-rock 3.8s ease-in-out infinite !important;
-                transform-origin: center center !important; font-size: 16px !important;
-                letter-spacing: 0.03em !important; padding: 14px 28px !important;
-                font-weight: 700 !important; box-shadow: 0 4px 20px rgba(109,40,217,0.35) !important;
+                background-image: radial-gradient(134.26% 244.64% at 42.92% -80.36%, #B301B3 25.45%, #381DBD 100%) !important;
+                background-size: 100% 100% !important;
+                border: 1px solid #8043C8 !important;
+                transition: background-size 150ms ease-in-out, box-shadow 150ms ease-in-out, transform 100ms ease !important;
+                font-size: 16px !important;
+                letter-spacing: 0.03em !important;
+                padding: 14px 28px !important;
+                font-weight: 700 !important;
             }
             div[data-testid="stButton"] button[kind="primary"]:hover {
-                animation-play-state: paused !important;
-                transform: rotate(0deg) scale(1.03) !important; box-shadow: 0 10px 30px rgba(109,40,217,0.5) !important;
+                background-size: 100% 200% !important;
+                box-shadow: 0px 0px 8px 0px rgba(180,40,180,0.35), 0px 0px 24px 0px rgba(102,43,223,0.35) !important;
+            }
+            div[data-testid="stButton"] button[kind="primary"]:active {
+                transform: scale(0.95) !important;
+                box-shadow: 0px 0px 11.7px 0px rgba(180,40,180,0.50), 0px 0px 28.8px 0px rgba(102,43,223,0.50) !important;
             }
             </style>
             """,
             unsafe_allow_html=True,
         )
         _, col_btn, _ = st.columns([1, 2, 1])
-        if col_btn.button("Begin Questionnaire", use_container_width=True, type="primary"):
-            st.session_state.quiz_step = 1
-            st.rerun()
+        col_btn.button("Find My Counselor →", use_container_width=True, type="primary",
+                       on_click=lambda: st.session_state.update(quiz_step=1))
 
     # ── STEP 1: Demographics ─────────────────────────────────────────────────
     elif st.session_state.quiz_step == 1:
@@ -483,9 +486,8 @@ def show_matching_page():
         st.selectbox("What is your cultural background or ethnicity?", ref["client_ethnicity"], key="client_ethnicity")
         st.markdown("<br>", unsafe_allow_html=True)
         _, col2 = st.columns([1, 1])
-        if col2.button("Next →", use_container_width=True, type="primary"):
-            st.session_state.quiz_step = 2
-            st.rerun()
+        col2.button("Next →", use_container_width=True, type="primary",
+                    on_click=lambda: st.session_state.update(quiz_step=2))
 
     # ── STEP 2: Clinical Needs ───────────────────────────────────────────────
     elif st.session_state.quiz_step == 2:
@@ -502,12 +504,10 @@ def show_matching_page():
         )
         st.markdown("<br>", unsafe_allow_html=True)
         col1, col2 = st.columns([1, 1])
-        if col1.button("← Back", use_container_width=True):
-            st.session_state.quiz_step = 1
-            st.rerun()
-        if col2.button("Next →", use_container_width=True, type="primary"):
-            st.session_state.quiz_step = 3
-            st.rerun()
+        col1.button("← Back", use_container_width=True,
+                    on_click=lambda: st.session_state.update(quiz_step=1))
+        col2.button("Next →", use_container_width=True, type="primary",
+                    on_click=lambda: st.session_state.update(quiz_step=3))
 
     # ── STEP 3: Preferences ──────────────────────────────────────────────────
     elif st.session_state.quiz_step == 3:
@@ -525,12 +525,10 @@ def show_matching_page():
         st.radio("Preferred counselor gender", ref["preferred_counselor_gender"], horizontal=True, key="preferred_c_gender")
         st.markdown("<br>", unsafe_allow_html=True)
         col1, col2 = st.columns([1, 1])
-        if col1.button("← Back", use_container_width=True):
-            st.session_state.quiz_step = 2
-            st.rerun()
-        if col2.button("Find My Best Match ✨", use_container_width=True, type="primary"):
-            st.session_state.quiz_step = 4
-            st.rerun()
+        col1.button("← Back", use_container_width=True,
+                    on_click=lambda: st.session_state.update(quiz_step=2))
+        col2.button("Find My Best Match ✨", use_container_width=True, type="primary",
+                    on_click=lambda: st.session_state.update(quiz_step=4))
 
     # ── STEP 4: Results ──────────────────────────────────────────────────────
     elif st.session_state.quiz_step == 4:
@@ -546,9 +544,8 @@ def show_matching_page():
         preferred_c_gender = st.session_state.preferred_c_gender
 
         _, btn_col = st.columns([3, 1])
-        if btn_col.button("↺ Start Over", use_container_width=True):
-            st.session_state.quiz_step = 0
-            st.rerun()
+        btn_col.button("↺ Start Over", use_container_width=True,
+                       on_click=lambda: st.session_state.update(quiz_step=0))
 
         with st.spinner("Analyzing compatibility factors to find your ideal match..."):
             time.sleep(1.2)
