@@ -4,6 +4,7 @@ import numpy as np
 import streamlit as st
 import streamlit.components.v1 as components
 import time
+import google.generativeai as genai
 
 from frontend.utils.api import get_reference_data, post_match, post_shap, save_intro_request
 
@@ -118,6 +119,10 @@ def inject_styles():
         .icon-circle { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; }
         .icon-circle.green { background: #10B981; color: #fff; }
         .icon-circle.amber { background: #F59E0B; color: #fff; }
+
+        .ai-explanation-box { background: linear-gradient(135deg, #F8F5FF 0%, #FDF9FF 100%); border: 1px solid rgba(139,92,246,0.15); border-left: 3px solid #8B5CF6; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
+        .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; }
+        .ai-explanation-text { font-size: 15.5px; color: #2D2D3F; line-height: 1.85; font-weight: 400; margin: 0; font-style: italic; }
 
         div[data-testid="stTabs"] button { font-family: 'DM Sans', sans-serif !important; font-size: 14px !important; font-weight: 500 !important; }
         </style>
@@ -421,6 +426,54 @@ def show_profile_dialog(c: dict, score=None):
                 st.rerun()
 
 
+# ── Gemini match explanation ──────────────────────────────────────────────────
+def get_gemini_explanation(best_c, client_issue, preferred_language, preferred_modality, preferred_c_gender, client_age, previous_exp):
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return None
+
+    gender = best_c.get("gender", "").lower()
+    pronoun = "she/her" if gender in ["female", "woman"] else ("he/him" if gender in ["male", "man"] else "they/them")
+    prev_text = "has previously tried counseling" if previous_exp else "is new to counseling"
+    gender_pref_text = (
+        f"prefers a {preferred_c_gender} counselor"
+        if preferred_c_gender not in ["No preference", ""]
+        else "has no gender preference"
+    )
+    modality_match = "Yes" if best_c.get("modality_match") == 1 else "No"
+    gender_match = "Yes" if best_c.get("gender_match") == 1 else "No"
+
+    prompt = f"""You are a warm, empathetic counseling match assistant for a mental health platform in Malaysia.
+
+A client is seeking support for: {client_issue}
+Client profile:
+- Age: {client_age}, {prev_text}, {gender_pref_text}
+- Preferred language: {preferred_language}
+- Preferred session modality: {preferred_modality}
+
+Their top matched counselor:
+- Name: {best_c.get("name")}, {pronoun}, {best_c.get("experience_years")} years experience
+- Specialization: {best_c.get("specialization")}
+- Session modality: {best_c.get("counselor_modality")} (matches client preference: {modality_match})
+- Language: {best_c.get("counselor_language")}
+- About: {best_c.get("about_me") or "N/A"}
+- Gender preference matched: {gender_match}
+
+Write a warm, personal 3–4 sentence paragraph explaining why this counselor is a great match for the client.
+Speak directly to the client using "you" and "your". Do not mention numbers, percentages, or scores.
+Focus on the human and practical fit — what makes this counselor right for them.
+If there is a mismatch (modality or gender preference), acknowledge it briefly in a reassuring, non-dismissive way.
+Write ONLY the paragraph. No bullet points, headers, or markdown formatting."""
+
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception:
+        return None
+
+
 # ── Main page ─────────────────────────────────────────────────────────────────
 def show_matching_page():
     inject_styles()
@@ -628,52 +681,74 @@ def show_matching_page():
 
         st.write("")
 
-        # ── Match Explanation ─────────────────────────────────────────────────
-        positive_points, negative_points = [], []
-        positive_points.append(f"Supports your preferred language ({preferred_language})")
-        if best_c["modality_match"] == 1:
-            positive_points.append(f"Modality matches your preference ({preferred_modality})")
-        else:
-            negative_points.append(f"Modality does not match ({preferred_modality})")
-        if best_c["issue_score"] >= 0.99:
-            positive_points.append(f"Direct specialization in {client_issue}")
-        elif best_c["issue_score"] >= 0.6:
-            positive_points.append(f"Related experience with {client_issue}")
-        else:
-            negative_points.append(f"Specialization less aligned with {client_issue}")
-        if preferred_c_gender != "No preference":
-            if best_c["gender_match"] == 1:
-                positive_points.append(f"Preferred gender matched ({preferred_c_gender})")
-            else:
-                negative_points.append(f"Preferred gender not matched ({preferred_c_gender})")
+        # ── Match Explanation (Gemini AI) ─────────────────────────────────────
+        cache_key = f"gemini_exp_{best_c.get('counselor_id')}"
+        if cache_key not in st.session_state:
+            with st.spinner("Generating your personalised match insight..."):
+                st.session_state[cache_key] = get_gemini_explanation(
+                    best_c, client_issue, preferred_language,
+                    preferred_modality, preferred_c_gender,
+                    client_age, int(previous_exp),
+                )
+        explanation = st.session_state[cache_key]
 
         st.markdown('<div class="explain-card">', unsafe_allow_html=True)
         st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THIS MATCH ?</p>', unsafe_allow_html=True)
-        exp_col1, exp_col2 = st.columns(2, gap="large")
-        with exp_col1:
-            st.markdown("<p style='font-size:15px; font-weight:600; color:#10B981; margin-bottom:0;'>Strengths</p>", unsafe_allow_html=True)
-            st.markdown('<div class="point-row-wrap">', unsafe_allow_html=True)
-            for item in positive_points[:4]:
-                st.markdown(
-                    f'<div class="point-row point-row-green"><div class="icon-circle green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>{item}</span></div>',
-                    unsafe_allow_html=True,
-                )
-            st.markdown('</div>', unsafe_allow_html=True)
-        with exp_col2:
-            st.markdown("<p style='font-size:15px; font-weight:600; color:#F59E0B; margin-bottom:0;'>Things to note</p>", unsafe_allow_html=True)
-            st.markdown('<div class="point-row-wrap">', unsafe_allow_html=True)
-            if negative_points:
-                for item in negative_points[:4]:
+
+        if explanation:
+            st.markdown(
+                f'<div class="ai-explanation-box">'
+                f'<div class="ai-badge">✦ AI Insight</div>'
+                f'<p class="ai-explanation-text">{explanation}</p>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            # Fallback to static bullets when Gemini is unavailable
+            positive_points, negative_points = [], []
+            positive_points.append(f"Supports your preferred language ({preferred_language})")
+            if best_c["modality_match"] == 1:
+                positive_points.append(f"Modality matches your preference ({preferred_modality})")
+            else:
+                negative_points.append(f"Modality does not match ({preferred_modality})")
+            if best_c["issue_score"] >= 0.99:
+                positive_points.append(f"Direct specialization in {client_issue}")
+            elif best_c["issue_score"] >= 0.6:
+                positive_points.append(f"Related experience with {client_issue}")
+            else:
+                negative_points.append(f"Specialization less aligned with {client_issue}")
+            if preferred_c_gender != "No preference":
+                if best_c["gender_match"] == 1:
+                    positive_points.append(f"Preferred gender matched ({preferred_c_gender})")
+                else:
+                    negative_points.append(f"Preferred gender not matched ({preferred_c_gender})")
+
+            exp_col1, exp_col2 = st.columns(2, gap="large")
+            with exp_col1:
+                st.markdown("<p style='font-size:15px; font-weight:600; color:#10B981; margin-bottom:0;'>Strengths</p>", unsafe_allow_html=True)
+                st.markdown('<div class="point-row-wrap">', unsafe_allow_html=True)
+                for item in positive_points[:4]:
                     st.markdown(
-                        f'<div class="point-row point-row-amber"><div class="icon-circle amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span>{item}</span></div>',
+                        f'<div class="point-row point-row-green"><div class="icon-circle green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>{item}</span></div>',
                         unsafe_allow_html=True,
                     )
-            else:
-                st.markdown(
-                    '<div class="point-row point-row-green"><div class="icon-circle green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>No major concerns detected</span></div>',
-                    unsafe_allow_html=True,
-                )
-            st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+            with exp_col2:
+                st.markdown("<p style='font-size:15px; font-weight:600; color:#F59E0B; margin-bottom:0;'>Things to note</p>", unsafe_allow_html=True)
+                st.markdown('<div class="point-row-wrap">', unsafe_allow_html=True)
+                if negative_points:
+                    for item in negative_points[:4]:
+                        st.markdown(
+                            f'<div class="point-row point-row-amber"><div class="icon-circle amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span>{item}</span></div>',
+                            unsafe_allow_html=True,
+                        )
+                else:
+                    st.markdown(
+                        '<div class="point-row point-row-green"><div class="icon-circle green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>No major concerns detected</span></div>',
+                        unsafe_allow_html=True,
+                    )
+                st.markdown('</div>', unsafe_allow_html=True)
+
         st.markdown("</div>", unsafe_allow_html=True)
 
         # ── SHAP expander ─────────────────────────────────────────────────────
