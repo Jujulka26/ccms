@@ -22,7 +22,7 @@ FEATURE_ORDER = [
 
 @lru_cache(maxsize=1)
 def load_resources():
-    model = joblib.load(str(BASE_DIR / "best_rf_model.pkl"))
+    model = joblib.load(str(BASE_DIR / "best_xgb_model.pkl"))
     df_ref = pd.read_csv(str(BASE_DIR / "client_counselor_dataset.csv"))
     return model, df_ref
 
