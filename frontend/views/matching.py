@@ -1,4 +1,6 @@
 import base64
+import hashlib
+import json as _json
 import os
 import numpy as np
 import streamlit as st
@@ -260,13 +262,14 @@ def scroll_to_results(anchor_id="match-results-anchor"):
 
 
 def render_hero_new():
-    img_tag = ""
-    try:
-        with open(os.path.join("assets", "2.png"), "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-        img_tag = f'<img src="data:image/png;base64,{b64}" class="hero-img" alt="" />'
-    except FileNotFoundError:
-        pass
+    if "hero_img_2_b64" not in st.session_state:
+        try:
+            with open(os.path.join("assets", "2.png"), "rb") as f:
+                st.session_state["hero_img_2_b64"] = base64.b64encode(f.read()).decode()
+        except FileNotFoundError:
+            st.session_state["hero_img_2_b64"] = None
+    b64 = st.session_state["hero_img_2_b64"]
+    img_tag = f'<img src="data:image/png;base64,{b64}" class="hero-img" alt="" />' if b64 else ""
     st.markdown(
         f"""
         <div class="hero-wrap">
@@ -722,10 +725,7 @@ def show_matching_page():
         preferred_modality = st.session_state.preferred_modality
         preferred_c_gender = st.session_state.preferred_c_gender
 
-        with st.spinner("Analyzing compatibility factors to find your ideal match..."):
-            time.sleep(1.2)
-
-        result = post_match({
+        _match_payload = {
             "client_age": client_age,
             "client_gender": client_gender,
             "client_ethnicity": client_ethnicity,
@@ -734,7 +734,17 @@ def show_matching_page():
             "preferred_language": preferred_language,
             "preferred_modality": preferred_modality,
             "preferred_c_gender": preferred_c_gender,
-        })
+        }
+        _match_cache_key = "match_" + hashlib.md5(
+            _json.dumps(sorted(_match_payload.items())).encode()
+        ).hexdigest()
+
+        if _match_cache_key not in st.session_state:
+            with st.spinner("Analyzing compatibility factors to find your ideal match..."):
+                time.sleep(1.2)
+            st.session_state[_match_cache_key] = post_match(_match_payload)
+
+        result = st.session_state[_match_cache_key]
 
         if result.get("error"):
             st.warning(result["error"])
@@ -877,7 +887,12 @@ def show_matching_page():
 
         # ── SHAP expander ─────────────────────────────────────────────────────
         with st.expander("Technical details — SHAP feature contributions", expanded=False):
-            shap_result = post_shap(best_features)
+            _shap_cache_key = "shap_" + hashlib.md5(
+                _json.dumps(sorted(best_features.items())).encode()
+            ).hexdigest()
+            if _shap_cache_key not in st.session_state:
+                st.session_state[_shap_cache_key] = post_shap(best_features)
+            shap_result = st.session_state[_shap_cache_key]
             if shap_result.get("error"):
                 st.info(shap_result["error"])
             else:

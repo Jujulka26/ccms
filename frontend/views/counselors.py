@@ -98,13 +98,14 @@ def inject_styles():
 def show_counselors_page():
     inject_styles()
 
-    img_tag = ""
-    try:
-        with open(os.path.join("assets", "1.png"), "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-        img_tag = f'<img src="data:image/png;base64,{b64}" class="dir-hero-img" alt="" />'
-    except FileNotFoundError:
-        pass
+    if "hero_img_1_b64" not in st.session_state:
+        try:
+            with open(os.path.join("assets", "1.png"), "rb") as f:
+                st.session_state["hero_img_1_b64"] = base64.b64encode(f.read()).decode()
+        except FileNotFoundError:
+            st.session_state["hero_img_1_b64"] = None
+    b64 = st.session_state["hero_img_1_b64"]
+    img_tag = f'<img src="data:image/png;base64,{b64}" class="dir-hero-img" alt="" />' if b64 else ""
 
     st.markdown(
         f"""
