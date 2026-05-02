@@ -9,6 +9,7 @@ import time
 import google.generativeai as genai
 
 from frontend.utils.api import get_reference_data, post_match, post_shap, save_intro_request
+from frontend.utils.avatar import avatar_html
 
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 def inject_styles():
@@ -95,18 +96,20 @@ def inject_styles():
         .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
         .result-card { position: relative; background: #FFFFFF; border-radius: 20px; padding: 28px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; }
         .result-card.primary { background: #1A1A2E; border-color: transparent; }
-        .result-card-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 20px; padding: 3px 10px; display: inline-block; margin-bottom: 18px; }
+        .result-card-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 20px; padding: 4px 12px; display: inline-block; margin-bottom: 0; align-self: flex-start; }
         .badge-primary { background: rgba(139,92,246,0.2); color: #A78BFA; }
         .badge-secondary { background: #F0EDE8; color: #8B8B9A; }
-        .profile-btn { position: absolute; top: 28px; right: 28px; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none !important; padding: 5px 12px; border-radius: 20px; transition: all 0.2s ease; box-shadow: none !important; cursor: pointer; }
-        .compat-score { font-family: 'DM Serif Display', serif; font-size: 52px; line-height: 1; color: #FFFFFF; margin-bottom: 4px; }
-        .compat-score-secondary { font-family: 'DM Serif Display', serif; font-size: 52px; line-height: 1; color: #1A1A2E; margin-bottom: 4px; }
-        .compat-label { font-size: 12px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 24px; }
-        .compat-label-secondary { font-size: 12px; color: #A0A0B0; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 24px; }
-        .counselor-name { font-size: 20px; font-weight: 600; color: #FFFFFF; margin-bottom: 16px; }
-        .counselor-name-secondary { font-size: 20px; font-weight: 600; color: #1A1A2E; margin-bottom: 16px; }
-        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
-        .info-row-secondary { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #F0EDE8; }
+        .card-header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+        .card-header-photo { flex-shrink: 0; }
+        .card-header-info { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+        .compat-score { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1; color: #FFFFFF; margin: 0; padding-left: 10px; }
+        .compat-score-secondary { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1; color: #1A1A2E; margin: 0; padding-left: 10px; }
+        .compat-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin: 0; padding-left: 10px; }
+        .compat-label-secondary { font-size: 10px; color: #A0A0B0; text-transform: uppercase; letter-spacing: 0.08em; margin: 0; padding-left: 10px; }
+        .counselor-name { font-size: 18px; font-weight: 700; color: #FFFFFF; margin: 0; padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .counselor-name-secondary { font-size: 18px; font-weight: 700; color: #1A1A2E; margin: 0; padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .info-row-secondary { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid #F0EDE8; }
         .info-key { font-size: 12px; color: rgba(255,255,255,0.4); }
         .info-key-secondary { font-size: 12px; color: #A0A0B0; }
         .info-val { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 500; }
@@ -295,14 +298,20 @@ def render_hero_new():
 def render_counselor_card(c: dict, score: float, is_primary=True):
     langs = c.get("counselor_language") or "—"
     mods = c.get("counselor_modality") or "—"
+    av = avatar_html(c['name'], c.get('image'), size=80, radius=16)
     if is_primary:
         st.markdown(
             f"""
             <div class="result-card primary">
-                <span class="result-card-badge badge-primary">Top Match</span>
-                <div class="compat-score">{score:.1f}%</div>
-                <div class="compat-label">Compatibility score</div>
-                <div class="counselor-name">{c['name']}</div>
+                <div class="card-header">
+                    <div class="card-header-photo">{av}</div>
+                    <div class="card-header-info">
+                        <span class="result-card-badge badge-primary">Top Match</span>
+                        <div class="counselor-name">{c['name']}</div>
+                        <div class="compat-score">{score:.1f}%</div>
+                        <div class="compat-label">Compatibility score</div>
+                    </div>
+                </div>
                 <div class="info-row"><span class="info-key">Experience</span><span class="info-val">{c['experience_years']} yrs</span></div>
                 <div class="info-row"><span class="info-key">Specialization</span><span class="info-val">{c['specialization']}</span></div>
                 <div class="info-row"><span class="info-key">Modality</span><span class="info-val">{mods}</span></div>
@@ -315,10 +324,15 @@ def render_counselor_card(c: dict, score: float, is_primary=True):
         st.markdown(
             f"""
             <div class="result-card">
-                <span class="result-card-badge badge-secondary">2nd Option</span>
-                <div class="compat-score-secondary">{score:.1f}%</div>
-                <div class="compat-label-secondary">Compatibility score</div>
-                <div class="counselor-name-secondary">{c['name']}</div>
+                <div class="card-header">
+                    <div class="card-header-photo">{av}</div>
+                    <div class="card-header-info">
+                        <span class="result-card-badge badge-secondary">2nd Option</span>
+                        <div class="counselor-name-secondary">{c['name']}</div>
+                        <div class="compat-score-secondary">{score:.1f}%</div>
+                        <div class="compat-label-secondary">Compatibility score</div>
+                    </div>
+                </div>
                 <div class="info-row-secondary"><span class="info-key-secondary">Experience</span><span class="info-val-secondary">{c['experience_years']} yrs</span></div>
                 <div class="info-row-secondary"><span class="info-key-secondary">Specialization</span><span class="info-val-secondary">{c['specialization']}</span></div>
                 <div class="info-row-secondary"><span class="info-key-secondary">Modality</span><span class="info-val-secondary">{mods}</span></div>
@@ -334,49 +348,11 @@ def render_counselor_card(c: dict, score: float, is_primary=True):
 
 
 # ── Profile dialog ─────────────────────────────────────────────────────────────
-_EXPERTISE_MAP = {
-    "Anxiety":    ["Anxiety Management", "Panic Attacks", "Worry Reduction", "Stress Relief", "Cognitive Reframing"],
-    "Depression": ["Low Mood Support", "Motivation Building", "Emotional Regulation", "Self-Esteem", "Behavioral Activation"],
-    "Stress":     ["Work-Life Balance", "Stress Coping", "Burnout Recovery", "Mindfulness", "Relaxation Techniques"],
-    "Trauma":     ["Trauma Processing", "PTSD Support", "Emotional Healing", "Resilience Building", "Safety Planning"],
-}
-_MODALITY_TAGS = {
-    "CBT": ["Cognitive Restructuring", "Thought Records"],
-    "Mindfulness": ["Present-Moment Awareness", "Breathing Techniques"],
-    "Humanistic": ["Person-Centered Growth", "Empathetic Support"],
-    "REBT": ["Belief Challenging", "Rational Thinking"],
-}
-_MODALITY_DESC = {
-    "CBT": "Cognitive Behavioral Therapy (CBT) helps you identify and change unhelpful thought patterns and behaviors. Through structured sessions, you'll learn to reframe negative thoughts and build healthier coping strategies.",
-    "Mindfulness": "Mindfulness-Based approaches teach you to observe your thoughts and feelings without judgment. You'll develop present-moment awareness and breathing techniques that reduce stress and increase emotional clarity.",
-    "Humanistic": "Humanistic counseling is a person-centered approach that focuses on your unique strengths and potential. Sessions are warm, empathetic, and non-judgmental — built around understanding your personal experience.",
-    "REBT": "Rational Emotive Behavior Therapy (REBT) helps you challenge irrational beliefs and replace them with healthier, rational thinking patterns, leading to more positive emotional outcomes.",
-}
-
-
-def _expertise_tags(spec, modality):
-    tags = list(_EXPERTISE_MAP.get(spec, []))
-    for tag in _MODALITY_TAGS.get(modality, []):
-        if tag not in tags:
-            tags.append(tag)
-    return tags[:6]
-
-
-def _helpful_thoughts(spec):
-    defaults = {
-        "Anxiety":    ["Am I doing enough?", "What if things go wrong?"],
-        "Depression": ["Why do I feel so empty?", "Will I ever feel better?"],
-        "Stress":     ["I can't keep up with everything.", "Why do I feel so overwhelmed?"],
-        "Trauma":     ["Why do I keep reliving this?", "Will I ever feel safe again?"],
-    }
-    return defaults.get(spec, ["How do I move forward?", "Is it okay to ask for help?"])
 
 
 @st.dialog("Counselor Profile", width="large")
 def show_profile_dialog(c: dict, score=None):
     name = c.get("name", "Counselor")
-    spec = c.get("specialization", "")
-    modality = c.get("counselor_modality", "")
     exp = c.get("experience_years", "—")
     lang = c.get("counselor_language", "—")
     about = c.get("about_me") or ""
@@ -384,10 +360,9 @@ def show_profile_dialog(c: dict, score=None):
     ht2 = c.get("helpful_thought_2") or ""
     ext = c.get("expertise_tags") or ""
 
-    pills = [t.strip() for t in ext.split(",") if t.strip()][:6] if ext.strip() else _expertise_tags(spec, modality)
-    thoughts = [t for t in [ht1, ht2] if t.strip()] or _helpful_thoughts(spec)
+    pills = [t.strip() for t in ext.split(",") if t.strip()][:6] if ext.strip() else []
+    thoughts = [t for t in [ht1, ht2] if t.strip()]
 
-    from frontend.utils.avatar import avatar_html
     av = avatar_html(name, c.get("image"), size=90, radius=16)
     st.markdown(
         f"""
@@ -413,33 +388,36 @@ def show_profile_dialog(c: dict, score=None):
         st.markdown('<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 8px;">About Me</p>', unsafe_allow_html=True)
         st.markdown(f'<p style="font-size:14px;color:#2D2D3F;line-height:1.7;margin-bottom:16px;">{about}</p>', unsafe_allow_html=True)
 
-    st.markdown('<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 10px;">Areas of Expertise</p>', unsafe_allow_html=True)
-    pill_html = "".join(
-        f'<span style="display:inline-block;background:#F3F0FF;color:#6D28D9;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin:0 6px 6px 0;">{p}</span>'
-        for p in pills
-    )
-    st.markdown(f'<div style="margin-bottom:16px;">{pill_html}</div>', unsafe_allow_html=True)
+    if pills:
+        st.markdown('<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 10px;">Areas of Expertise</p>', unsafe_allow_html=True)
+        pill_html = "".join(
+            f'<span style="display:inline-block;background:#F3F0FF;color:#6D28D9;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin:0 6px 6px 0;">{p}</span>'
+            for p in pills
+        )
+        st.markdown(f'<div style="margin-bottom:16px;">{pill_html}</div>', unsafe_allow_html=True)
 
-    thought_items = "".join(
-        f'<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">'
-        f'<span style="color:#8B5CF6;font-size:14px;flex-shrink:0;">&#10024;</span>'
-        f'<span style="font-size:14px;color:#2D2D3F;font-style:italic;font-weight:500;">"{t}"</span>'
-        f'</div>'
-        for t in thoughts
-    )
-    st.markdown(
-        f"""
-        <div style="background:#F8F5FF;border:1px solid #E9E1FF;border-radius:14px;padding:20px 22px;margin-bottom:16px;">
-            <p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 12px;">Thoughts I can help you with</p>
-            {thought_items}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    if thoughts:
+        thought_items = "".join(
+            f'<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">'
+            f'<span style="color:#8B5CF6;font-size:14px;flex-shrink:0;">&#10024;</span>'
+            f'<span style="font-size:14px;color:#2D2D3F;font-style:italic;font-weight:500;">"{t}"</span>'
+            f'</div>'
+            for t in thoughts
+        )
+        st.markdown(
+            f"""
+            <div style="background:#F8F5FF;border:1px solid #E9E1FF;border-radius:14px;padding:20px 22px;margin-bottom:16px;">
+                <p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 12px;">Thoughts I can help you with</p>
+                {thought_items}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    with st.expander("What approaches do I use?"):
-        desc = _MODALITY_DESC.get(modality, f"This counselor uses {modality} as their primary approach.")
-        st.markdown(f'<p style="font-size:14px;color:#2D2D3F;line-height:1.7;">{desc}</p>', unsafe_allow_html=True)
+    modality_desc = c.get("modality_desc") or ""
+    if modality_desc.strip():
+        with st.expander("What approaches do I use?"):
+            st.markdown(f'<p style="font-size:14px;color:#2D2D3F;line-height:1.7;">{modality_desc}</p>', unsafe_allow_html=True)
 
     st.write("")
 

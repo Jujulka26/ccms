@@ -77,6 +77,7 @@ def inject_styles():
             display: inline-block; font-size: 11px; font-weight: 700;
             letter-spacing: 0.05em; text-transform: uppercase;
             border-radius: 20px; padding: 3px 12px; margin-bottom: 14px;
+            align-self: flex-start;
         }
         .c-info { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; flex: 1; }
         .c-info-row {
