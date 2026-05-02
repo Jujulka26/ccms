@@ -31,7 +31,8 @@ def load_counselors() -> list[dict]:
     cursor = conn.cursor(dictionary=True)
     try:
         query = """
-        SELECT c.*, p.about_me, p.expertise_tags, p.helpful_thought_1, p.helpful_thought_2
+        SELECT c.*, p.about_me, p.expertise_tags, p.helpful_thought_1, p.helpful_thought_2,
+               p.modality_desc, p.image
         FROM tbl_counselor c
         LEFT JOIN tbl_counselor_profile p ON c.counselor_id = p.counselor_id
         """
@@ -63,6 +64,7 @@ def add_counselor(
     name, age, gender, ethnicity, specialization,
     counselor_language, counselor_modality, experience_years,
     about_me, expertise_tags, helpful_thought_1, helpful_thought_2,
+    modality_desc=None, image=None,
 ):
     conn = get_connection()
     cursor = conn.cursor()
@@ -76,9 +78,9 @@ def add_counselor(
         counselor_id = cursor.lastrowid
         cursor.execute(
             """INSERT INTO tbl_counselor_profile
-               (counselor_id, about_me, expertise_tags, helpful_thought_1, helpful_thought_2)
-               VALUES (%s, %s, %s, %s, %s)""",
-            (counselor_id, about_me, expertise_tags, helpful_thought_1, helpful_thought_2),
+               (counselor_id, about_me, expertise_tags, helpful_thought_1, helpful_thought_2, modality_desc, image)
+               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+            (counselor_id, about_me, expertise_tags, helpful_thought_1, helpful_thought_2, modality_desc, image),
         )
         conn.commit()
     except Exception:
@@ -93,6 +95,7 @@ def update_counselor(
     counselor_id, name, age, gender, ethnicity, specialization,
     counselor_language, counselor_modality, experience_years,
     about_me, expertise_tags, helpful_thought_1, helpful_thought_2,
+    modality_desc=None, image=None,
 ):
     conn = get_connection()
     cursor = conn.cursor()
@@ -108,16 +111,17 @@ def update_counselor(
         if cursor.fetchone():
             cursor.execute(
                 """UPDATE tbl_counselor_profile
-                   SET about_me=%s, expertise_tags=%s, helpful_thought_1=%s, helpful_thought_2=%s
+                   SET about_me=%s, expertise_tags=%s, helpful_thought_1=%s, helpful_thought_2=%s,
+                       modality_desc=%s, image=%s
                    WHERE counselor_id=%s""",
-                (about_me, expertise_tags, helpful_thought_1, helpful_thought_2, counselor_id),
+                (about_me, expertise_tags, helpful_thought_1, helpful_thought_2, modality_desc, image, counselor_id),
             )
         else:
             cursor.execute(
                 """INSERT INTO tbl_counselor_profile
-                   (counselor_id, about_me, expertise_tags, helpful_thought_1, helpful_thought_2)
-                   VALUES (%s, %s, %s, %s, %s)""",
-                (counselor_id, about_me, expertise_tags, helpful_thought_1, helpful_thought_2),
+                   (counselor_id, about_me, expertise_tags, helpful_thought_1, helpful_thought_2, modality_desc, image)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+                (counselor_id, about_me, expertise_tags, helpful_thought_1, helpful_thought_2, modality_desc, image),
             )
         conn.commit()
     except Exception:

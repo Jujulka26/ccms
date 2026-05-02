@@ -185,15 +185,15 @@ def show_counselors_page():
 
         spec_bg, spec_color = _SPEC_COLORS.get(spec, ("#F3F4F6", "#374151"))
         mod_icon = _MODALITY_ICONS.get(modality.split(",")[0].strip(), "💬")
-        avatar_url = f"https://api.dicebear.com/7.x/avataaars/svg?seed={name.replace(' ', '')}&backgroundColor=b6e3f4,c0aede,d1d4f9"
+        from frontend.utils.avatar import avatar_html
+        av = avatar_html(name, c.get("image"), size=56, radius=12)
 
         with cols[i % 3]:
             st.markdown(
                 f"""
                 <div class="c-card">
                     <div class="c-avatar-wrap">
-                        <img src="{avatar_url}" width="56" height="56"
-                             style="border-radius:12px; border:1.5px solid #EDE8E3; flex-shrink:0;" />
+                        {av}
                         <div>
                             <div class="c-name">{name}</div>
                             <div class="c-title">Licensed Counselor</div>

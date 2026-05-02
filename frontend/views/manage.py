@@ -1,6 +1,17 @@
 import streamlit as st
 import pandas as pd
+from pathlib import Path
 from frontend.utils.api import get_counselors, add_counselor, update_counselor, delete_counselor
+
+_IMG_DIR = Path(__file__).parent.parent.parent / "backend" / "static" / "counselors"
+
+
+def _save_image(file, name: str) -> str:
+    _IMG_DIR.mkdir(parents=True, exist_ok=True)
+    ext = Path(file.name).suffix.lower()
+    filename = name.strip().lower().replace(" ", "_") + ext
+    (_IMG_DIR / filename).write_bytes(file.read())
+    return filename
 
 
 def inject_styles():
@@ -143,43 +154,50 @@ def safe_str(val):
     return str(val)
 
 
-@st.dialog("Add new counselor")
+@st.dialog("Add new counselor", width="large")
 def render_add_counselor_dialog():
     with st.form("add_counselor_dialog_form"):
-        st.markdown("#### Basic Information")
-        col1, col2 = st.columns(2, gap="medium")
+        tab1, tab2 = st.tabs(["Basic Info", "Profile Details"])
 
-        with col1:
-            name = st.text_input("Name")
-            age = st.number_input("Age", 20, 70, 30)
-            gender = st.selectbox("Gender", GENDER_OPTIONS)
-            ethnicity = st.selectbox("Ethnicity", ETHNICITY_OPTIONS)
+        with tab1:
+            col1, col2 = st.columns(2, gap="medium")
+            with col1:
+                name = st.text_input("Name")
+                age = st.number_input("Age", 20, 70, 30)
+                gender = st.selectbox("Gender", GENDER_OPTIONS)
+                ethnicity = st.selectbox("Ethnicity", ETHNICITY_OPTIONS)
+            with col2:
+                counselor_language = st.multiselect("Language", LANGUAGE_OPTIONS, default=["Malay"], max_selections=2)
+                specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=SPECIALIZATION_OPTIONS.index("Stress"))
+                counselor_modality = st.selectbox("Modality", MODALITY_OPTIONS, index=MODALITY_OPTIONS.index("CBT"))
+                experience_years = st.number_input("Years of Experience", 0, 30, 3)
 
-        with col2:
-            counselor_language = st.multiselect("Counselor language", LANGUAGE_OPTIONS, default=["Malay"], max_selections=2)
-            specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=SPECIALIZATION_OPTIONS.index("Stress"))
-            counselor_modality = st.selectbox("Counselor modality", MODALITY_OPTIONS, index=MODALITY_OPTIONS.index("CBT"))
-            experience_years = st.number_input("Years of Experience", 0, 30, 3)
-
-        st.divider()
-        st.markdown("#### Profile Display Details")
-        about_me = st.text_area("About Me", placeholder="I am a dedicated counseling professional...")
-        expertise_tags = st.text_input("Expertise Tags", placeholder="e.g., Anxiety, Overthinking, Self Growth")
-
-        t_col1, t_col2 = st.columns(2)
-        with t_col1:
-            helpful_thought_1 = st.text_input("Helpful Thought 1", placeholder="e.g., Am I doing enough?")
-        with t_col2:
-            helpful_thought_2 = st.text_input("Helpful Thought 2", placeholder="e.g., Why do I feel so alone?")
+        with tab2:
+            profile_img = st.file_uploader("Profile Photo", type=["jpg", "jpeg", "png"])
+            about_me = st.text_area("About Me", placeholder="I am a dedicated counseling professional...", height=80)
+            modality_desc = st.text_area("Modality Description", placeholder="Describe what your counseling approach means in practice...", height=80)
+            expertise_tags = st.text_input("Expertise Tags", placeholder="e.g., Anxiety, Overthinking, Self Growth")
+            t_col1, t_col2 = st.columns(2)
+            with t_col1:
+                helpful_thought_1 = st.text_input("Helpful Thought 1", placeholder="e.g., Am I doing enough?")
+            with t_col2:
+                helpful_thought_2 = st.text_input("Helpful Thought 2", placeholder="e.g., Why do I feel so alone?")
 
         submitted = st.form_submit_button("Save counselor", use_container_width=True, type="primary")
 
     if submitted:
-        if not name.strip():
-            st.error("Name is required.")
-        elif not counselor_language:
-            st.error("Please select at least one language.")
+        missing = []
+        if not name.strip():                  missing.append("Name")
+        if not counselor_language:            missing.append("Language")
+        if not about_me.strip():              missing.append("About Me")
+        if not modality_desc.strip():         missing.append("Modality Description")
+        if not expertise_tags.strip():        missing.append("Expertise Tags")
+        if not helpful_thought_1.strip():     missing.append("Helpful Thought 1")
+        if not helpful_thought_2.strip():     missing.append("Helpful Thought 2")
+        if missing:
+            st.error(f"Please fill in: {', '.join(missing)}")
         else:
+            img_filename = _save_image(profile_img, name) if profile_img else None
             add_counselor({
                 "name": name, "age": age, "gender": gender, "ethnicity": ethnicity,
                 "specialization": specialization,
@@ -188,12 +206,14 @@ def render_add_counselor_dialog():
                 "experience_years": experience_years,
                 "about_me": about_me, "expertise_tags": expertise_tags,
                 "helpful_thought_1": helpful_thought_1, "helpful_thought_2": helpful_thought_2,
+                "modality_desc": modality_desc, "image": img_filename,
             })
+            get_counselors.clear()
             st.success("Counselor added successfully.")
             st.rerun()
 
 
-@st.dialog("Edit counselor")
+@st.dialog("Edit counselor", width="large")
 def render_edit_counselor_dialog():
     counselors = get_counselors()
     if not counselors:
@@ -214,43 +234,56 @@ def render_edit_counselor_dialog():
     modality_index = _option_index(MODALITY_OPTIONS, row.get("counselor_modality"))
 
     with st.form("edit_counselor_dialog_form"):
-        st.markdown("#### Basic Information")
-        edit_col1, edit_col2 = st.columns(2, gap="medium")
+        tab1, tab2 = st.tabs(["Basic Info", "Profile Details"])
 
-        with edit_col1:
-            edit_name = st.text_input("Name", value=row["name"])
-            edit_age = st.number_input("Age", 20, 70, int(row["age"]))
-            edit_gender = st.selectbox("Gender", GENDER_OPTIONS, index=gender_index)
-            edit_ethnicity = st.selectbox("Ethnicity", ETHNICITY_OPTIONS, index=ethnicity_index)
+        with tab1:
+            edit_col1, edit_col2 = st.columns(2, gap="medium")
+            with edit_col1:
+                edit_name = st.text_input("Name", value=row["name"])
+                edit_age = st.number_input("Age", 20, 70, int(row["age"]))
+                edit_gender = st.selectbox("Gender", GENDER_OPTIONS, index=gender_index)
+                edit_ethnicity = st.selectbox("Ethnicity", ETHNICITY_OPTIONS, index=ethnicity_index)
+            with edit_col2:
+                current_langs = [l.strip() for l in str(row.get("counselor_language", "")).split(",") if l.strip() in LANGUAGE_OPTIONS]
+                if not current_langs:
+                    current_langs = [LANGUAGE_OPTIONS[0]]
+                edit_language = st.multiselect("Language", LANGUAGE_OPTIONS, default=current_langs, max_selections=2)
+                edit_specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=specialization_index)
+                edit_modality = st.selectbox("Modality", MODALITY_OPTIONS, index=modality_index)
+                edit_year_exp = st.number_input("Years of Experience", 0, 30, int(row["experience_years"]))
 
-        with edit_col2:
-            current_langs = [l.strip() for l in str(row.get("counselor_language", "")).split(",") if l.strip() in LANGUAGE_OPTIONS]
-            if not current_langs:
-                current_langs = [LANGUAGE_OPTIONS[0]]
-            edit_language = st.multiselect("Counselor language", LANGUAGE_OPTIONS, default=current_langs, max_selections=2)
-            edit_specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=specialization_index)
-            edit_modality = st.selectbox("Counselor modality", MODALITY_OPTIONS, index=modality_index)
-            edit_year_exp = st.number_input("Years of Experience", 0, 30, int(row["experience_years"]))
-
-        st.divider()
-        st.markdown("#### Profile Display Details")
-        edit_about_me = st.text_area("About Me", value=safe_str(row.get("about_me")))
-        edit_expertise_tags = st.text_input("Expertise Tags", value=safe_str(row.get("expertise_tags")))
-
-        e_col1, e_col2 = st.columns(2)
-        with e_col1:
-            edit_thought_1 = st.text_input("Helpful Thought 1", value=safe_str(row.get("helpful_thought_1")))
-        with e_col2:
-            edit_thought_2 = st.text_input("Helpful Thought 2", value=safe_str(row.get("helpful_thought_2")))
+        with tab2:
+            current_img = safe_str(row.get("image"))
+            if current_img:
+                st.caption(f"Current photo: `{current_img}` — upload below to replace")
+            edit_profile_img = st.file_uploader("Profile Photo", type=["jpg", "jpeg", "png"])
+            edit_about_me = st.text_area("About Me", value=safe_str(row.get("about_me")), height=80)
+            edit_modality_desc = st.text_area("Modality Description", value=safe_str(row.get("modality_desc")), height=80)
+            edit_expertise_tags = st.text_input("Expertise Tags", value=safe_str(row.get("expertise_tags")))
+            e_col1, e_col2 = st.columns(2)
+            with e_col1:
+                edit_thought_1 = st.text_input("Helpful Thought 1", value=safe_str(row.get("helpful_thought_1")))
+            with e_col2:
+                edit_thought_2 = st.text_input("Helpful Thought 2", value=safe_str(row.get("helpful_thought_2")))
 
         submitted = st.form_submit_button("Update counselor", use_container_width=True, type="primary")
 
     if submitted:
-        if not edit_name.strip():
-            st.error("Name is required.")
-        elif not edit_language:
-            st.error("Please select at least one language.")
+        missing = []
+        if not edit_name.strip():             missing.append("Name")
+        if not edit_language:                 missing.append("Language")
+        if not edit_about_me.strip():         missing.append("About Me")
+        if not edit_modality_desc.strip():    missing.append("Modality Description")
+        if not edit_expertise_tags.strip():   missing.append("Expertise Tags")
+        if not edit_thought_1.strip():        missing.append("Helpful Thought 1")
+        if not edit_thought_2.strip():        missing.append("Helpful Thought 2")
+        if missing:
+            st.error(f"Please fill in: {', '.join(missing)}")
         else:
+            if edit_profile_img:
+                img_filename = _save_image(edit_profile_img, edit_name)
+            else:
+                img_filename = safe_str(row.get("image")) or None
             update_counselor(int(selected_id), {
                 "name": edit_name, "age": edit_age, "gender": edit_gender, "ethnicity": edit_ethnicity,
                 "specialization": edit_specialization,
@@ -259,7 +292,9 @@ def render_edit_counselor_dialog():
                 "experience_years": edit_year_exp,
                 "about_me": edit_about_me, "expertise_tags": edit_expertise_tags,
                 "helpful_thought_1": edit_thought_1, "helpful_thought_2": edit_thought_2,
+                "modality_desc": edit_modality_desc, "image": img_filename,
             })
+            get_counselors.clear()
             st.success(f"Counselor {int(selected_id)} updated successfully.")
             st.rerun()
 
@@ -283,6 +318,7 @@ def render_delete_counselor_dialog():
 
     if st.button("Delete counselor", type="primary", use_container_width=True, disabled=not confirm_delete):
         delete_counselor(int(selected_id))
+        get_counselors.clear()
         st.success(f"Counselor {int(selected_id)} deleted successfully.")
         st.rerun()
 

@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Environment
+.env
+.venv/
+venv/
+
+# ML model (large binary — commit separately if needed)
+*.pkl
+
+# Counselor images (user-uploaded content)
+backend/static/counselors/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -161,38 +161,43 @@ def engineer_features_from_df(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+_shap_explainer = None
+
+
+def _get_shap_explainer():
+    global _shap_explainer
+    if _shap_explainer is None:
+        import shap
+        pipeline, _ = load_resources()
+        _shap_explainer = shap.TreeExplainer(pipeline.named_steps['model'])
+    return _shap_explainer
+
+
 def compute_shap(features: dict) -> dict:
     try:
         import shap
     except ImportError:
         return {"error": "SHAP is not installed. Run: pip install shap", "shap_values": [], "base_value": 0.0, "feature_names": [], "feature_values": []}
 
-    model, df_ref = load_resources()
-
     try:
-        background_df = engineer_features_from_df(df_ref)
-        if len(background_df) < 10:
-            return {"error": "Insufficient background data for SHAP (need ≥ 10 rows)", "shap_values": [], "base_value": 0.0, "feature_names": [], "feature_values": []}
-        if len(background_df) > 100:
-            background_df = background_df.sample(100, random_state=42)
+        pipeline, _ = load_resources()
+        explainer = _get_shap_explainer()
 
         feature_values = [features.get(f, 0.0) for f in FEATURE_ORDER]
         x_row = pd.DataFrame([{f: features.get(f, 0.0) for f in FEATURE_ORDER}])
 
-        def predict_positive(data):
-            return model.predict_proba(pd.DataFrame(data, columns=FEATURE_ORDER))[:, 1]
-
-        explainer = shap.KernelExplainer(predict_positive, background_df[FEATURE_ORDER].values, link="identity")
-        shap_vals = explainer.shap_values(x_row[FEATURE_ORDER].values, nsamples=200)
+        # Scale features the same way the model was trained
+        x_scaled = pipeline.named_steps['prep'].transform(x_row[FEATURE_ORDER])
+        shap_vals = explainer.shap_values(x_scaled)
 
         if isinstance(shap_vals, list):
-            row_contrib = np.array(shap_vals[0]).flatten().tolist()
+            row_contrib = np.array(shap_vals[1]).flatten().tolist()
         else:
             row_contrib = np.array(shap_vals).flatten().tolist()
 
         expected = explainer.expected_value
         if isinstance(expected, (list, np.ndarray)):
-            base_value = float(np.array(expected).flat[0])
+            base_value = float(np.array(expected).flat[-1])
         else:
             base_value = float(expected)
 

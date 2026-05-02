@@ -16,6 +16,8 @@ class CounselorBase(BaseModel):
     expertise_tags: Optional[str] = None
     helpful_thought_1: Optional[str] = None
     helpful_thought_2: Optional[str] = None
+    modality_desc: Optional[str] = None
+    image: Optional[str] = None
 
 
 class CounselorCreate(CounselorBase):

@@ -1,5 +1,4 @@
 import streamlit as st
-
 from frontend.views.manage import show_manage_page
 from frontend.views.matching import show_matching_page
 from frontend.views.model_performance import show_model_performance_page
@@ -459,13 +458,13 @@ if role == "admin":
         '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Admin Navigation</div>',
         unsafe_allow_html=True
     )
-    page = st.sidebar.radio("Navigation", ["Client-Counselor Matching", "Counselor Management", "Review Requests", "Model Performance"], label_visibility="collapsed")
+    page = st.sidebar.radio("Navigation", ["Match a Client", "Counselor Management", "Our Counselors", "Review Requests", "Model Performance"], label_visibility="collapsed")
 else:
     st.sidebar.markdown(
         '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Client Navigation</div>',
         unsafe_allow_html=True
     )
-    page = st.sidebar.radio("Navigation", ["Find a Counselor", "Our Counselors", "Chat with Bot", "About Us", "Frequently Asked Questions", "Contact Us", "Privacy Policy"], label_visibility="collapsed")
+    page = st.sidebar.radio("Navigation", ["Find a Counselor", "Our Counselors", "Chat with Mira", "Frequently Asked Questions", "About Us", "Contact Us", "Privacy Policy"], label_visibility="collapsed")
 
 # Invisible spacer — pushes the footer to the bottom of the sidebar
 st.sidebar.markdown('<div class="sidebar-spacer" style="flex-grow: 1; min-height: 50px;"></div>', unsafe_allow_html=True)
@@ -480,7 +479,7 @@ if st.sidebar.button("Log out", use_container_width=True):
     _logout_dialog()
 
 
-if page in ["Client-Counselor Matching", "Find a Counselor"]:
+if page in ["Match a Client", "Find a Counselor"]:
     show_matching_page()
 elif page == "Counselor Management":
     show_manage_page()
@@ -492,7 +491,7 @@ elif page == "Our Counselors":
     show_counselors_page()
 elif page == "Frequently Asked Questions":
     show_faq_page()
-elif page == "Chat with Bot":
+elif page == "Chat with Mira":
     show_chatbot_page()
 elif page == "About Us":
     show_aboutus_page()

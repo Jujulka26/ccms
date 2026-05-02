@@ -84,8 +84,8 @@ def inject_styles():
         }
         [data-testid="block-container"] [data-baseweb="radio"] { padding: 9px 22px !important; background: #F7F5F0 !important; border: 1.5px solid #E5E2DC !important; border-radius: 30px !important; cursor: pointer !important; transition: background 0.18s ease, border-color 0.18s ease !important; margin-right: 2px !important; }
         [data-testid="block-container"] [data-baseweb="radio"]:hover { border-color: #8B5CF6 !important; background: rgba(139,92,246,0.06) !important; }
-        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) { background: rgba(139,92,246,0.12) !important; border-color: #8B5CF6 !important; }
-        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) p { color: #6D28D9 !important; font-weight: 700 !important; }
+        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) { background: rgba(249,115,22,0.08) !important; border-color: #F97316 !important; }
+        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) p { font-weight: 700 !important; }
         [data-testid="block-container"] [data-baseweb="radio"] p { font-size: 14px !important; margin: 0 !important; color: #4A4A5A !important; font-weight: 500 !important; }
 
         [data-testid="block-container"] div[data-testid="stButton"] button { border-radius: 12px !important; font-family: 'DM Sans', sans-serif !important; font-size: 15px !important; font-weight: 600 !important; padding: 10px 24px !important; transition: all 0.2s; width: 100% !important; }
@@ -387,11 +387,12 @@ def show_profile_dialog(c: dict, score=None):
     pills = [t.strip() for t in ext.split(",") if t.strip()][:6] if ext.strip() else _expertise_tags(spec, modality)
     thoughts = [t for t in [ht1, ht2] if t.strip()] or _helpful_thoughts(spec)
 
-    avatar_url = f"https://api.dicebear.com/7.x/avataaars/svg?seed={name.replace(' ', '')}&backgroundColor=b6e3f4,c0aede,d1d4f9"
+    from frontend.utils.avatar import avatar_html
+    av = avatar_html(name, c.get("image"), size=90, radius=16)
     st.markdown(
         f"""
         <div style="display:flex;align-items:center;gap:24px;margin-bottom:20px;">
-            <img src="{avatar_url}" width="90" height="90" style="border-radius:16px;border:2px solid #EDE8E3;flex-shrink:0;" />
+            {av}
             <div style="flex:1;">
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
                     <span style="font-family:'DM Serif Display',serif;font-size:22px;color:#1A1A2E;">{name}</span>
@@ -567,6 +568,43 @@ def show_matching_page():
     render_hero_new()
     st.markdown('<div class="form-card">', unsafe_allow_html=True)
 
+    components.html(
+        """
+        <script>
+        (function() {
+            var doc = window.parent.document;
+            function applyOrange() {
+                doc.querySelectorAll('[data-baseweb="radio"]').forEach(function(pill) {
+                    if (pill.closest('[data-testid="stSidebar"]')) return;
+                    var input = pill.querySelector('input[type="radio"]');
+                    if (!input) return;
+                    var outerRing = pill.children[0];
+                    var innerDot  = outerRing ? outerRing.children[0] : null;
+                    if (input.checked) {
+                        if (outerRing) {
+                            outerRing.style.setProperty('border-color', '#F97316', 'important');
+                            outerRing.style.setProperty('background-color', '#F97316', 'important');
+                        }
+                        if (innerDot) innerDot.style.setProperty('background-color', '#FFFFFF', 'important');
+                    } else {
+                        if (outerRing) {
+                            outerRing.style.removeProperty('border-color');
+                            outerRing.style.removeProperty('background-color');
+                        }
+                        if (innerDot) innerDot.style.removeProperty('background-color');
+                    }
+                });
+            }
+            applyOrange();
+            [150, 400, 800].forEach(function(t) { setTimeout(applyOrange, t); });
+            new MutationObserver(applyOrange).observe(doc.body, { subtree: true, childList: true, attributes: true });
+            setInterval(applyOrange, 300);
+        })();
+        </script>
+        """,
+        height=0, width=0,
+    )
+
     # ── STEP 0: Welcome ──────────────────────────────────────────────────────
     if st.session_state.quiz_step == 0:
         st.markdown("<h3 style='color: #1A1A2E; text-align: center; margin-bottom: 10px; font-family: \"DM Serif Display\", serif;'>Let's find someone who truly gets you.</h3>", unsafe_allow_html=True)
@@ -610,7 +648,9 @@ def show_matching_page():
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         st.selectbox("What is your cultural background or ethnicity?", ref["client_ethnicity"], key="client_ethnicity")
         st.markdown("<br>", unsafe_allow_html=True)
-        _, col2 = st.columns([1, 1])
+        col1, col2 = st.columns([1, 1])
+        col1.button("← Back", use_container_width=True,
+                    on_click=lambda: st.session_state.update(quiz_step=0))
         col2.button("Next →", use_container_width=True, type="primary",
                     on_click=lambda: st.session_state.update(quiz_step=2))
 
@@ -772,44 +812,6 @@ def show_matching_page():
                 render_counselor_card(second_c, second_c["compatibility_score"], is_primary=False)
             else:
                 st.info("No second match available.")
-
-        components.html(
-            """
-            <script>
-            function sp(el, prop, val) { el.style.setProperty(prop, val, 'important'); }
-            function styleVPButtons() {
-                var doc = window.parent.document;
-                var cols = doc.querySelectorAll('[data-testid="column"]');
-                cols.forEach(function(col) {
-                    var card = col.querySelector('.result-card');
-                    if (!card) return;
-                    var isPrimary = card.classList.contains('primary');
-                    var bg = isPrimary ? '#22223D' : '#FAFAF8';
-                    var color = isPrimary ? '#A78BFA' : '#6D28D9';
-                    var hoverBg = isPrimary ? '#2A2A4A' : '#F0EDE8';
-                    var hoverColor = isPrimary ? '#C4B5FD' : '#5B21B6';
-                    col.querySelectorAll('[data-testid="element-container"]').forEach(function(ec) {
-                        sp(ec, 'margin-top', '0'); sp(ec, 'padding-top', '0'); sp(ec, 'margin-bottom', '0'); sp(ec, 'padding-bottom', '0');
-                    });
-                    col.querySelectorAll('[data-testid="stVerticalBlock"]').forEach(function(vb) { sp(vb, 'gap', '0'); });
-                    col.querySelectorAll('[data-testid="stButton"]').forEach(function(wrapper) {
-                        sp(wrapper, 'width', '100%'); sp(wrapper, 'margin', '0'); sp(wrapper, 'padding', '0');
-                        var btn = wrapper.querySelector('button');
-                        if (!btn) return;
-                        sp(btn, 'background', bg); sp(btn, 'color', color); sp(btn, 'border-radius', '14px');
-                        sp(btn, 'border', 'none'); sp(btn, 'width', '100%'); sp(btn, 'padding', '13px 24px');
-                        sp(btn, 'font-size', '12px'); sp(btn, 'font-weight', '600'); sp(btn, 'letter-spacing', '0.05em');
-                        sp(btn, 'text-transform', 'uppercase'); sp(btn, 'box-shadow', 'none'); sp(btn, 'transform', 'none');
-                        btn.onmouseenter = function() { sp(btn, 'background', hoverBg); sp(btn, 'color', hoverColor); };
-                        btn.onmouseleave = function() { sp(btn, 'background', bg); sp(btn, 'color', color); };
-                    });
-                });
-            }
-            styleVPButtons(); setTimeout(styleVPButtons, 150); setTimeout(styleVPButtons, 500);
-            </script>
-            """,
-            height=0, width=0,
-        )
 
         st.write("")
 

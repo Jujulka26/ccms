@@ -21,6 +21,7 @@ def create_counselor(payload: CounselorCreate):
             payload.specialization, payload.counselor_language, payload.counselor_modality,
             payload.experience_years, payload.about_me, payload.expertise_tags,
             payload.helpful_thought_1, payload.helpful_thought_2,
+            payload.modality_desc, payload.image,
         )
         return {"message": "Counselor added successfully."}
     except Exception as e:
@@ -35,6 +36,7 @@ def update_counselor(counselor_id: int, payload: CounselorUpdate):
             payload.specialization, payload.counselor_language, payload.counselor_modality,
             payload.experience_years, payload.about_me, payload.expertise_tags,
             payload.helpful_thought_1, payload.helpful_thought_2,
+            payload.modality_desc, payload.image,
         )
         return {"message": f"Counselor {counselor_id} updated successfully."}
     except Exception as e:
