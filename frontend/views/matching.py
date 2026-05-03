@@ -94,8 +94,12 @@ def inject_styles():
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover { box-shadow: 0 6px 20px rgba(124,58,237,0.45) !important; transform: translateY(-1px); }
 
         .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
-        .result-card { position: relative; background: #FFFFFF; border-radius: 20px; padding: 28px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; }
+        .result-card { position: relative; background: #FFFFFF; border-radius: 20px; padding: 28px 28px 0; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; overflow: hidden; }
         .result-card.primary { background: #1A1A2E; border-color: transparent; }
+        .card-view-btn { display: block; width: calc(100% + 56px); margin: 24px -28px 0; padding: 14px 28px; background: transparent; border: none; border-top: 1px solid rgba(0,0,0,0.07); color: #7C3AED; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: center; font-family: 'DM Sans', sans-serif; transition: background 0.15s, color 0.15s; }
+        .result-card.primary .card-view-btn { border-top-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.55); }
+        .card-view-btn:hover { background: rgba(124,58,237,0.07); color: #5B21B6; }
+        .result-card.primary .card-view-btn:hover { background: rgba(255,255,255,0.06); color: #FFFFFF; }
         .result-card-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 20px; padding: 4px 12px; display: inline-block; margin-bottom: 0; align-self: flex-start; }
         .badge-primary { background: rgba(139,92,246,0.2); color: #A78BFA; }
         .badge-secondary { background: #F0EDE8; color: #8B8B9A; }
@@ -316,6 +320,7 @@ def render_counselor_card(c: dict, score: float, is_primary=True):
                 <div class="info-row"><span class="info-key">Specialization</span><span class="info-val">{c['specialization']}</span></div>
                 <div class="info-row"><span class="info-key">Modality</span><span class="info-val">{mods}</span></div>
                 <div class="info-row" style="border:none"><span class="info-key">Language</span><span class="info-val">{langs}</span></div>
+                <button class="card-view-btn">VIEW FULL PROFILE →</button>
             </div>
             """,
             unsafe_allow_html=True,
@@ -337,13 +342,14 @@ def render_counselor_card(c: dict, score: float, is_primary=True):
                 <div class="info-row-secondary"><span class="info-key-secondary">Specialization</span><span class="info-val-secondary">{c['specialization']}</span></div>
                 <div class="info-row-secondary"><span class="info-key-secondary">Modality</span><span class="info-val-secondary">{mods}</span></div>
                 <div class="info-row-secondary" style="border:none"><span class="info-key-secondary">Language</span><span class="info-val-secondary">{langs}</span></div>
+                <button class="card-view-btn">VIEW FULL PROFILE →</button>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
     card_id = f"{int(c.get('counselor_id', 0))}_{'p' if is_primary else 's'}"
-    if st.button("View Full Profile", key=f"vp_{card_id}", use_container_width=True, type="primary" if is_primary else "secondary"):
+    if st.button("View Full Profile", key=f"vp_{card_id}", use_container_width=True, type="secondary"):
         show_profile_dialog(c, score)
 
 
@@ -790,6 +796,47 @@ def show_matching_page():
                 render_counselor_card(second_c, second_c["compatibility_score"], is_primary=False)
             else:
                 st.info("No second match available.")
+
+        components.html(
+            """
+            <script>
+            (function() {
+                function run() {
+                    var doc = window.parent.document;
+                    doc.querySelectorAll('.card-view-btn').forEach(function(btn) {
+                        if (btn._ready) return;
+
+                        var col = btn.closest('[data-testid="column"]');
+                        if (!col) return;
+
+                        var stBtnWrap = col.querySelector('[data-testid="stButton"]');
+                        if (!stBtnWrap) return;
+
+                        // Hide the native button — position off-screen so JS .click() still works
+                        stBtnWrap.style.cssText = [
+                            'position:fixed', 'left:-9999px', 'width:1px',
+                            'height:1px', 'overflow:hidden', 'pointer-events:none',
+                            'opacity:0'
+                        ].join('!important;') + '!important';
+
+                        btn._ready = true;
+                        btn.addEventListener('click', function() {
+                            var native = stBtnWrap.querySelector('button');
+                            if (native) native.click();
+                        });
+                    });
+                }
+                // Run now, after short delays, and on every DOM mutation
+                [0, 150, 400, 800].forEach(function(t) { setTimeout(run, t); });
+                new MutationObserver(run).observe(
+                    window.parent.document.body,
+                    { subtree: true, childList: true }
+                );
+            })();
+            </script>
+            """,
+            height=0, width=0,
+        )
 
         st.write("")
 

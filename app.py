@@ -441,11 +441,28 @@ if role is None:
 
 @st.dialog("Confirm logout")
 def _logout_dialog():
+    # Inject red style for the logout button — avoids type="primary" so the
+    # global primaryColor="#7C3AED" theme never touches this button.
+    st.markdown("""<style>
+    div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] > div:first-child button,
+    div[data-testid="stModal"] div[data-testid="stHorizontalBlock"] > div:first-child button {
+        background-color: #EF4444 !important;
+        background-image: none !important;
+        color: #FFFFFF !important;
+        border: 1px solid #EF4444 !important;
+        font-weight: 600 !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] > div:first-child button:hover,
+    div[data-testid="stModal"] div[data-testid="stHorizontalBlock"] > div:first-child button:hover {
+        background-color: #DC2626 !important;
+        border-color: #DC2626 !important;
+    }
+    </style>""", unsafe_allow_html=True)
     st.markdown("Are you sure you want to log out?")
     st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("Log out", type="primary", use_container_width=True):
+        if st.button("Log out", use_container_width=True):
             del st.session_state["role"]
             st.rerun()
     with col2:
