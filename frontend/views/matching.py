@@ -805,25 +805,25 @@ def show_matching_page():
                     var doc = window.parent.document;
                     doc.querySelectorAll('.card-view-btn').forEach(function(btn) {
                         if (btn._ready) return;
-
-                        var col = btn.closest('[data-testid="column"]');
-                        if (!col) return;
-
-                        var stBtnWrap = col.querySelector('[data-testid="stButton"]');
-                        if (!stBtnWrap) return;
-
-                        // Hide the native button — position off-screen so JS .click() still works
-                        stBtnWrap.style.cssText = [
-                            'position:fixed', 'left:-9999px', 'width:1px',
-                            'height:1px', 'overflow:hidden', 'pointer-events:none',
-                            'opacity:0'
-                        ].join('!important;') + '!important';
-
-                        btn._ready = true;
-                        btn.addEventListener('click', function() {
-                            var native = stBtnWrap.querySelector('button');
-                            if (native) native.click();
-                        });
+                        var container = btn.closest('[data-testid="stElementContainer"]');
+                        if (!container) return;
+                        var sibling = container.nextElementSibling;
+                        while (sibling) {
+                            var stBtn = sibling.querySelector('[data-testid="stButton"] button');
+                            if (stBtn) {
+                                sibling.style.cssText = [
+                                    'position:fixed', 'left:-9999px', 'width:1px',
+                                    'height:1px', 'overflow:hidden', 'pointer-events:none',
+                                    'opacity:0'
+                                ].join('!important;') + '!important';
+                                btn._ready = true;
+                                (function(b, nb) {
+                                    b.addEventListener('click', function() { nb.click(); });
+                                })(btn, stBtn);
+                                break;
+                            }
+                            sibling = sibling.nextElementSibling;
+                        }
                     });
                 }
                 // Run now, after short delays, and on every DOM mutation

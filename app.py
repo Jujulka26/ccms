@@ -217,11 +217,19 @@ def inject_app_styles():
             font-family: 'DM Sans', sans-serif;
         }
 
-        /* ── Nav radio group spacing ──────────────────────────────────── */
-        section[data-testid="stSidebar"] div[role="radiogroup"] {
-            gap: 6px;
-            display: flex;
-            flex-direction: column;
+        /* ── Nav radio group — fill full sidebar width ────────────────── */
+        /* Streamlit gives the radio stElementContainer width="fit-content" (confirmed via DOM).
+           All other sidebar elements get width="100%". Target it directly. */
+        section[data-testid="stSidebar"] [data-testid="stElementContainer"][width="fit-content"],
+        section[data-testid="stSidebar"] [data-testid="stRadio"],
+        section[data-testid="stSidebar"] [role="radiogroup"] {
+            width: 100% !important;
+        }
+        section[data-testid="stSidebar"] [role="radiogroup"] {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 6px !important;
         }
 
         /* Hide the radio bullet — Streamlit renders this as label[data-baseweb="radio"]

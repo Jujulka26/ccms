@@ -1,6 +1,7 @@
 import base64
 import os
 import streamlit as st
+import streamlit.components.v1 as components
 
 from frontend.utils.api import get_counselors
 from frontend.views.matching import show_profile_dialog
@@ -56,15 +57,26 @@ def inject_styles():
 
         .c-card {
             background: #FFFFFF; border-radius: 20px;
-            padding: 24px; border: 1px solid rgba(0,0,0,0.06);
-            height: 100%; display: flex; flex-direction: column;
-            transition: all 0.2s ease;
+            padding: 24px 24px 0; border: 1px solid rgba(0,0,0,0.06);
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .c-card:hover {
             border-color: rgba(139,92,246,0.3);
-            box-shadow: 0 8px 24px rgba(139,92,246,0.1);
-            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(139,92,246,0.1);
         }
+        .card-view-btn-dir {
+            display: block; width: calc(100% + 48px); margin: 18px -24px 0;
+            padding: 14px 24px; background: transparent; border: none;
+            border-top: 1px solid rgba(0,0,0,0.07);
+            color: #7C3AED; font-size: 12px; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            cursor: pointer; text-align: center;
+            font-family: 'DM Sans', sans-serif;
+            transition: background 0.15s, color 0.15s;
+        }
+        .card-view-btn-dir:hover { background: rgba(124,58,237,0.07); color: #5B21B6; }
         .c-avatar-wrap {
             display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
         }
@@ -207,6 +219,7 @@ def show_counselors_page():
                         <div class="c-info-row"><span class="c-info-icon">{mod_icon}</span>{modality}</div>
                         <div class="c-info-row"><span class="c-info-icon">💬</span>{lang}</div>
                     </div>
+                    <button class="card-view-btn-dir">VIEW FULL PROFILE →</button>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -214,3 +227,43 @@ def show_counselors_page():
             if st.button("View Full Profile", key=f"dir_vp_{c.get('counselor_id')}_{i}",
                          use_container_width=True):
                 show_profile_dialog(c)
+
+    components.html(
+        """
+        <script>
+        (function() {
+            function run() {
+                var doc = window.parent.document;
+                doc.querySelectorAll('.card-view-btn-dir').forEach(function(btn) {
+                    if (btn._ready) return;
+                    var container = btn.closest('[data-testid="stElementContainer"]');
+                    if (!container) return;
+                    var sibling = container.nextElementSibling;
+                    while (sibling) {
+                        var stBtn = sibling.querySelector('[data-testid="stButton"] button');
+                        if (stBtn) {
+                            sibling.style.cssText = [
+                                'position:fixed', 'left:-9999px', 'width:1px',
+                                'height:1px', 'overflow:hidden', 'pointer-events:none',
+                                'opacity:0'
+                            ].join('!important;') + '!important';
+                            btn._ready = true;
+                            (function(b, nb) {
+                                b.addEventListener('click', function() { nb.click(); });
+                            })(btn, stBtn);
+                            break;
+                        }
+                        sibling = sibling.nextElementSibling;
+                    }
+                });
+            }
+            [0, 150, 400, 800].forEach(function(t) { setTimeout(run, t); });
+            new MutationObserver(run).observe(
+                window.parent.document.body,
+                { subtree: true, childList: true }
+            );
+        })();
+        </script>
+        """,
+        height=0, width=0,
+    )
