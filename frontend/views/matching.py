@@ -95,6 +95,12 @@ def inject_styles():
 
         .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
         .result-card { position: relative; background: #FFFFFF; border-radius: 20px; padding: 28px 28px 0; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; overflow: hidden; }
+        .dismiss-x { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s ease; line-height: 1; z-index: 10; }
+        .dismiss-x:hover { background: rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.5); color: #EF4444; }
+        .dismiss-x-light { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1); color: #B0B0C0; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s ease; line-height: 1; z-index: 10; }
+        .dismiss-x-light:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.35); color: #EF4444; }
+        .st-key-dismiss_0, .st-key-dismiss_1 { display: none !important; }
+        [class*="st-key-vp_"] { display: none !important; }
         .result-card.primary { background: #1A1A2E; border-color: transparent; }
         .card-view-btn { display: block; width: calc(100% + 56px); margin: 24px -28px 0; padding: 14px 28px; background: transparent; border: none; border-top: 1px solid rgba(0,0,0,0.07); color: #7C3AED; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: center; font-family: 'DM Sans', sans-serif; transition: background 0.15s, color 0.15s; }
         .result-card.primary .card-view-btn { border-top-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.55); }
@@ -299,14 +305,18 @@ def render_hero_new():
     )
 
 
-def render_counselor_card(c: dict, score: float, is_primary=True):
+def render_counselor_card(c: dict, score: float, is_primary=True, dismiss_key: str | None = None):
     langs = c.get("counselor_language") or "—"
     mods = c.get("counselor_modality") or "—"
     av = avatar_html(c['name'], c.get('image'), size=80, radius=16)
+    dismiss_btn_html = f'<div class="dismiss-x" data-dismiss="{dismiss_key}">✕</div>' if dismiss_key else ""
+    dismiss_btn_light = f'<div class="dismiss-x-light" data-dismiss="{dismiss_key}">✕</div>' if dismiss_key else ""
+
     if is_primary:
         st.markdown(
             f"""
             <div class="result-card primary">
+                {dismiss_btn_html}
                 <div class="card-header">
                     <div class="card-header-photo">{av}</div>
                     <div class="card-header-info">
@@ -329,6 +339,7 @@ def render_counselor_card(c: dict, score: float, is_primary=True):
         st.markdown(
             f"""
             <div class="result-card">
+                {dismiss_btn_light}
                 <div class="card-header">
                     <div class="card-header-photo">{av}</div>
                     <div class="card-header-info">
@@ -356,74 +367,94 @@ def render_counselor_card(c: dict, score: float, is_primary=True):
 # ── Profile dialog ─────────────────────────────────────────────────────────────
 
 
-@st.dialog("Counselor Profile", width="large")
+@st.dialog("Profile")
 def show_profile_dialog(c: dict, score=None):
-    name = c.get("name", "Counselor")
-    exp = c.get("experience_years", "—")
-    lang = c.get("counselor_language", "—")
-    about = c.get("about_me") or ""
-    ht1 = c.get("helpful_thought_1") or ""
-    ht2 = c.get("helpful_thought_2") or ""
-    ext = c.get("expertise_tags") or ""
+    name         = c.get("name", "Counselor")
+    exp          = c.get("experience_years", "—")
+    lang         = c.get("counselor_language", "—")
+    spec         = c.get("specialization", "")
+    modality     = c.get("counselor_modality", "—")
+    about        = c.get("about_me") or ""
+    ht1          = c.get("helpful_thought_1") or ""
+    ht2          = c.get("helpful_thought_2") or ""
+    ext          = c.get("expertise_tags") or ""
+    modality_desc = c.get("modality_desc") or ""
 
-    pills = [t.strip() for t in ext.split(",") if t.strip()][:6] if ext.strip() else []
+    pills    = [t.strip() for t in ext.split(",") if t.strip()][:6] if ext.strip() else []
     thoughts = [t for t in [ht1, ht2] if t.strip()]
+    av       = avatar_html(name, c.get("image"), size=84, radius=16)
 
-    av = avatar_html(name, c.get("image"), size=90, radius=16)
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+    .prof-header { display:flex; align-items:center; gap:20px; margin-bottom:16px; }
+    .prof-name { font-family:'DM Serif Display',serif; font-size:22px; color:#1A1A2E; margin:0 0 3px; line-height:1.2; }
+    .prof-role { font-size:12px; color:#8B5CF6; font-weight:600; margin:0 0 7px; }
+    .prof-meta { display:flex; flex-wrap:wrap; column-gap:14px; row-gap:3px; }
+    .prof-meta-item { font-size:12.5px; color:#5A5A6E; }
+    .prof-meta-score { font-size:18px; color:#7C3AED; font-weight:700; }
+    .prof-score-chip { display:inline-flex; align-items:center; background:#F3F0FF; color:#6D28D9; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:2px 10px; border-radius:20px; border:1px solid rgba(109,40,217,0.2); margin-bottom:6px; }
+    .prof-rule { border:none; border-top:1px solid #EBEBEB; margin:14px 0 16px; }
+    .prof-label { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#8B5CF6; margin:0 0 8px; }
+    .prof-section { margin-bottom:18px; }
+    .prof-about { font-size:12.5px; color:#2D2D3F; line-height:1.75; margin:0; }
+    .prof-pills { display:flex; flex-wrap:wrap; gap:6px; }
+    .prof-pill { background:#F3F0FF; color:#6D28D9; font-size:12px; font-weight:600; padding:4px 12px; border-radius:20px; border:1px solid rgba(109,40,217,0.15); }
+    .prof-thought { font-size:13.5px; color:#4A4A5A; font-style:italic; line-height:1.65; padding-left:12px; border-left:2px solid #D8D0F5; margin-bottom:8px; }
+    .prof-thought:last-child { margin-bottom:0; }
+    div[data-testid="stExpander"] { background:#FFFFFF !important; border:1px solid #EBEBEB !important; border-radius:12px !important; box-shadow:none !important; margin-bottom:0 !important; }
+    div[data-testid="stExpander"] summary { background:#FFFFFF !important; font-size:13px !important; font-weight:600 !important; color:#4A4A5A !important; text-transform:none !important; letter-spacing:0 !important; padding:12px 16px !important; border-radius:12px !important; }
+    div[data-testid="stExpander"] summary:hover { background:#F7F5FF !important; color:#6D28D9 !important; }
+    div[data-testid="stExpander"] svg { color:#8B5CF6 !important; }
+    div[data-testid="stDialog"] [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:first-child { margin-top:-16px !important; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    score_item = f'<span class="prof-meta-score">✦ {score:.1f}%</span>' if score else ""
+    _translate = '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5A5A6E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>'
+    meta_html = (
+        f'<span class="prof-meta-item">💼 {exp} yrs exp</span>'
+        + (f'<span class="prof-meta-item">{_translate}{lang}</span>' if lang and lang != "—" else "")
+    )
     st.markdown(
-        f"""
-        <div style="display:flex;align-items:center;gap:24px;margin-bottom:20px;">
-            {av}
-            <div style="flex:1;">
-                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
-                    <span style="font-family:'DM Serif Display',serif;font-size:22px;color:#1A1A2E;">{name}</span>
-                </div>
-                <div style="font-size:13px;color:#8B5CF6;font-weight:600;margin-bottom:8px;">Licensed Counselor</div>
-                <div style="display:flex;gap:16px;flex-wrap:wrap;">
-                    <span style="font-size:12px;color:#5A5A6E;">&#128188; {exp} yrs exp</span>
-                    <span style="font-size:12px;color:#5A5A6E;">&#128172; {lang}</span>
-                </div>
-            </div>
-        </div>
-        """,
+        f'<div class="prof-header">{av}'
+        f'<div style="padding-left:6px;">'
+        f'<div style="display:flex;align-items:baseline;gap:10px;">'
+        f'<div class="prof-name">{name}</div>{score_item}</div>'
+        f'<div class="prof-role">Licensed Counselor</div>'
+        f'<div class="prof-meta">{meta_html}</div></div></div>'
+        f'<hr class="prof-rule">',
         unsafe_allow_html=True,
     )
-    st.divider()
 
     if about.strip():
-        st.markdown('<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 8px;">About Me</p>', unsafe_allow_html=True)
-        st.markdown(f'<p style="font-size:14px;color:#2D2D3F;line-height:1.7;margin-bottom:16px;">{about}</p>', unsafe_allow_html=True)
-
-    if pills:
-        st.markdown('<p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 10px;">Areas of Expertise</p>', unsafe_allow_html=True)
-        pill_html = "".join(
-            f'<span style="display:inline-block;background:#F3F0FF;color:#6D28D9;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin:0 6px 6px 0;">{p}</span>'
-            for p in pills
-        )
-        st.markdown(f'<div style="margin-bottom:16px;">{pill_html}</div>', unsafe_allow_html=True)
-
-    if thoughts:
-        thought_items = "".join(
-            f'<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">'
-            f'<span style="color:#8B5CF6;font-size:14px;flex-shrink:0;">&#10024;</span>'
-            f'<span style="font-size:14px;color:#2D2D3F;font-style:italic;font-weight:500;">"{t}"</span>'
-            f'</div>'
-            for t in thoughts
-        )
         st.markdown(
-            f"""
-            <div style="background:#F8F5FF;border:1px solid #E9E1FF;border-radius:14px;padding:20px 22px;margin-bottom:16px;">
-                <p style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;margin:0 0 12px;">Thoughts I can help you with</p>
-                {thought_items}
-            </div>
-            """,
+            f'<div class="prof-section"><div class="prof-label">About</div>'
+            f'<p class="prof-about">{about}</p></div>',
             unsafe_allow_html=True,
         )
 
-    modality_desc = c.get("modality_desc") or ""
+    if pills:
+        pills_html = "".join(f'<span class="prof-pill">{p}</span>' for p in pills)
+        st.markdown(
+            f'<div class="prof-section"><div class="prof-label">Areas of Expertise</div>'
+            f'<div class="prof-pills">{pills_html}</div></div>',
+            unsafe_allow_html=True,
+        )
+
+    if thoughts:
+        rows = "".join(f'<div class="prof-thought">"{t}"</div>' for t in thoughts)
+        st.markdown(
+            f'<div class="prof-section"><div class="prof-label">You might be thinking...</div>{rows}</div>',
+            unsafe_allow_html=True,
+        )
+
     if modality_desc.strip():
-        with st.expander("What approaches do I use?"):
-            st.markdown(f'<p style="font-size:14px;color:#2D2D3F;line-height:1.7;">{modality_desc}</p>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="prof-section"><div class="prof-label">How I work with you</div>'
+            f'<p class="prof-about">{modality_desc}</p></div>',
+            unsafe_allow_html=True,
+        )
 
     st.write("")
 
@@ -435,19 +466,13 @@ def show_profile_dialog(c: dict, score=None):
         st.session_state[req_state_key] = val
 
     if not st.session_state[req_state_key]:
-        st.button(f"✉️ Get to know {name}", use_container_width=True, type="primary", on_click=toggle_req, args=(True,))
+        st.button(f"✉️ Get to know {name}", use_container_width=True, type="primary",
+                  on_click=toggle_req, args=(True,))
     else:
-        st.markdown(
-            f"""
-            <div style="border:1px solid #E5E2DC;border-radius:14px;padding:20px;background:#F7F5F0;margin-bottom:12px;">
-                <p style="font-size:14px;color:#4A4A5A;margin-bottom:16px;">
-                    <b>Leave your details below.</b> The clinic coordinator will review your match and connect you with {name} via email.
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.caption(
+            f"Leave your details below. The clinic coordinator will connect you with {name} via email."
         )
-        client_name = st.text_input("Your Full Name")
+        client_name  = st.text_input("Your Full Name")
         client_email = st.text_input("Your Email Address")
 
         col1, col2 = st.columns(2)
@@ -483,24 +508,17 @@ def _counselor_summary(c) -> str:
     )
 
 
-def get_gemini_explanations(best_c, second_c, client_issue, preferred_language, preferred_modality, preferred_c_gender, client_age, previous_exp):
-    import json
+def get_gemini_explanation(c, client_issue, preferred_language, preferred_modality, preferred_c_gender, client_age, previous_exp) -> str | None:
+    """Generate a single counselor explanation. Cache by counselor_id externally."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        return None, None
+        return None
 
     prev_text = "has previously tried counseling" if previous_exp else "is new to counseling"
     gender_pref_text = (
         f"prefers a {preferred_c_gender} counselor"
         if preferred_c_gender not in ["No preference", ""]
         else "has no gender preference"
-    )
-
-    second_block = f"\nAlternative counselor:\n{_counselor_summary(second_c)}" if second_c else ""
-    alt_instruction = (
-        '\n- "alternative": A concise 2-sentence paragraph comparing this counselor to the top match '
-        'and explaining what makes them worth considering if the client wants a different option.'
-        if second_c else '\n- "alternative": null'
     )
 
     prompt = f"""You are a warm, empathetic counseling match assistant for a mental health platform in Malaysia.
@@ -511,24 +529,50 @@ Client profile:
 - Preferred language: {preferred_language}
 - Preferred session modality: {preferred_modality}
 
-Top matched counselor:
-{_counselor_summary(best_c)}
-{second_block}
+Matched counselor:
+{_counselor_summary(c)}
 
-Return a JSON object with exactly these keys:
-- "top": A warm, personal 3–4 sentence paragraph explaining why the top counselor is a great match. Speak directly to the client using "you"/"your". Do not mention numbers or scores. If there is a mismatch (modality or gender), acknowledge it briefly in a reassuring way.{alt_instruction}
+Write a warm, personal 3-4 sentence paragraph explaining why this counselor is a good match for the client. Speak directly to the client using "you"/"your". Do not mention numbers or scores. If there is a mismatch (modality or gender), acknowledge it briefly in a reassuring way.
 
-Respond with valid JSON only. No markdown, no code fences."""
+Respond with plain text only. No JSON, no markdown."""
 
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-2.5-flash-lite")
         response = model.generate_content(prompt)
-        text = response.text.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        data = json.loads(text)
-        return data.get("top"), data.get("alternative")
+        return response.text.strip()
     except Exception:
-        return None, None
+        return None
+
+
+
+@st.dialog("Start over?")
+def _start_over_dialog(reset_fn):
+    st.markdown("""<style>
+    div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] > div:first-child button,
+    div[data-testid="stModal"] div[data-testid="stHorizontalBlock"] > div:first-child button {
+        background-color: #EF4444 !important;
+        background-image: none !important;
+        color: #FFFFFF !important;
+        border: 1px solid #EF4444 !important;
+        font-weight: 600 !important;
+    }
+    div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] > div:first-child button:hover,
+    div[data-testid="stModal"] div[data-testid="stHorizontalBlock"] > div:first-child button:hover {
+        background-color: #DC2626 !important;
+        border-color: #DC2626 !important;
+    }
+    </style>""", unsafe_allow_html=True)
+    st.markdown("Your current matches will be cleared and you'll need to go through the questionnaire again.")
+    st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Yes, start over", use_container_width=True, type="primary"):
+            reset_fn()
+            st.rerun()
+    with col2:
+        if st.button("Cancel", use_container_width=True):
+            st.rerun()
 
 
 # ── Main page ─────────────────────────────────────────────────────────────────
@@ -539,6 +583,8 @@ def show_matching_page():
 
     if "quiz_step" not in st.session_state:
         st.session_state.quiz_step = 0
+    if "excluded_counselor_ids" not in st.session_state:
+        st.session_state.excluded_counselor_ids = []
 
     if "client_age" not in st.session_state:          st.session_state.client_age = 25
     if "client_gender" not in st.session_state:       st.session_state.client_gender = ref["client_gender"][0] if ref["client_gender"] else ""
@@ -681,64 +727,13 @@ def show_matching_page():
 
     # ── STEP 4: Results ──────────────────────────────────────────────────────
     elif st.session_state.quiz_step == 4:
-        prog_col, btn_col = st.columns([20, 1])
-        with prog_col:
-            st.markdown(
-                """
-                <div style="margin-bottom:28px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                        <span style="font-size:12px; font-weight:600; color:#6D28D9; letter-spacing:0.06em; text-transform:uppercase;">Match Complete</span>
-                        <span style="font-size:12px; font-weight:700; color:#6D28D9;">100%</span>
-                    </div>
-                    <div style="height:8px; background:#EDE8FF; border-radius:99px; overflow:hidden;">
-                        <div style="height:100%; width:100%; background:linear-gradient(90deg,#8B5CF6,#6D28D9); border-radius:99px;"></div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        with btn_col:
-            st.button("↺", key="start_over_btn", use_container_width=True,
-                      on_click=lambda: st.session_state.update(quiz_step=0))
-
-        components.html(
-            """
-            <script>
-            (function styleStartOver() {
-                var doc = window.parent.document;
-                var btns = doc.querySelectorAll('button');
-                btns.forEach(function(btn) {
-                    if (btn.innerText.trim() === '↺') {
-                        btn.style.setProperty('width', '40px', 'important');
-                        btn.style.setProperty('height', '40px', 'important');
-                        btn.style.setProperty('min-width', 'unset', 'important');
-                        btn.style.setProperty('padding', '0', 'important');
-                        btn.style.setProperty('border-radius', '10px', 'important');
-                        btn.style.setProperty('font-size', '18px', 'important');
-                        btn.style.setProperty('display', 'flex', 'important');
-                        btn.style.setProperty('align-items', 'center', 'important');
-                        btn.style.setProperty('justify-content', 'center', 'important');
-                    }
-                });
-            })();
-            setTimeout(function(){
-                var doc = window.parent.document;
-                var btns = doc.querySelectorAll('button');
-                btns.forEach(function(btn) {
-                    if (btn.innerText.trim() === '↺') {
-                        btn.style.setProperty('width', '40px', 'important');
-                        btn.style.setProperty('height', '40px', 'important');
-                        btn.style.setProperty('min-width', 'unset', 'important');
-                        btn.style.setProperty('padding', '0', 'important');
-                        btn.style.setProperty('border-radius', '10px', 'important');
-                        btn.style.setProperty('font-size', '18px', 'important');
-                    }
-                });
-            }, 300);
-            </script>
-            """,
-            height=0, width=0,
-        )
+        def _full_reset():
+            st.session_state.quiz_step = 0
+            st.session_state.excluded_counselor_ids = []
+            # Clear all match caches so dismissed counselors re-enter the pool
+            for k in list(st.session_state.keys()):
+                if k.startswith("match_") or k.startswith("gemini_single_"):
+                    del st.session_state[k]
 
         client_age = st.session_state.client_age
         client_gender = st.session_state.client_gender
@@ -749,6 +744,8 @@ def show_matching_page():
         preferred_modality = st.session_state.preferred_modality
         preferred_c_gender = st.session_state.preferred_c_gender
 
+        # Cache key based on quiz answers only — exclude_ids filtered locally so
+        # dismissals are instant (no new API call needed)
         _match_payload = {
             "client_age": client_age,
             "client_gender": client_gender,
@@ -765,8 +762,8 @@ def show_matching_page():
 
         if _match_cache_key not in st.session_state:
             with st.spinner("Analyzing compatibility factors to find your ideal match..."):
-                time.sleep(1.2)
-            st.session_state[_match_cache_key] = post_match(_match_payload)
+                pass
+            st.session_state[_match_cache_key] = post_match({**_match_payload, "exclude_ids": []})
 
         result = st.session_state[_match_cache_key]
 
@@ -775,8 +772,26 @@ def show_matching_page():
             st.markdown("</div>", unsafe_allow_html=True)
             return
 
-        best_c = result["top_match"]
-        second_c = result.get("second_match")
+        # Store the full ranked list once; dismissals filter it locally — no API re-call
+        ranked_key = _match_cache_key + "_all"
+        if ranked_key not in st.session_state:
+            st.session_state[ranked_key] = result.get("matches") or (
+                [result["top_match"]] + ([result["second_match"]] if result.get("second_match") else [])
+            )
+
+        # Filter out dismissed counselors on every render (instant, no API call)
+        excluded_set = set(st.session_state.excluded_counselor_ids)
+        ranked_list = [c for c in st.session_state[ranked_key] if c["counselor_id"] not in excluded_set]
+
+        if not ranked_list:
+            st.warning("You've dismissed all available counselors.")
+            if st.button("↺  Start Over", key="start_over_empty", use_container_width=False):
+                _start_over_dialog(_full_reset)
+            st.markdown("</div>", unsafe_allow_html=True)
+            return
+
+        best_c   = ranked_list[0]
+        second_c = ranked_list[1] if len(ranked_list) > 1 else None
         best_features = result.get("best_features", {})
 
         if not best_c:
@@ -788,14 +803,55 @@ def show_matching_page():
         scroll_to_results()
 
         st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">YOUR MATCHES</p>', unsafe_allow_html=True)
+
+
+        def _dismiss(idx):
+            dismissed_id = ranked_list[idx]["counselor_id"]
+            st.session_state.excluded_counselor_ids = (
+                st.session_state.excluded_counselor_ids + [dismissed_id]
+            )
+
         col1, col2 = st.columns(2, gap="large")
         with col1:
-            render_counselor_card(best_c, best_c["compatibility_score"], is_primary=True)
+            render_counselor_card(best_c, best_c["compatibility_score"], is_primary=True, dismiss_key="dismiss_0")
+            # Hidden Streamlit button wired to X via JS
+            if st.button("__dismiss0__", key="dismiss_0", use_container_width=True):
+                _dismiss(0)
+                st.rerun()
         with col2:
             if second_c:
-                render_counselor_card(second_c, second_c["compatibility_score"], is_primary=False)
+                render_counselor_card(second_c, second_c["compatibility_score"], is_primary=False, dismiss_key="dismiss_1")
+                if st.button("__dismiss1__", key="dismiss_1", use_container_width=True):
+                    _dismiss(1)
+                    st.rerun()
             else:
-                st.info("No second match available.")
+                st.markdown(
+                    """
+                    <div style="
+                        background: linear-gradient(160deg, #F8F5FF 0%, #FDFCFF 100%);
+                        border-radius: 20px;
+                        padding: 44px 32px;
+                        border: 1.5px solid rgba(139,92,246,0.35);
+                        min-height: 370px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        text-align: center;
+                    ">
+                        <div style="font-size: 36px; margin-bottom: 24px; opacity: 0.3; line-height:1;">❝</div>
+                        <p style="font-family: 'DM Serif Display', serif; font-size: 18px; color: #3D1D8A; font-style: italic; line-height: 1.7; margin: 0 0 14px; max-width: 260px;">
+                            You deserve to feel heard, supported, and understood. Reaching out takes courage.
+                        </p>
+                        <p style="font-size: 11.5px; color: #B0A9C0; letter-spacing: 0.07em; text-transform: uppercase; margin: 0 0 24px;">— A reminder for you</p>
+                        <div style="width: 40px; height: 1px; background: rgba(139,92,246,0.2); margin-bottom: 24px;"></div>
+                        <p style="font-size: 11px; color: #E8637A; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; margin: 0;">
+                            No more counselors available.
+                        </p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
         components.html(
             """
@@ -811,11 +867,6 @@ def show_matching_page():
                         while (sibling) {
                             var stBtn = sibling.querySelector('[data-testid="stButton"] button');
                             if (stBtn) {
-                                sibling.style.cssText = [
-                                    'position:fixed', 'left:-9999px', 'width:1px',
-                                    'height:1px', 'overflow:hidden', 'pointer-events:none',
-                                    'opacity:0'
-                                ].join('!important;') + '!important';
                                 btn._ready = true;
                                 (function(b, nb) {
                                     b.addEventListener('click', function() { nb.click(); });
@@ -838,20 +889,55 @@ def show_matching_page():
             height=0, width=0,
         )
 
+        # Wire X overlay buttons to hidden Streamlit dismiss buttons
+        components.html("""
+        <script>
+        (function() {
+            function wireDismiss() {
+                var doc = window.parent.document;
+                // Wire each .dismiss-x / .dismiss-x-light to its hidden Streamlit button
+                // Find the button via its container's st-key-* class (reliable, no text matching)
+                doc.querySelectorAll('[data-dismiss]').forEach(function(xBtn) {
+                    if (xBtn._wired) return;
+                    var key = xBtn.getAttribute('data-dismiss');
+                    var container = doc.querySelector('.st-key-' + key);
+                    if (!container) return;
+                    var target = container.querySelector('button');
+                    if (target) {
+                        xBtn._wired = true;
+                        xBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            target.click();
+                        });
+                    }
+                });
+            }
+            [0, 150, 400, 800].forEach(function(t) { setTimeout(wireDismiss, t); });
+            new MutationObserver(wireDismiss).observe(
+                window.parent.document.body, { subtree: true, childList: true }
+            );
+        })();
+        </script>
+        """, height=0, width=0)
+
         st.write("")
 
-        # ── Match Explanation (Gemini AI) ─────────────────────────────────────
-        second_id = second_c.get("counselor_id") if second_c else "none"
-        cache_key = f"gemini_exp_{best_c.get('counselor_id')}_{second_id}"
-        if cache_key not in st.session_state:
-            with st.spinner("Generating your personalised match insight..."):
-                top_exp, alt_exp = get_gemini_explanations(
-                    best_c, second_c, client_issue, preferred_language,
-                    preferred_modality, preferred_c_gender,
-                    client_age, int(previous_exp),
+        # ── Match Explanation (Gemini AI) — generate only for visible 2, cache by ID ──
+        def _get_explanation(c):
+            key = f"gemini_single_{c.get('counselor_id')}"
+            if key not in st.session_state:
+                st.session_state[key] = get_gemini_explanation(
+                    c, client_issue, preferred_language, preferred_modality,
+                    preferred_c_gender, client_age, int(previous_exp),
                 )
-                st.session_state[cache_key] = (top_exp, alt_exp)
-        explanation, explanation_2 = st.session_state[cache_key]
+            return st.session_state[key]
+
+        with st.spinner("Generating your personalised match insight..."):
+            explanation = _get_explanation(best_c)
+        explanation_2 = None
+        if second_c:
+            with st.spinner("Generating insight for your 2nd option..."):
+                explanation_2 = _get_explanation(second_c)
 
         st.markdown('<div class="explain-card">', unsafe_allow_html=True)
         st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THIS MATCH ?</p>', unsafe_allow_html=True)
@@ -948,7 +1034,7 @@ def show_matching_page():
         # ── Second Match Explanation ──────────────────────────────────────────
         if second_c and explanation_2:
             st.markdown('<div class="explain-card">', unsafe_allow_html=True)
-            st.markdown('<p class="explain-title" style="color:#6B7280; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THE ALTERNATIVE ?</p>', unsafe_allow_html=True)
+            st.markdown('<p class="explain-title" style="color:#6B7280; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THE 2ND OPTION ?</p>', unsafe_allow_html=True)
             st.markdown(
                 f'<div class="ai-explanation-box-alt">'
                 f'<div class="ai-badge-alt">✦ AI Insight</div>'
@@ -957,5 +1043,52 @@ def show_matching_page():
                 unsafe_allow_html=True,
             )
             st.markdown("</div>", unsafe_allow_html=True)
+
+        # ── Start Over ───────────────────────────────────────────────────────
+        st.markdown("""
+        <div style="height:32px;"></div>
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+            <div style="flex:1; height:1px; background:rgba(0,0,0,0.08);"></div>
+            <span style="font-size:11px; color:#C0C0CC; letter-spacing:0.08em; text-transform:uppercase; white-space:nowrap;">Not happy with your results?</span>
+            <div style="flex:1; height:1px; background:rgba(0,0,0,0.08);"></div>
+        </div>
+        """, unsafe_allow_html=True)
+        _, center, _ = st.columns([2, 1, 2])
+        with center:
+            if st.button("↺  Start Over", key="start_over_bottom", use_container_width=True):
+                _start_over_dialog(_full_reset)
+        components.html("""
+        <script>
+        (function() {
+            function styleStartOver() {
+                var doc = window.parent.document;
+                doc.querySelectorAll('button').forEach(function(btn) {
+                    if (btn.innerText.trim().startsWith('↺')) {
+                        btn.style.setProperty('background', 'transparent', 'important');
+                        btn.style.setProperty('color', '#EF4444', 'important');
+                        btn.style.setProperty('border', '1.5px solid rgba(239,68,68,0.45)', 'important');
+                        btn.style.setProperty('border-radius', '50px', 'important');
+                        btn.style.setProperty('font-size', '13px', 'important');
+                        btn.style.setProperty('font-weight', '600', 'important');
+                        btn.style.setProperty('letter-spacing', '0.04em', 'important');
+                        btn.style.setProperty('box-shadow', 'none', 'important');
+                        btn.onmouseenter = function() {
+                            this.style.setProperty('background', 'rgba(239,68,68,0.07)', 'important');
+                            this.style.setProperty('border-color', '#EF4444', 'important');
+                        };
+                        btn.onmouseleave = function() {
+                            this.style.setProperty('background', 'transparent', 'important');
+                            this.style.setProperty('border-color', 'rgba(239,68,68,0.45)', 'important');
+                        };
+                    }
+                });
+            }
+            [0, 150, 400].forEach(function(t) { setTimeout(styleStartOver, t); });
+            new MutationObserver(styleStartOver).observe(
+                window.parent.document.body, { subtree: true, childList: true }
+            );
+        })();
+        </script>
+        """, height=0, width=0)
 
     st.markdown('</div>', unsafe_allow_html=True)

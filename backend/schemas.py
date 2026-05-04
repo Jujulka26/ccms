@@ -74,6 +74,7 @@ class MatchRequest(BaseModel):
     preferred_language: str
     preferred_modality: str
     preferred_c_gender: str
+    exclude_ids: List[int] = []
 
 
 class MatchedCounselor(BaseModel):
@@ -90,6 +91,8 @@ class MatchedCounselor(BaseModel):
     expertise_tags: Optional[str] = None
     helpful_thought_1: Optional[str] = None
     helpful_thought_2: Optional[str] = None
+    modality_desc: Optional[str] = None
+    image: Optional[str] = None
     compatibility_score: float
     issue_score: float
     modality_match: int
@@ -99,6 +102,7 @@ class MatchedCounselor(BaseModel):
 class MatchResponse(BaseModel):
     top_match: Optional[MatchedCounselor] = None
     second_match: Optional[MatchedCounselor] = None
+    matches: Optional[List[MatchedCounselor]] = None
     best_features: Optional[Dict[str, float]] = None
     error: Optional[str] = None
 
@@ -129,3 +133,5 @@ class ModelPerformanceResponse(BaseModel):
     best_model: str
     best_roc_auc: float
     model_count: int
+    deployed_model: str
+    tuning_models: List[Dict[str, Any]]

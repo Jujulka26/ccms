@@ -77,6 +77,7 @@ def inject_styles():
             transition: background 0.15s, color 0.15s;
         }
         .card-view-btn-dir:hover { background: rgba(124,58,237,0.07); color: #5B21B6; }
+        [data-testid="stElementContainer"]:has(.c-card) { margin-bottom: 24px !important; }
         .c-avatar-wrap {
             display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
         }
@@ -102,6 +103,7 @@ def inject_styles():
             font-size: 13px; color: #8B5CF6; font-weight: 600;
             margin-bottom: 20px; letter-spacing: 0.02em;
         }
+        [class*="st-key-dir_vp_"] { display: none !important; }
         </style>
         """,
         unsafe_allow_html=True,
@@ -187,9 +189,20 @@ def show_counselors_page():
         st.info("No counselors match the selected filters.")
         return
 
+    # ── Pagination ───────────────────────────────────────────────────────────
+    PAGE_SIZE = 12
+    total_pages = max(1, -(-len(filtered) // PAGE_SIZE))  # ceiling division
+
+    if "dir_page" not in st.session_state or st.session_state.get("dir_last_total") != len(filtered):
+        st.session_state["dir_page"] = 0
+    st.session_state["dir_last_total"] = len(filtered)
+
+    page = st.session_state["dir_page"]
+    page_items = filtered[page * PAGE_SIZE : (page + 1) * PAGE_SIZE]
+
     # ── Grid ─────────────────────────────────────────────────────────────────
     cols = st.columns(3, gap="large")
-    for i, c in enumerate(filtered):
+    for i, c in enumerate(page_items):
         name     = c.get("name", "Counselor")
         spec     = c.get("specialization", "")
         exp      = c.get("experience_years", "—")
@@ -228,6 +241,25 @@ def show_counselors_page():
                          use_container_width=True):
                 show_profile_dialog(c)
 
+    # ── Pagination controls ───────────────────────────────────────────────────
+    if total_pages > 1:
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+        pcol1, pcol2, pcol3 = st.columns([1, 2, 1])
+        with pcol1:
+            if st.button("← Previous", disabled=(page == 0), use_container_width=True):
+                st.session_state["dir_page"] -= 1
+                st.rerun()
+        with pcol2:
+            st.markdown(
+                f'<div style="text-align:center;font-size:13px;color:#8B5CF6;font-weight:600;padding-top:10px;">'
+                f'Page {page + 1} of {total_pages}</div>',
+                unsafe_allow_html=True,
+            )
+        with pcol3:
+            if st.button("Next →", disabled=(page >= total_pages - 1), use_container_width=True):
+                st.session_state["dir_page"] += 1
+                st.rerun()
+
     components.html(
         """
         <script>
@@ -242,11 +274,6 @@ def show_counselors_page():
                     while (sibling) {
                         var stBtn = sibling.querySelector('[data-testid="stButton"] button');
                         if (stBtn) {
-                            sibling.style.cssText = [
-                                'position:fixed', 'left:-9999px', 'width:1px',
-                                'height:1px', 'overflow:hidden', 'pointer-events:none',
-                                'opacity:0'
-                            ].join('!important;') + '!important';
                             btn._ready = true;
                             (function(b, nb) {
                                 b.addEventListener('click', function() { nb.click(); });

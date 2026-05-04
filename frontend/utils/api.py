@@ -89,6 +89,7 @@ def login(email: str, password: str) -> bool:
 
 # ── Requests ───────────────────────────────────────────────────────────────────
 
+@st.cache_data(ttl=60)
 def get_requests() -> list[dict]:
     return _get("/requests/")
 

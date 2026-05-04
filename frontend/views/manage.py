@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from pathlib import Path
-from frontend.utils.api import get_counselors, add_counselor, update_counselor, delete_counselor
+from frontend.utils.api import get_counselors, add_counselor, update_counselor, delete_counselor, get_reference_data
 
 _IMG_DIR = Path(__file__).parent.parent.parent / "backend" / "static" / "counselors"
 
@@ -209,6 +209,7 @@ def render_add_counselor_dialog():
                 "modality_desc": modality_desc, "image": img_filename,
             })
             get_counselors.clear()
+            get_reference_data.clear()
             st.success("Counselor added successfully.")
             st.rerun()
 
@@ -295,6 +296,7 @@ def render_edit_counselor_dialog():
                 "modality_desc": edit_modality_desc, "image": img_filename,
             })
             get_counselors.clear()
+            get_reference_data.clear()
             st.success(f"Counselor {int(selected_id)} updated successfully.")
             st.rerun()
 
@@ -319,6 +321,7 @@ def render_delete_counselor_dialog():
     if st.button("Delete counselor", type="primary", use_container_width=True, disabled=not confirm_delete):
         delete_counselor(int(selected_id))
         get_counselors.clear()
+        get_reference_data.clear()
         st.success(f"Counselor {int(selected_id)} deleted successfully.")
         st.rerun()
 

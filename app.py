@@ -38,6 +38,8 @@ def inject_app_styles():
             background: #F7F5F0;
         }
 
+        [data-stale="true"] { opacity: 0 !important; transition: none !important; }
+
         .block-container {
             max-width: 1200px;
         }
@@ -362,9 +364,229 @@ def inject_app_styles():
             margin: 20px 0;
         }
 
+        /* ── Landing page ─────────────────────────────────────────────── */
+
+        /* Shared button */
+        .land-cta-btn {
+            display: inline-block;
+            background: #8B5CF6;
+            color: #FFFFFF !important;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none !important;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+            box-shadow: 0 4px 20px rgba(139,92,246,0.4);
+        }
+        .land-cta-btn:hover {
+            background: #7C3AED;
+            box-shadow: 0 8px 28px rgba(139,92,246,0.55);
+            transform: translateY(-1px);
+        }
+
+        /* Full-bleed band wrapper */
+        .land-band {
+            padding: 80px clamp(24px, 8vw, 120px);
+        }
+        /* Inner max-width centering */
+        .land-inner {
+            max-width: 1080px;
+            margin: 0 auto;
+        }
+
+        /* Hero band */
+        .land-hero-band {
+            background: #0F0E1A;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .land-hero-band::before {
+            content: '';
+            position: absolute;
+            top: -120px; right: -80px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .land-hero-band::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -40px;
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .land-hero-eyebrow {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #A78BFA;
+            background: rgba(167,139,250,0.12);
+            border: 1px solid rgba(167,139,250,0.25);
+            border-radius: 20px;
+            padding: 5px 16px;
+            margin-bottom: 28px;
+        }
+        .land-hero-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 58px;
+            line-height: 1.08;
+            color: #FFFFFF;
+            margin: 0 auto 24px;
+            letter-spacing: -1.5px;
+            max-width: 720px;
+        }
+        .land-hero-copy {
+            font-size: 18px;
+            color: rgba(255,255,255,0.52);
+            max-width: 500px;
+            line-height: 1.72;
+            margin: 0 auto 44px;
+            text-align: center;
+        }
+
+        /* Steps band */
+        .land-steps-band {
+            background: #F5F3FF;
+        }
+        .land-band-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #8B5CF6;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .land-band-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 36px;
+            color: #1A1A2E;
+            text-align: center;
+            margin: 0 0 48px;
+        }
+        .land-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .land-step {
+            padding: 36px 32px;
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(139,92,246,0.06);
+        }
+        .land-step-num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 44px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .land-step-num.n1 { color: #C4B5FD; }
+        .land-step-num.n2 { color: #8B5CF6; }
+        .land-step-num.n3 { color: #5B21B6; }
+        .land-step-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 10px;
+        }
+        .land-step-copy {
+            font-size: 14px;
+            color: #5A5A6E;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        /* Why band */
+        .land-why-band {
+            background: #FFFFFF;
+        }
+        .land-why-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+        .land-why-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+        .land-why-icon.purple { background: rgba(139,92,246,0.12); }
+        .land-why-icon.green  { background: rgba(16,185,129,0.12); }
+        .land-why-icon.blue   { background: rgba(59,130,246,0.12); }
+        .land-why-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 10px;
+        }
+        .land-why-copy {
+            font-size: 14px;
+            color: #5A5A6E;
+            line-height: 1.72;
+            margin: 0;
+        }
+
+        /* CTA band */
+        .land-cta-band {
+            background: linear-gradient(135deg, #0F0E1A 0%, #1E1048 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .land-cta-band::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 360px; height: 360px;
+            background: radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .land-cta-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 38px;
+            color: #FFFFFF;
+            margin: 0 0 14px;
+        }
+        .land-cta-copy {
+            font-size: 16px;
+            color: rgba(255,255,255,0.48);
+            margin: 0 0 36px;
+        }
+
+        /* Staff link */
+        .land-staff-link {
+            background: #FFFFFF;
+            text-align: center;
+            padding: 18px 0 20px;
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        .land-staff-link a {
+            font-size: 12px;
+            color: #C4C4D0 !important;
+            text-decoration: none !important;
+            letter-spacing: 0.04em;
+            transition: color 0.2s;
+        }
+        .land-staff-link a:hover { color: #8B5CF6 !important; }
+
         @media (max-width: 768px) {
             .hero-title { font-size: 32px; }
             .landing-title { font-size: 22px; }
+            .land-hero-title { font-size: 36px; }
+            .land-steps, .land-why-grid { grid-template-columns: 1fr; }
+            .land-step:first-child, .land-step:last-child { border-radius: 16px; }
         }
         </style>
         """,
@@ -390,47 +612,97 @@ inject_app_styles()
 
 
 if "role" not in st.session_state:
-    render_hero(
-        "Client-Counselor Matching System",
-        "Choose a path to continue.",
-        eyebrow="Welcome",
+    # Override Streamlit container so sections bleed edge-to-edge
+    st.markdown(
+        """
+        <style>
+        .stApp { background: #FFFFFF !important; }
+        section[data-testid="stMain"] .block-container {
+            padding: 0 !important;
+            max-width: 100% !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
     )
 
-    left_col, right_col = st.columns(2, gap="large")
+    st.markdown(
+        """
+        <!-- ── Hero ──────────────────────────────────────────────────────── -->
+        <div class="land-hero-band land-band">
+            <div class="land-inner" style="position:relative;z-index:2;">
+                <div class="land-hero-eyebrow">AI-Powered Counselor Matching</div>
+                <div class="land-hero-title">Find the right counselor,<br>matched just for you</div>
+                <a href="/?login=client" target="_self" class="land-cta-btn">Find your counselor &rarr;</a>
+            </div>
+        </div>
 
-    with left_col:
-        st.markdown(
-            """
-            <a href="/?login=client" target="_self" class="clickable-card-link">
-                <div class="landing-card">
-                    <div>
-                        <div class="landing-badge">Client</div>
-                        <div class="landing-title">Find a counselor</div>
-                        <div class="landing-meta">Get matched in a few simple steps.</div>
+        <!-- ── How it works ───────────────────────────────────────────────── -->
+        <div class="land-steps-band land-band">
+            <div class="land-inner">
+                <div class="land-band-label">How it works</div>
+                <div class="land-band-title">Three simple steps</div>
+                <div class="land-steps">
+                    <div class="land-step">
+                        <div class="land-step-num n1">01</div>
+                        <div class="land-step-title">Share your preferences</div>
+                        <p class="land-step-copy">Tell us about yourself — your age, concerns, preferred language, and what you're looking for in a counselor.</p>
                     </div>
-                    <div class="landing-action">Continue as Client &rarr;</div>
+                    <div class="land-step">
+                        <div class="land-step-num n2">02</div>
+                        <div class="land-step-title">Get AI-matched</div>
+                        <p class="land-step-copy">Our model analyses compatibility across multiple dimensions to surface your best-fit counselors from our directory.</p>
+                    </div>
+                    <div class="land-step">
+                        <div class="land-step-num n3">03</div>
+                        <div class="land-step-title">Connect by email</div>
+                        <p class="land-step-copy">Submit an intro request and your counselor will reach out to arrange your first session. No account needed.</p>
+                    </div>
                 </div>
-            </a>
-            """,
-            unsafe_allow_html=True,
-        )
+            </div>
+        </div>
 
-    with right_col:
-        st.markdown(
-            """
-            <a href="/?login=admin" target="_self" class="clickable-card-link">
-                <div class="landing-card admin">
+        <!-- ── Why us ─────────────────────────────────────────────────────── -->
+        <div class="land-why-band land-band">
+            <div class="land-inner">
+                <div class="land-band-label">Why us</div>
+                <div class="land-band-title">Built around you</div>
+                <div class="land-why-grid">
                     <div>
-                        <div class="landing-badge admin">Admin</div>
-                        <div class="landing-title">Manage directory and models</div>
-                        <div class="landing-meta">Sign in to manage records and review performance.</div>
+                        <div class="land-why-icon purple">✦</div>
+                        <div class="land-why-title">Personalised Matching</div>
+                        <p class="land-why-copy">Not a random list — every recommendation is scored for compatibility with your specific profile, concerns, and preferences.</p>
                     </div>
-                    <div class="landing-action">Sign in as Admin &rarr;</div>
+                    <div>
+                        <div class="land-why-icon green">◎</div>
+                        <div class="land-why-title">Full Transparency</div>
+                        <p class="land-why-copy">We don't just show you a match — we explain exactly why each counselor is suitable for you, so you can make an informed choice.</p>
+                    </div>
+                    <div>
+                        <div class="land-why-icon blue">⬡</div>
+                        <div class="land-why-title">No Account Needed</div>
+                        <p class="land-why-copy">No sign-up, no password, no tracking. Just answer a few questions and get matched instantly — your privacy is respected.</p>
+                    </div>
                 </div>
-            </a>
-            """,
-            unsafe_allow_html=True,
-        )
+            </div>
+        </div>
+
+        <!-- ── CTA ────────────────────────────────────────────────────────── -->
+        <div class="land-cta-band land-band">
+            <div class="land-inner" style="position:relative;z-index:2;">
+                <div class="land-cta-title">Ready to find your counselor?</div>
+                <p class="land-cta-copy">It only takes a few minutes. No account required.</p>
+                <a href="/?login=client" target="_self" class="land-cta-btn">Get matched now &rarr;</a>
+            </div>
+        </div>
+
+        <!-- ── Staff link ──────────────────────────────────────────────────── -->
+        <div class="land-staff-link">
+            <a href="/?login=admin" target="_self">Staff access &rarr;</a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.stop()
 
@@ -447,10 +719,7 @@ if role is None:
     st.rerun()
 
 
-@st.dialog("Confirm logout")
-def _logout_dialog():
-    # Inject red style for the logout button — avoids type="primary" so the
-    # global primaryColor="#7C3AED" theme never touches this button.
+def _dialog_styles():
     st.markdown("""<style>
     div[data-testid="stDialog"] div[data-testid="stHorizontalBlock"] > div:first-child button,
     div[data-testid="stModal"] div[data-testid="stHorizontalBlock"] > div:first-child button {
@@ -466,11 +735,31 @@ def _logout_dialog():
         border-color: #DC2626 !important;
     }
     </style>""", unsafe_allow_html=True)
+
+
+@st.dialog("Confirm logout")
+def _logout_dialog():
+    _dialog_styles()
     st.markdown("Are you sure you want to log out?")
     st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Log out", use_container_width=True):
+            del st.session_state["role"]
+            st.rerun()
+    with col2:
+        if st.button("Cancel", use_container_width=True):
+            st.rerun()
+
+
+@st.dialog("Go back to home?")
+def _back_dialog():
+    _dialog_styles()
+    st.markdown("You'll need to start the matching process again.")
+    st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Go back", use_container_width=True):
             del st.session_state["role"]
             st.rerun()
     with col2:
@@ -495,13 +784,17 @@ else:
 st.sidebar.markdown('<div class="sidebar-spacer" style="flex-grow: 1; min-height: 50px;"></div>', unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown(
-    f'<div style="font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 12px; padding: 0 2px;">Signed in as <strong style="color:rgba(255,255,255,0.9)">{role.title()}</strong></div>',
-    unsafe_allow_html=True
-)
 
-if st.sidebar.button("Log out", use_container_width=True):
-    _logout_dialog()
+if role == "admin":
+    st.sidebar.markdown(
+        f'<div style="font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 12px; padding: 0 2px;">Signed in as <strong style="color:rgba(255,255,255,0.9)">Admin</strong></div>',
+        unsafe_allow_html=True
+    )
+    if st.sidebar.button("Log out", use_container_width=True):
+        _logout_dialog()
+else:
+    if st.sidebar.button("← Back to home", use_container_width=True):
+        _back_dialog()
 
 
 if page in ["Match a Client", "Find a Counselor"]:

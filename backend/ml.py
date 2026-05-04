@@ -53,11 +53,14 @@ def run_match(match_req, counselors: list[dict]) -> dict:
     preferred_language = match_req.preferred_language
     preferred_modality = match_req.preferred_modality
     preferred_c_gender = match_req.preferred_c_gender
+    exclude_ids = set(getattr(match_req, "exclude_ids", []) or [])
 
     model, _ = load_resources()
 
     rows = []
     for c in counselors:
+        if c.get("counselor_id") in exclude_ids:
+            continue
         counselor_languages = [v.strip() for v in str(c.get("counselor_language", "")).split(",") if v.strip()]
         if preferred_language not in counselor_languages:
             continue
@@ -101,6 +104,8 @@ def run_match(match_req, counselors: list[dict]) -> dict:
             "expertise_tags": c.get("expertise_tags"),
             "helpful_thought_1": c.get("helpful_thought_1"),
             "helpful_thought_2": c.get("helpful_thought_2"),
+            "modality_desc": c.get("modality_desc"),
+            "image": c.get("image"),
             "compatibility_score": float(row["compatibility"]),
             "issue_score": float(row["issue_score"]),
             "modality_match": int(row["modality_match"]),
@@ -110,15 +115,15 @@ def run_match(match_req, counselors: list[dict]) -> dict:
     best_row = ranked.iloc[0]
     best_features = {f: float(best_row[f]) for f in FEATURE_ORDER}
 
-    result = {
-        "top_match": build_match(best_row),
+    top_n = min(5, len(ranked))
+    matches = [build_match(ranked.iloc[i]) for i in range(top_n)]
+
+    return {
+        "top_match": matches[0],
+        "second_match": matches[1] if len(matches) > 1 else None,
+        "matches": matches,
         "best_features": best_features,
     }
-
-    if len(ranked) > 1:
-        result["second_match"] = build_match(ranked.iloc[1])
-
-    return result
 
 
 def get_reference_data() -> dict:

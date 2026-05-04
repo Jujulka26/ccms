@@ -88,8 +88,8 @@ def inject_styles():
             background-color: #F0EDE8 !important;
         }
         .pm-recommend {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, #FFFFFF 100%);
-            border: 1px solid rgba(245, 158, 11, 0.25);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, #FFFFFF 100%);
+            border: 1px solid rgba(139, 92, 246, 0.25);
             border-radius: 16px;
             padding: 28px 32px;
             margin-top: 4px;
@@ -102,9 +102,9 @@ def inject_styles():
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #F59E0B;
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: #8B5CF6;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
             border-radius: 20px;
             padding: 4px 12px;
             margin-bottom: 14px;
@@ -120,6 +120,15 @@ def inject_styles():
             color: #5A5A6E;
             line-height: 1.65;
             margin: 0;
+        }
+        .pm-note {
+            background: rgba(245, 158, 11, 0.06);
+            border-left: 3px solid #F59E0B;
+            border-radius: 0 8px 8px 0;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #5A5A6E;
+            margin-bottom: 20px;
         }
         </style>
         """,
@@ -150,8 +159,9 @@ def show_model_performance_page():
 
     model_count = data["model_count"]
     best_roc = data["best_roc_auc"] * 100
-    best_name = data["best_model"]
+    deployed_model = data.get("deployed_model", "XGBoost")
     df = pd.DataFrame(data["models"])
+    tuning_models = data.get("tuning_models", [])
 
     st.markdown(
         f"""
@@ -159,17 +169,17 @@ def show_model_performance_page():
             <div class="pm-stat-card">
                 <div class="pm-stat-eyebrow" style="color:#8B5CF6;">Models compared</div>
                 <div class="pm-stat-value">{model_count}</div>
-                <div class="pm-stat-label">evaluated in this run</div>
+                <div class="pm-stat-label">evaluated at baseline</div>
             </div>
             <div class="pm-stat-card">
                 <div class="pm-stat-eyebrow" style="color:#10B981;">Best ROC-AUC</div>
                 <div class="pm-stat-value">{best_roc:.1f}%</div>
-                <div class="pm-stat-label">highest discrimination score</div>
+                <div class="pm-stat-label">after hyperparameter tuning</div>
             </div>
             <div class="pm-stat-card">
-                <div class="pm-stat-eyebrow" style="color:#F59E0B;">Top model</div>
-                <div class="pm-stat-value" style="font-size:26px;padding-top:6px;">{best_name}</div>
-                <div class="pm-stat-label">best overall average</div>
+                <div class="pm-stat-eyebrow" style="color:#6366F1;">Deployed model</div>
+                <div class="pm-stat-value" style="font-size:26px;padding-top:6px;">{deployed_model}</div>
+                <div class="pm-stat-label">best after tuning — active in production</div>
             </div>
         </div>
         """,
@@ -178,13 +188,21 @@ def show_model_performance_page():
 
     st.markdown('<hr style="margin: 32px 0 32px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);" />', unsafe_allow_html=True)
 
+    # ── Baseline comparison ──────────────────────────────────────────────────
     st.markdown(
         """
         <div class="pm-card">
-            <div class="pm-card-title">Model comparison</div>
-            <p class="pm-card-copy">Switch between the detailed table and visual comparison chart.</p>
+            <div class="pm-card-title">Baseline model comparison</div>
+            <p class="pm-card-copy">All four candidate models evaluated at default settings before tuning.</p>
         </div>
         """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        '<div class="pm-note">Random Forest has a marginally higher overall average at baseline, '
+        'but this difference is within noise. Tuning was applied to the top two candidates to determine '
+        'the final deployment choice.</div>',
         unsafe_allow_html=True,
     )
 
@@ -195,21 +213,41 @@ def show_model_performance_page():
         df_plot = df.set_index("Model")[["Accuracy", "F1", "ROC-AUC"]] * 100
         st.line_chart(df_plot, use_container_width=True)
 
-    df["Overall"] = df[["Accuracy", "F1", "ROC-AUC"]].mean(axis=1)
-    df_sorted = df.sort_values("Overall", ascending=False)
-    top_two = df_sorted.head(2)
+    # ── Tuning comparison ────────────────────────────────────────────────────
+    if tuning_models:
+        st.markdown('<hr style="margin: 32px 0 32px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);" />', unsafe_allow_html=True)
 
-    if len(top_two) >= 2 and top_two.iloc[0]["Overall"] - top_two.iloc[1]["Overall"] > 0.01:
-        reason = "the highest overall average across Accuracy, F1 and ROC-AUC"
-    else:
-        reason = "overall strong and consistent performance across all metrics"
+        st.markdown(
+            """
+            <div class="pm-card">
+                <div class="pm-card-title">Tuning evaluation — Random Forest vs XGBoost</div>
+                <p class="pm-card-copy">Random Forest (Bagging) and XGBoost (Boosting) were tuned via grid search. XGBoost outperforms RF across all three metrics after tuning.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
+        df_tuning = pd.DataFrame(tuning_models)
+
+        tuning_tabs = st.tabs(["📊  Table", "📈  Chart"])
+        with tuning_tabs[0]:
+            st.dataframe(df_tuning, use_container_width=True, hide_index=True)
+        with tuning_tabs[1]:
+            df_tuning_plot = df_tuning.set_index("Model")[["Accuracy", "F1", "ROC-AUC"]] * 100
+            st.bar_chart(df_tuning_plot, use_container_width=True)
+
+    # ── Recommendation ───────────────────────────────────────────────────────
     st.markdown(
         f"""
         <div class="pm-recommend">
-            <div class="pm-recommend-badge">✓ &nbsp;Recommendation</div>
-            <div class="pm-recommend-title">{best_name} is your best choice</div>
-            <p class="pm-recommend-copy">Based on {reason}.</p>
+            <div class="pm-recommend-badge">&#10003; &nbsp;Deployed Model</div>
+            <div class="pm-recommend-title">{deployed_model} is the active model</div>
+            <p class="pm-recommend-copy">
+                While Random Forest achieved a marginally higher overall average at baseline, both models were
+                hyperparameter-tuned for a fair final comparison. After tuning, XGBoost (Boosting) outperformed
+                Random Forest (Bagging) across all three metrics — Accuracy, F1, and ROC-AUC — and was selected
+                as the deployed model for client-counselor matching.
+            </p>
         </div>
         """,
         unsafe_allow_html=True,

@@ -14,6 +14,7 @@ def confirm_approve_dialog(request_id, client_name, client_email, counselor_name
         if st.button("Yes, Approve", type="primary", use_container_width=True):
             approve_request(request_id)
             send_approval_email(request_id, client_name, client_email, counselor_name)
+            get_requests.clear()
             st.success("Request approved!")
             st.rerun()
     with col2:
