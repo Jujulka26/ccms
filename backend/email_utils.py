@@ -1,15 +1,14 @@
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 
-SENDER_EMAIL = "saltysmilesofficial@gmail.com"
+resend.api_key = os.environ.get("RESEND_API_KEY", "")
+
+SENDER_EMAIL = "noreply@cc-match.com"
 
 
 def send_approval_email(client_name: str, client_email: str, counselor_name: str):
-    password = os.environ.get("EMAIL_PASSWORD", "")
-    if not password:
-        raise RuntimeError("EMAIL_PASSWORD environment variable is not set.")
+    if not resend.api_key:
+        raise RuntimeError("RESEND_API_KEY environment variable is not set.")
 
     body = f"""Hello {client_name},
 
@@ -22,14 +21,9 @@ If you have any immediate questions, feel free to reply to this email.
 Warm regards,
 Client-Counselor Matching System
 """
-    msg = MIMEMultipart()
-    msg["From"] = SENDER_EMAIL
-    msg["To"] = client_email
-    msg["Subject"] = "Counselor Match Request Approved!"
-    msg.attach(MIMEText(body, "plain"))
-
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    server.login(SENDER_EMAIL, password)
-    server.sendmail(SENDER_EMAIL, client_email, msg.as_string())
-    server.quit()
+    resend.Emails.send({
+        "from": f"CC Match <{SENDER_EMAIL}>",
+        "to": client_email,
+        "subject": "Counselor Match Request Approved!",
+        "text": body,
+    })
