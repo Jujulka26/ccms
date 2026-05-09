@@ -1,33 +1,6 @@
-import os
-import resend
 import streamlit as st
 
-resend.api_key = os.environ.get("RESEND_API_KEY", "")
-
-
-def send_enquiry_email(name, email, subject, message):
-    if not resend.api_key:
-        raise RuntimeError("RESEND_API_KEY environment variable is not set.")
-
-    body = f"""New enquiry received via the Client-Counselor Matching System.
-
-Name    : {name}
-Email   : {email}
-Subject : {subject}
-
-Message:
-{message}
-
----
-Reply directly to this email to respond to {name}.
-"""
-    resend.Emails.send({
-        "from": "CC Match <noreply@cc-match.com>",
-        "to": "support@cc-match.com",
-        "reply_to": email,
-        "subject": f"[Client Enquiry] {subject} — from {name}",
-        "text": body,
-    })
+from frontend.utils.api import send_enquiry_email
 
 
 def show_contactus_page():

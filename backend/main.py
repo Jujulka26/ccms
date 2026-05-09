@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.routers import counselors, auth, requests, matching, model_performance
+from backend.routers import counselors, auth, requests, matching, model_performance, contact
 
 app = FastAPI(title="Client-Counselor Matching System API", version="1.0.0")
 
@@ -17,6 +17,7 @@ app.include_router(auth.router)
 app.include_router(requests.router)
 app.include_router(matching.router)
 app.include_router(model_performance.router)
+app.include_router(contact.router)
 
 
 @app.get("/")

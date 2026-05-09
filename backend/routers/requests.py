@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from backend.schemas import IntroRequestCreate, RequestResponse, UpdateRequestStatus
+from backend.schemas import IntroRequestCreate, RequestResponse, UpdateRequestStatus, ApprovalEmailRequest
 from backend.email_utils import send_approval_email
 import backend.db as db
 
@@ -36,9 +36,9 @@ def approve_request(request_id: int, payload: UpdateRequestStatus):
 
 
 @router.post("/{request_id}/send-approval-email")
-def send_email(request_id: int, client_name: str, client_email: str, counselor_name: str):
+def send_email(request_id: int, payload: ApprovalEmailRequest):
     try:
-        send_approval_email(client_name, client_email, counselor_name)
+        send_approval_email(payload.client_name, payload.client_email, payload.counselor_name)
         return {"message": "Approval email sent."}
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))

@@ -65,6 +65,19 @@ class UpdateRequestStatus(BaseModel):
     status: str
 
 
+class EnquiryRequest(BaseModel):
+    name: str
+    email: str
+    subject: str
+    message: str
+
+
+class ApprovalEmailRequest(BaseModel):
+    client_name: str
+    client_email: str
+    counselor_name: str
+
+
 class MatchRequest(BaseModel):
     client_age: int
     client_gender: str

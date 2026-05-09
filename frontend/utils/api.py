@@ -111,17 +111,23 @@ def send_approval_email(request_id: int, client_name: str, client_email: str, co
     try:
         r = requests.post(
             f"{BASE_URL}/requests/{request_id}/send-approval-email",
-            params={"client_name": client_name, "client_email": client_email, "counselor_name": counselor_name},
+            json={"client_name": client_name, "client_email": client_email, "counselor_name": counselor_name},
             timeout=15,
         )
         r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        detail = ""
-        try:
-            detail = e.response.json().get("detail", str(e))
-        except Exception:
-            detail = str(e)
-        st.warning(f"Email could not be sent: {detail}")
+    except Exception as e:
+        st.warning(f"Email could not be sent: {e}")
+
+
+# ── Contact ────────────────────────────────────────────────────────────────────
+
+def send_enquiry_email(name: str, email: str, subject: str, message: str):
+    r = requests.post(
+        f"{BASE_URL}/contact/send-enquiry",
+        json={"name": name, "email": email, "subject": subject, "message": message},
+        timeout=15,
+    )
+    r.raise_for_status()
 
 
 # ── Matching ───────────────────────────────────────────────────────────────────
