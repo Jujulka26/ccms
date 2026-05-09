@@ -1,19 +1,13 @@
 import os
+import resend
 import streamlit as st
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+
+resend.api_key = os.environ.get("RESEND_API_KEY", "")
 
 
 def send_enquiry_email(name, email, subject, message):
-    sender_email = "saltysmilesofficial@gmail.com"
-    sender_password = os.environ.get("EMAIL_PASSWORD", "")
-
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = sender_email
-    msg['Reply-To'] = email
-    msg['Subject'] = f"[Client Enquiry] {subject} — from {name}"
+    if not resend.api_key:
+        raise RuntimeError("RESEND_API_KEY environment variable is not set.")
 
     body = f"""New enquiry received via the Client-Counselor Matching System.
 
@@ -27,13 +21,13 @@ Message:
 ---
 Reply directly to this email to respond to {name}.
 """
-    msg.attach(MIMEText(body, 'plain'))
-
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    server.login(sender_email, sender_password)
-    server.sendmail(sender_email, sender_email, msg.as_string())
-    server.quit()
+    resend.Emails.send({
+        "from": "CC Match <noreply@cc-match.com>",
+        "to": "support@cc-match.com",
+        "reply_to": email,
+        "subject": f"[Client Enquiry] {subject} — from {name}",
+        "text": body,
+    })
 
 
 def show_contactus_page():
@@ -241,7 +235,7 @@ def show_contactus_page():
             <div class="cu-info-card">
                 <div class="cu-info-icon">📧</div>
                 <div class="cu-info-label">Email</div>
-                <div class="cu-info-value">saltysmilesofficial@gmail.com</div>
+                <div class="cu-info-value">support@cc-match.com</div>
                 <p class="cu-info-sub">We reply within 24–48 hours on business days.</p>
             </div>
             """,

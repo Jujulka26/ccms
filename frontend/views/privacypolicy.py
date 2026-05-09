@@ -181,7 +181,7 @@ def show_privacypolicy_page():
         """
         <div class="pp-contact-box">
             <div class="pp-contact-title">Questions about your privacy?</div>
-            <p class="pp-contact-body">Contact us at <span class="pp-contact-email">saltysmilesofficial@gmail.com</span><br>and we will respond within 24–48 hours.</p>
+            <p class="pp-contact-body">Contact us at <span class="pp-contact-email">support@cc-match.com</span><br>and we will respond within 24–48 hours.</p>
         </div>
         """,
         unsafe_allow_html=True,
