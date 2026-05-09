@@ -1,5 +1,5 @@
 @echo off
-cd /d "C:\Users\My PC\OneDrive\Desktop\ccms"
+cd /d "C:\Users\My PC\OneDrive\Desktop\LLM Wiki-CCMS\raw\ccms"
 
 echo Starting FastAPI Backend...
 start "FastAPI Backend" cmd /k "c:\python_env\py311_env\Scripts\activate && uvicorn backend.main:app --reload"
