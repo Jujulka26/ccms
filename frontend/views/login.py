@@ -55,9 +55,9 @@ def show_login_page():
                 st.rerun()
 
             if submitted:
-                if not email or not password:
+                if not email.strip() or not password.strip():
                     st.error("Please enter both email and password.")
-                elif login(email, password):
+                elif login(email.strip(), password.strip()):
                     st.session_state.role = "admin"
                     st.rerun()
                 else:

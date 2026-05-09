@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 
 BASE_URL = "http://localhost:8000"
+_BACKEND_CONN_ERROR = "Cannot connect to the backend. Make sure FastAPI is running: `uvicorn backend.main:app --reload`"
 
 
 def _get(path: str) -> dict | list:
@@ -10,10 +11,14 @@ def _get(path: str) -> dict | list:
         r.raise_for_status()
         return r.json()
     except requests.exceptions.ConnectionError:
-        st.error("Cannot connect to the backend. Make sure FastAPI is running: `uvicorn backend.main:app --reload`")
+        st.error(_BACKEND_CONN_ERROR)
         st.stop()
     except requests.exceptions.HTTPError as e:
-        st.error(f"Backend error: {e.response.json().get('detail', str(e))}")
+        try:
+            detail = e.response.json().get("detail", str(e))
+        except Exception:
+            detail = str(e)
+        st.error(f"Backend error: {detail}")
         st.stop()
 
 
@@ -23,7 +28,7 @@ def _post(path: str, body: dict) -> dict:
         r.raise_for_status()
         return r.json()
     except requests.exceptions.ConnectionError:
-        st.error("Cannot connect to the backend. Make sure FastAPI is running: `uvicorn backend.main:app --reload`")
+        st.error(_BACKEND_CONN_ERROR)
         st.stop()
     except requests.exceptions.HTTPError as e:
         detail = ""
@@ -41,10 +46,14 @@ def _put(path: str, body: dict) -> dict:
         r.raise_for_status()
         return r.json()
     except requests.exceptions.ConnectionError:
-        st.error("Cannot connect to the backend. Make sure FastAPI is running: `uvicorn backend.main:app --reload`")
+        st.error(_BACKEND_CONN_ERROR)
         st.stop()
     except requests.exceptions.HTTPError as e:
-        st.error(f"Backend error: {e.response.json().get('detail', str(e))}")
+        try:
+            detail = e.response.json().get("detail", str(e))
+        except Exception:
+            detail = str(e)
+        st.error(f"Backend error: {detail}")
         st.stop()
 
 
@@ -54,10 +63,14 @@ def _delete(path: str) -> dict:
         r.raise_for_status()
         return r.json()
     except requests.exceptions.ConnectionError:
-        st.error("Cannot connect to the backend. Make sure FastAPI is running: `uvicorn backend.main:app --reload`")
+        st.error(_BACKEND_CONN_ERROR)
         st.stop()
     except requests.exceptions.HTTPError as e:
-        st.error(f"Backend error: {e.response.json().get('detail', str(e))}")
+        try:
+            detail = e.response.json().get("detail", str(e))
+        except Exception:
+            detail = str(e)
+        st.error(f"Backend error: {detail}")
         st.stop()
 
 
