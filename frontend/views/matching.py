@@ -277,7 +277,7 @@ def scroll_to_results(anchor_id="match-results-anchor"):
 def render_hero_new():
     if "hero_img_2_b64" not in st.session_state:
         try:
-            with open(os.path.join("assets", "2.png"), "rb") as f:
+            with open(os.path.join("assets", "ccmatchlogo.png"), "rb") as f:
                 st.session_state["hero_img_2_b64"] = base64.b64encode(f.read()).decode()
         except FileNotFoundError:
             st.session_state["hero_img_2_b64"] = None
@@ -474,6 +474,7 @@ def show_profile_dialog(c: dict, score=None):
         )
         client_name  = st.text_input("Your Full Name")
         client_email = st.text_input("Your Email Address")
+        st.write("")
 
         col1, col2 = st.columns(2)
         col1.button("Cancel", use_container_width=True, on_click=toggle_req, args=(False,))
