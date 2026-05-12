@@ -5,9 +5,9 @@ import numpy as np
 # ======================================================
 # 1. GLOBAL SETTINGS
 # ======================================================
-NUM_CLIENTS = 700
-NUM_COUNSELORS = 120
-COUNSELORS_PER_CLIENT = 40
+NUM_CLIENTS = 1200
+NUM_COUNSELORS = 200
+COUNSELORS_PER_CLIENT = 60
 
 random.seed(42)
 np.random.seed(42)
@@ -39,10 +39,18 @@ def generate_experience_years(age):
 # 4. ISSUE SIMILARITY
 # ======================================================
 ISSUE_SIMILARITY = {
-    "Anxiety": {"Anxiety":1.0,"Stress":0.7,"Trauma":0.5,"Depression":0.6},
-    "Stress": {"Stress":1.0,"Anxiety":0.7,"Trauma":0.6,"Depression":0.5},
-    "Trauma": {"Trauma":1.0,"Stress":0.6,"Anxiety":0.5,"Depression":0.4},
-    "Depression": {"Depression":1.0,"Anxiety":0.6,"Stress":0.5,"Trauma":0.4}
+    "Anxiety":    {"Anxiety":1.0,"Stress":0.7,"Trauma":0.6,"Depression":0.6},
+    "Stress":     {"Stress":1.0,"Anxiety":0.7,"Trauma":0.6,"Depression":0.5},
+    "Trauma":     {"Trauma":1.0,"Stress":0.6,"Anxiety":0.6,"Depression":0.6},
+    "Depression": {"Depression":1.0,"Anxiety":0.6,"Stress":0.5,"Trauma":0.6}
+}
+
+# Clinical evidence: how well each modality treats each issue
+MODALITY_ISSUE_FIT = {
+    "Anxiety":    {"CBT": 1.0, "Mindfulness": 0.8, "REBT": 0.7, "Humanistic": 0.5},
+    "Depression": {"CBT": 1.0, "Mindfulness": 0.8, "Humanistic": 0.6, "REBT": 0.6},
+    "Stress":     {"Mindfulness": 1.0, "CBT": 0.7, "Humanistic": 0.7, "REBT": 0.5},
+    "Trauma":     {"CBT": 1.0, "Humanistic": 0.6, "Mindfulness": 0.5, "REBT": 0.3},
 }
 
 # ======================================================
@@ -120,7 +128,7 @@ for i in range(NUM_COUNSELORS):
 # 7. GENERATE PAIRS & LABEL (FIXED)
 # ======================================================
 rows = []
-MAX_SCORE = 74
+MAX_SCORE = 75  # 26 + 6 + 6 + 8 + 6 + 9 (trauma exp) + 14 (modality fit)
 
 for client in clients:
     for counselor in random.sample(counselors, COUNSELORS_PER_CLIENT):
@@ -135,13 +143,13 @@ for client in clients:
 
         # Issue similarity
         sim = ISSUE_SIMILARITY[client["client_issue"]][counselor["specialization"]]
-        S += 30 * sim
+        S += 26 * sim
 
-        # Modality
+        # Modality preference match
         if client["preferred_modality"] == counselor["counselor_modality"]:
-            S += 15 + (5 * sim)
+            S += 5 + sim
         else:
-            S += 3 + (2 * sim)
+            S += 1 + sim
 
         # Previous experience
         S += 6 if client["previous_counseling_experience"] == 1 else 3
@@ -150,20 +158,29 @@ for client in clients:
         preferred = client["preferred_counselor_gender"]
         c_gender = counselor["counselor_gender"]
         if preferred == "No preference":
-            S += 6
+            S += 5
         elif preferred == c_gender:
-            S += 10
+            S += 8
         else:
             S += 2
 
         # Ethnicity
         if client["client_ethnicity"] == counselor["counselor_ethnicity"]:
-            S += 5
+            S += 6
         else:
-            S += 3
+            S += 2
 
-        # Experience bonus
-        S += min(counselor["experience_years"], 10) * 0.3
+        # Experience bonus - weighted by clinical complexity of the issue
+        if client["client_issue"] == "Trauma":
+            S += min(counselor["experience_years"], 15) * 0.6  # up to 9 pts
+        elif client["client_issue"] == "Depression":
+            S += min(counselor["experience_years"], 12) * 0.5  # up to 6 pts
+        else:
+            S += min(counselor["experience_years"], 10) * 0.3  # up to 3 pts
+
+        # Clinical modality-issue fit (evidence-based)
+        fit = MODALITY_ISSUE_FIT[client["client_issue"]][counselor["counselor_modality"]]
+        S += 14 * fit  # up to 14 pts
 
         # ======================================================
         # FINAL LABEL
@@ -172,9 +189,9 @@ for client in clients:
         base_prob += random.uniform(-0.05, 0.05)
         final_prob = max(0.05, min(0.95, base_prob))
 
-        if final_prob > 0.70:
+        if final_prob > 0.65:
             match_success = 1
-        elif final_prob < 0.50:
+        elif final_prob < 0.55:
             match_success = 0
         else:
             match_success = np.random.binomial(1, final_prob)
