@@ -5,9 +5,9 @@ import numpy as np
 # ======================================================
 # 1. GLOBAL SETTINGS
 # ======================================================
-NUM_CLIENTS = 1200
-NUM_COUNSELORS = 200
-COUNSELORS_PER_CLIENT = 60
+NUM_CLIENTS = 1200   # 900
+NUM_COUNSELORS = 200   # 180
+COUNSELORS_PER_CLIENT = 50  #60
 
 random.seed(42)
 np.random.seed(42)
@@ -40,17 +40,17 @@ def generate_experience_years(age):
 # ======================================================
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety":1.0,"Stress":0.7,"Trauma":0.6,"Depression":0.6},
-    "Stress":     {"Stress":1.0,"Anxiety":0.7,"Trauma":0.6,"Depression":0.5},
+    "Stress":     {"Stress":1.0,"Anxiety":0.7,"Trauma":0.6,"Depression":0.6},
     "Trauma":     {"Trauma":1.0,"Stress":0.6,"Anxiety":0.6,"Depression":0.6},
-    "Depression": {"Depression":1.0,"Anxiety":0.6,"Stress":0.5,"Trauma":0.6}
+    "Depression": {"Depression":1.0,"Anxiety":0.6,"Stress":0.6,"Trauma":0.6}
 }
 
 # Clinical evidence: how well each modality treats each issue
 MODALITY_ISSUE_FIT = {
-    "Anxiety":    {"CBT": 1.0, "Mindfulness": 0.8, "REBT": 0.7, "Humanistic": 0.5},
-    "Depression": {"CBT": 1.0, "Mindfulness": 0.8, "Humanistic": 0.6, "REBT": 0.6},
+    "Anxiety":    {"CBT": 1.0, "Mindfulness": 0.8, "REBT": 0.7, "Humanistic": 0.4},
+    "Depression": {"CBT": 1.0, "Mindfulness": 0.8, "Humanistic": 0.7, "REBT": 0.6},
     "Stress":     {"Mindfulness": 1.0, "CBT": 0.7, "Humanistic": 0.7, "REBT": 0.5},
-    "Trauma":     {"CBT": 1.0, "Humanistic": 0.6, "Mindfulness": 0.5, "REBT": 0.3},
+    "Trauma":     {"CBT": 1.0, "Humanistic": 0.5, "Mindfulness": 0.5, "REBT": 0.5},
 }
 
 # ======================================================
@@ -128,7 +128,8 @@ for i in range(NUM_COUNSELORS):
 # 7. GENERATE PAIRS & LABEL (FIXED)
 # ======================================================
 rows = []
-MAX_SCORE = 75  # 26 + 6 + 6 + 8 + 6 + 9 (trauma exp) + 14 (modality fit)
+S_MIN = 38.7  # worst pair: 45*0.6 + (3+0.6) + 1.5 + 1 + 2 + 0 + 9*0.4 + 0
+S_MAX = 90.0  # best pair:  45*1.0 + (11+1.0) + 5 + 5 + 5 + 7 + 9*1.0 + 2
 
 for client in clients:
     for counselor in random.sample(counselors, COUNSELORS_PER_CLIENT):
@@ -141,57 +142,57 @@ for client in clients:
 
         S = 0
 
-        # Issue similarity
+        # Issue similarity (d=0.75)
         sim = ISSUE_SIMILARITY[client["client_issue"]][counselor["specialization"]]
-        S += 26 * sim
+        S += 45 * sim
 
-        # Modality preference match
+        # Modality preference match (d=0.27, Swift et al. 2018)
         if client["preferred_modality"] == counselor["counselor_modality"]:
-            S += 5 + sim
+            S += 11 + sim
         else:
-            S += 1 + sim
+            S += 3 + sim
 
-        # Previous experience
-        S += 6 if client["previous_counseling_experience"] == 1 else 3
+        # Previous experience (d~0.10, weak evidence)
+        S += 5 if client["previous_counseling_experience"] == 1 else 1.5
 
-        # Gender
+        # Gender (d=0.12, Cabral & Smith 2011)
         preferred = client["preferred_counselor_gender"]
         c_gender = counselor["counselor_gender"]
         if preferred == "No preference":
             S += 5
         elif preferred == c_gender:
-            S += 8
+            S += 5
         else:
-            S += 2
+            S += 1
 
-        # Ethnicity
+        # Ethnicity (d=0.09, Cabral & Smith 2011)
         if client["client_ethnicity"] == counselor["counselor_ethnicity"]:
-            S += 6
+            S += 5
         else:
             S += 2
 
-        # Experience bonus - weighted by clinical complexity of the issue
-        if client["client_issue"] == "Trauma":
-            S += min(counselor["experience_years"], 15) * 0.6  # up to 9 pts
-        elif client["client_issue"] == "Depression":
-            S += min(counselor["experience_years"], 12) * 0.5  # up to 6 pts
-        else:
-            S += min(counselor["experience_years"], 10) * 0.3  # up to 3 pts
+        # Senior counselor bonus (d=0.21) — binary: exp >= 8 yrs = senior
+        if counselor["experience_years"] >= 8:
+            S += 7
 
-        # Clinical modality-issue fit (evidence-based)
+        # Clinical modality-issue fit (d=0.175)
         fit = MODALITY_ISSUE_FIT[client["client_issue"]][counselor["counselor_modality"]]
-        S += 14 * fit  # up to 14 pts
+        S += 9 * fit  # up to 9 pts
+
+        # Age gap (Lehane 2025, small directional effect)
+        age_gap = abs(client["client_age"] - counselor["counselor_age"])
+        S += max(0, 20 - age_gap) * 0.10  # up to 2 pts for close age pairs
 
         # ======================================================
         # FINAL LABEL
         # ======================================================
-        base_prob = S / MAX_SCORE
+        base_prob = (S - S_MIN) / (S_MAX - S_MIN)  # normalized [0, 1]
         base_prob += random.uniform(-0.05, 0.05)
-        final_prob = max(0.05, min(0.95, base_prob))
+        final_prob = max(0.0, min(1.0, base_prob))
 
-        if final_prob > 0.65:
+        if final_prob > 0.49:
             match_success = 1
-        elif final_prob < 0.55:
+        elif final_prob < 0.29:
             match_success = 0
         else:
             match_success = np.random.binomial(1, final_prob)

@@ -7,13 +7,13 @@ router = APIRouter(prefix="/model-performance", tags=["model-performance"])
 
 BASE_DIR = Path(__file__).parent.parent.parent
 
-DEPLOYED_MODEL = "XGBoost"
+DEPLOYED_MODEL = "Ensemble (LGBM+Cat)"
 
 
 @router.get("/", response_model=ModelPerformanceResponse)
 def get_model_performance():
-    csv_path = BASE_DIR / "model_results.csv"
-    tuning_csv_path = BASE_DIR / "tuning_comparison.csv"
+    csv_path        = BASE_DIR / "model_results.csv"
+    ensemble_csv    = BASE_DIR / "ensemble_comparison.csv"
 
     if not csv_path.exists():
         raise HTTPException(status_code=404, detail="model_results.csv not found. Please run training first.")
@@ -27,13 +27,12 @@ def get_model_performance():
         tuning_models = []
         best_roc = float(df["ROC-AUC"].max())
 
-        if tuning_csv_path.exists():
-            df_tuning = pd.read_csv(str(tuning_csv_path))
-            tuning_models = df_tuning.to_dict(orient="records")
-            # Use tuned XGBoost ROC-AUC as the headline metric
-            xgb_row = df_tuning[df_tuning["Model"].str.contains("XGBoost", case=False)]
-            if not xgb_row.empty:
-                best_roc = float(xgb_row["ROC-AUC"].iloc[0])
+        if ensemble_csv.exists():
+            df_ensemble = pd.read_csv(str(ensemble_csv))
+            tuning_models = df_ensemble.to_dict(orient="records")
+            ens_row = df_ensemble[df_ensemble["Model"].str.contains("Ensemble", case=False)]
+            if not ens_row.empty:
+                best_roc = float(ens_row["ROC-AUC"].iloc[0])
 
         return {
             "models": df.drop(columns=["Overall"]).to_dict(orient="records"),

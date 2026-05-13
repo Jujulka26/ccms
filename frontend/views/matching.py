@@ -295,7 +295,7 @@ def render_hero_new():
                 <div class="hero-image-wrap">{img_tag}</div>
             </div>
             <div class="hero-stats">
-                <div><div class="hero-stat-num">9</div><div class="hero-stat-label">Match factors</div></div>
+                <div><div class="hero-stat-num">11</div><div class="hero-stat-label">Match factors</div></div>
                 <div><div class="hero-stat-num">ML</div><div class="hero-stat-label">Powered</div></div>
                 <div><div class="hero-stat-num">SHAP</div><div class="hero-stat-label">Explainability</div></div>
             </div>
@@ -1011,10 +1011,17 @@ def show_matching_page():
                 st.info(shap_result["error"])
             else:
                 readable_names = {
-                    "issue_score": "Issue Similarity", "modality_match": "Preferred Modality Match",
-                    "gender_match": "Preferred Gender Match", "ethnicity_match": "Ethnicity Match",
-                    "age_gap": "Age Gap", "client_age": "Client Age", "counselor_age": "Counselor Age",
-                    "exp_years": "Counselor Experience (Years)", "prev_exp": "Client Previous Experience",
+                    "issue_score":        "Issue Similarity",
+                    "modality_issue_fit": "Issue-Modality Fit",
+                    "modality_match":     "Preferred Modality Match",
+                    "gender_match":       "Preferred Gender Match",
+                    "exp_issue_weight":   "Counselor Seniority",
+                    "ethnicity_match":    "Ethnicity Match",
+                    "prev_exp":           "Client Previous Experience",
+                    "age_gap":            "Age Gap",
+                    "exp_years":          "Counselor Experience (Years)",
+                    "client_age":         "Client Age",
+                    "counselor_age":      "Counselor Age",
                 }
                 try:
                     import matplotlib.pyplot as plt

@@ -159,7 +159,7 @@ def show_model_performance_page():
 
     model_count = data["model_count"]
     best_roc = data["best_roc_auc"] * 100
-    deployed_model = data.get("deployed_model", "XGBoost")
+    deployed_model = data.get("deployed_model", "Ensemble (LGBM+Cat)")
     df = pd.DataFrame(data["models"])
     tuning_models = data.get("tuning_models", [])
 
@@ -220,8 +220,8 @@ def show_model_performance_page():
         st.markdown(
             """
             <div class="pm-card">
-                <div class="pm-card-title">Tuning evaluation — Random Forest vs XGBoost</div>
-                <p class="pm-card-copy">Random Forest (Bagging) and XGBoost (Boosting) were tuned via grid search. XGBoost outperforms RF across all three metrics after tuning.</p>
+                <div class="pm-card-title">Ensemble evaluation — LightGBM vs CatBoost</div>
+                <p class="pm-card-copy">LightGBM and CatBoost were identified as the top two models with complementary strengths — LightGBM achieved higher ROC-AUC while CatBoost achieved higher Accuracy. A soft-voting ensemble combining both was selected as the final deployed model.</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -243,10 +243,10 @@ def show_model_performance_page():
             <div class="pm-recommend-badge">&#10003; &nbsp;Deployed Model</div>
             <div class="pm-recommend-title">{deployed_model} is the active model</div>
             <p class="pm-recommend-copy">
-                While Random Forest achieved a marginally higher overall average at baseline, both models were
-                hyperparameter-tuned for a fair final comparison. After tuning, XGBoost (Boosting) outperformed
-                Random Forest (Bagging) across all three metrics — Accuracy, F1, and ROC-AUC — and was selected
-                as the deployed model for client-counselor matching.
+                LightGBM and CatBoost were the top two performers at baseline. A soft-voting ensemble
+                averaging their predicted probabilities achieved the best overall results — matching peak F1
+                while combining both models' strengths — and was selected as the deployed model for
+                client-counselor matching.
             </p>
         </div>
         """,
