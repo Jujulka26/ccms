@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 from backend.routers import counselors, auth, requests, matching, model_performance, contact
 
@@ -18,6 +19,7 @@ app.include_router(requests.router)
 app.include_router(matching.router)
 app.include_router(model_performance.router)
 app.include_router(contact.router)
+
 
 
 @app.get("/")

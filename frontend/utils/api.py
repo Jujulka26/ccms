@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+from urllib.parse import quote
 
 BASE_URL = "http://localhost:8000"
 _BACKEND_CONN_ERROR = "Cannot connect to the backend. Make sure FastAPI is running: `uvicorn backend.main:app --reload`"
@@ -105,6 +106,11 @@ def login(email: str, password: str) -> bool:
 @st.cache_data(ttl=60)
 def get_requests() -> list[dict]:
     return _get("/requests/")
+
+
+def check_pending_request(email: str) -> bool:
+    result = _get(f"/requests/check-pending?email={quote(email)}")
+    return result.get("has_pending", False) if result else False
 
 
 def save_intro_request(client_name: str, client_email: str, counselor_id: int, compatibility_score: float):

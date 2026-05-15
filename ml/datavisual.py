@@ -33,7 +33,8 @@ def show_histogram(series, title, xlabel):
 # =========================================================
 # 1. LOAD DATA
 # =========================================================
-df = pd.read_csv("client_counselor_dataset.csv")
+from pathlib import Path as _Path
+df = pd.read_csv(_Path(__file__).parent / "client_counselor_dataset.csv")
 
 print("===== BASIC INFO =====")
 print(df.info())

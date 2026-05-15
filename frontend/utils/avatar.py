@@ -1,4 +1,5 @@
 import base64
+import io
 from pathlib import Path
 
 _AVATAR_COLORS = [
@@ -7,6 +8,27 @@ _AVATAR_COLORS = [
 ]
 
 _IMG_DIR = Path(__file__).parent.parent.parent / "backend" / "static" / "counselors"
+
+# Cache: filename -> base64 data URL of the resized thumbnail
+_IMG_CACHE: dict[str, str] = {}
+_THUMB_SIZE = 160  # px — more than enough for 84px display
+
+
+def _load_thumbnail(img_path: Path) -> str:
+    """Read, resize to thumbnail, return as base64 data URL."""
+    try:
+        from PIL import Image
+        img = Image.open(img_path).convert("RGB")
+        img.thumbnail((_THUMB_SIZE, _THUMB_SIZE), Image.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=85, optimize=True)
+        b64 = base64.b64encode(buf.getvalue()).decode()
+        return f"data:image/jpeg;base64,{b64}"
+    except ImportError:
+        # Pillow not installed — fall back to raw base64 (original behavior)
+        ext = img_path.suffix.lstrip(".")
+        b64 = base64.b64encode(img_path.read_bytes()).decode()
+        return f"data:image/{ext};base64,{b64}"
 
 
 def _initials(name: str) -> str:
@@ -21,14 +43,15 @@ def _color(name: str) -> str:
 
 
 def avatar_html(name: str, image: str | None, size: int = 72, radius: int = 14) -> str:
-    """Return an <img> tag if image file exists, otherwise a styled initials div."""
+    """Return an <img> tag (thumbnail base64) or a styled initials div."""
     if image:
-        img_path = _IMG_DIR / image
-        if img_path.exists():
-            ext = img_path.suffix.lstrip(".")
-            b64 = base64.b64encode(img_path.read_bytes()).decode()
+        if image not in _IMG_CACHE:
+            img_path = _IMG_DIR / image
+            _IMG_CACHE[image] = _load_thumbnail(img_path) if img_path.exists() else ""
+        data_url = _IMG_CACHE[image]
+        if data_url:
             return (
-                f'<img src="data:image/{ext};base64,{b64}" '
+                f'<img src="{data_url}" '
                 f'width="{size}" height="{size}" '
                 f'style="border-radius:{radius}px;border:1.5px solid #EDE8E3;'
                 f'flex-shrink:0;object-fit:cover;" />'

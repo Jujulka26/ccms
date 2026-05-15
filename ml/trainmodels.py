@@ -94,8 +94,6 @@ features = [
     'ethnicity_match',
     'prev_exp',
     'age_gap',
-    'exp_years',
-    'client_age',
     'counselor_age',
 ]
 

@@ -39,8 +39,8 @@ def show_login_page():
 
     with col2:
         with st.form("admin_login_card", clear_on_submit=False):
-            st.markdown('<div class="login-title">Admin Login</div>', unsafe_allow_html=True)
-            st.markdown('<div class="login-subtitle">Sign in to manage directory and models.</div>', unsafe_allow_html=True)
+            st.markdown('<div class="login-title">Staff Login</div>', unsafe_allow_html=True)
+            st.markdown('<div class="login-subtitle">Authorised access only.</div>', unsafe_allow_html=True)
 
             email = st.text_input("Email")
             password = st.text_input("Password", type="password")

@@ -5,9 +5,9 @@ import numpy as np
 # ======================================================
 # 1. GLOBAL SETTINGS
 # ======================================================
-NUM_CLIENTS = 1200   # 900
-NUM_COUNSELORS = 200   # 180
-COUNSELORS_PER_CLIENT = 50  #60
+NUM_CLIENTS = 900# 900
+NUM_COUNSELORS = 180   # 180
+COUNSELORS_PER_CLIENT = 60  #60
 
 random.seed(42)
 np.random.seed(42)
@@ -128,8 +128,8 @@ for i in range(NUM_COUNSELORS):
 # 7. GENERATE PAIRS & LABEL (FIXED)
 # ======================================================
 rows = []
-S_MIN = 38.7  # worst pair: 45*0.6 + (3+0.6) + 1.5 + 1 + 2 + 0 + 9*0.4 + 0
-S_MAX = 90.0  # best pair:  45*1.0 + (11+1.0) + 5 + 5 + 5 + 7 + 9*1.0 + 2
+S_MIN = 32.7  # worst pair: 35*0.6 + (3+0.6) + 1.5 + 1 + 2 + 0 + 9*0.4 + 0
+S_MAX = 80.0  # best pair:  35*1.0 + (11+1.0) + 5 + 5 + 5 + 7 + 9*1.0 + 2
 
 for client in clients:
     for counselor in random.sample(counselors, COUNSELORS_PER_CLIENT):
@@ -144,7 +144,7 @@ for client in clients:
 
         # Issue similarity (d=0.75)
         sim = ISSUE_SIMILARITY[client["client_issue"]][counselor["specialization"]]
-        S += 45 * sim
+        S += 35 * sim
 
         # Modality preference match (d=0.27, Swift et al. 2018)
         if client["preferred_modality"] == counselor["counselor_modality"]:
@@ -190,9 +190,9 @@ for client in clients:
         base_prob += random.uniform(-0.05, 0.05)
         final_prob = max(0.0, min(1.0, base_prob))
 
-        if final_prob > 0.49:
+        if final_prob > 0.50:
             match_success = 1
-        elif final_prob < 0.29:
+        elif final_prob < 0.22:
             match_success = 0
         else:
             match_success = np.random.binomial(1, final_prob)

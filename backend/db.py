@@ -91,6 +91,17 @@ def add_counselor(
         conn.close()
 
 
+def get_counselor_by_name(name: str) -> dict | None:
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT counselor_id FROM tbl_counselor WHERE name=%s LIMIT 1", (name,))
+        return cursor.fetchone()
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def update_counselor(
     counselor_id, name, age, gender, ethnicity, specialization,
     counselor_language, counselor_modality, experience_years,
@@ -138,6 +149,20 @@ def delete_counselor(counselor_id: int):
     try:
         cursor.execute("DELETE FROM tbl_counselor WHERE counselor_id=%s", (counselor_id,))
         conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def has_pending_request(email: str) -> bool:
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT 1 FROM tbl_request WHERE client_email=%s AND status='Pending' LIMIT 1",
+            (email,),
+        )
+        return cursor.fetchone() is not None
     finally:
         cursor.close()
         conn.close()

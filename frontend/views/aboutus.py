@@ -192,7 +192,7 @@ def show_aboutus_page():
             <div style="position: relative; z-index: 2;">
                 <div class="au-eyebrow">About Us</div>
                 <div class="au-hero-title">Built for people,<br>powered by AI.</div>
-                <p class="au-hero-copy">We believe everyone deserves the right mental health support — our platform uses machine learning to find the counselor who truly fits you.</p>
+                <p class="au-hero-copy">The right support, matched to you.</p>
             </div>
             <div class="au-hero-emoji">🧠</div>
         </div>

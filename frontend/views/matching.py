@@ -8,7 +8,7 @@ import streamlit.components.v1 as components
 import time
 import google.generativeai as genai
 
-from frontend.utils.api import get_reference_data, post_match, post_shap, save_intro_request
+from frontend.utils.api import get_reference_data, post_match, post_shap, save_intro_request, check_pending_request
 from frontend.utils.avatar import avatar_html
 
 # ── Custom CSS ────────────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ def inject_styles():
             color: #8B5CF6; background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.25);
             border-radius: 20px; padding: 4px 14px; margin-bottom: 20px;
         }
-        .hero-title { font-family: 'DM Serif Display', serif; font-size: 42px; line-height: 1.15; color: #1A1A2E; margin: 0 0 16px; letter-spacing: -0.5px; }
+        .hero-title { font-family: 'DM Serif Display', serif; font-size: clamp(26px, 5vw, 42px); line-height: 1.15; color: #1A1A2E; margin: 0 0 16px; letter-spacing: -0.5px; }
         .hero-subtitle { font-size: 16px; color: #4A4A5C; max-width: 480px; line-height: 1.65; margin: 0; }
         .hero-stats { display: flex; gap: 40px; margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(0,0,0,0.08); }
         .hero-stat-num { font-family: 'DM Serif Display', serif; font-size: 28px; color: #1A1A2E; line-height: 1; }
@@ -193,6 +193,16 @@ def inject_styles():
             padding: 24px !important;
             background: #FFFFFF;
         }
+        [data-testid="stCustomComponentV1"] {
+            height: 0 !important;
+            min-height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: hidden !important;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -277,7 +287,7 @@ def scroll_to_results(anchor_id="match-results-anchor"):
 def render_hero_new():
     if "hero_img_2_b64" not in st.session_state:
         try:
-            with open(os.path.join("assets", "ccmatchlogo.png"), "rb") as f:
+            with open(os.path.join("frontend", "assets", "ccmatchlogo.png"), "rb") as f:
                 st.session_state["hero_img_2_b64"] = base64.b64encode(f.read()).decode()
         except FileNotFoundError:
             st.session_state["hero_img_2_b64"] = None
@@ -290,19 +300,79 @@ def render_hero_new():
                 <div class="hero-text">
                     <div class="hero-eyebrow">AI-Powered Matching</div>
                     <h1 class="hero-title">Find Your<br><em>Ideal Counselor</em></h1>
-                    <p class="hero-subtitle">Our model analyses compatibility across specialization, language, modality and personal fit — ranked by predicted outcome.</p>
+                    <p class="hero-subtitle" style="font-style:italic;">"Asking for help is a sign of strength, not weakness."</p>
                 </div>
                 <div class="hero-image-wrap">{img_tag}</div>
             </div>
             <div class="hero-stats">
-                <div><div class="hero-stat-num">11</div><div class="hero-stat-label">Match factors</div></div>
-                <div><div class="hero-stat-num">ML</div><div class="hero-stat-label">Powered</div></div>
+                <div><div class="hero-stat-num">9</div><div class="hero-stat-label">Match factors</div></div>
+                <div><div class="hero-stat-num">Match</div><div class="hero-stat-label">Personalised</div></div>
                 <div><div class="hero-stat-num">SHAP</div><div class="hero-stat-label">Explainability</div></div>
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+
+def render_disclaimer():
+    st.markdown(
+        """
+        <div style="
+            background: rgba(245,158,11,0.05);
+            border: 1px solid rgba(245,158,11,0.25);
+            border-left: 4px solid #F59E0B;
+            border-radius: 0 12px 12px 0;
+            padding: 14px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        ">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span style="font-size:13px; color:#5A5A6E; line-height:1.6;">
+                <strong style="color:#B45309;">Disclaimer:</strong>
+                Compatibility scores are AI-generated estimates based on stated preferences — not clinical assessments. Results should not replace the advice of a qualified mental health professional.
+            </span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _match_badges(c: dict, primary: bool) -> str:
+    feats = c.get("features") or {}
+    badges = []
+    issue = c.get("issue_score", 0)
+    if issue >= 1.0:
+        badges.append(("Issue Match", True))
+    elif issue >= 0.6:
+        badges.append(("Related Issue", None))
+    if c.get("modality_match"):
+        badges.append(("Modality Match", True))
+    if feats.get("exp_issue_weight") or c.get("experience_years", 0) >= 8:
+        badges.append(("Senior Counselor", True))
+    if c.get("gender_match"):
+        badges.append(("Gender Match", True))
+    if feats.get("ethnicity_match"):
+        badges.append(("Ethnicity Match", True))
+
+    if primary:
+        def chip(label, matched):
+            if matched is True:
+                return f'<span style="background:rgba(16,185,129,0.18);color:#6EE7B7;border:1px solid rgba(16,185,129,0.3);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">✓ {label}</span>'
+            return f'<span style="background:rgba(245,158,11,0.18);color:#FCD34D;border:1px solid rgba(245,158,11,0.3);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">~ {label}</span>'
+    else:
+        def chip(label, matched):
+            if matched is True:
+                return f'<span style="background:rgba(16,185,129,0.1);color:#065F46;border:1px solid rgba(16,185,129,0.25);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">✓ {label}</span>'
+            return f'<span style="background:rgba(245,158,11,0.1);color:#92400E;border:1px solid rgba(245,158,11,0.25);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">~ {label}</span>'
+
+    return '<div style="display:flex;flex-wrap:wrap;gap:6px;padding:12px 0 4px;">' + "".join(chip(l, m) for l, m in badges) + "</div>"
 
 
 def render_counselor_card(c: dict, score: float, is_primary=True, dismiss_key: str | None = None):
@@ -326,6 +396,7 @@ def render_counselor_card(c: dict, score: float, is_primary=True, dismiss_key: s
                         <div class="compat-label">Compatibility score</div>
                     </div>
                 </div>
+                {_match_badges(c, True)}
                 <div class="info-row"><span class="info-key">Experience</span><span class="info-val">{c['experience_years']} yrs</span></div>
                 <div class="info-row"><span class="info-key">Specialization</span><span class="info-val">{c['specialization']}</span></div>
                 <div class="info-row"><span class="info-key">Modality</span><span class="info-val">{mods}</span></div>
@@ -349,6 +420,7 @@ def render_counselor_card(c: dict, score: float, is_primary=True, dismiss_key: s
                         <div class="compat-label-secondary">Compatibility score</div>
                     </div>
                 </div>
+                {_match_badges(c, False)}
                 <div class="info-row-secondary"><span class="info-key-secondary">Experience</span><span class="info-val-secondary">{c['experience_years']} yrs</span></div>
                 <div class="info-row-secondary"><span class="info-key-secondary">Specialization</span><span class="info-val-secondary">{c['specialization']}</span></div>
                 <div class="info-row-secondary"><span class="info-key-secondary">Modality</span><span class="info-val-secondary">{mods}</span></div>
@@ -387,83 +459,160 @@ def show_profile_dialog(c: dict, score=None):
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
-    .prof-header { display:flex; align-items:center; gap:20px; margin-bottom:16px; }
-    .prof-name { font-family:'DM Serif Display',serif; font-size:22px; color:#1A1A2E; margin:0 0 3px; line-height:1.2; }
-    .prof-role { font-size:12px; color:#8B5CF6; font-weight:600; margin:0 0 7px; }
-    .prof-meta { display:flex; flex-wrap:wrap; column-gap:14px; row-gap:3px; }
-    .prof-meta-item { font-size:12.5px; color:#5A5A6E; }
+
+    div[role="dialog"] {
+        max-width: 730px !important;
+        width: 730px !important;
+    }
+
+    .prof-header-band {
+        background: linear-gradient(135deg, #F3F0FF 0%, #FFF8F3 100%);
+        border-radius: 16px; padding: 20px 20px 16px; margin-bottom: 4px;
+        border: 1px solid rgba(139,92,246,0.1);
+    }
+    .prof-header { display:flex; align-items:center; gap:18px; }
+    .prof-name { font-family:'DM Serif Display',serif; font-size:23px; color:#1A1A2E; margin:0 0 3px; line-height:1.2; }
+    .prof-role { font-size:12px; color:#8B5CF6; font-weight:700; margin:0 0 8px; letter-spacing:0.03em; }
+    .prof-meta { display:flex; flex-wrap:wrap; column-gap:12px; row-gap:4px; }
+    .prof-meta-item { font-size:12px; color:#5A5A6E; display:flex; align-items:center; gap:3px; }
     .prof-meta-score { font-size:18px; color:#7C3AED; font-weight:700; }
     .prof-score-chip { display:inline-flex; align-items:center; background:#F3F0FF; color:#6D28D9; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:2px 10px; border-radius:20px; border:1px solid rgba(109,40,217,0.2); margin-bottom:6px; }
     .prof-rule { border:none; border-top:1px solid #EBEBEB; margin:14px 0 16px; }
-    .prof-label { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#8B5CF6; margin:0 0 8px; }
-    .prof-section { margin-bottom:18px; }
-    .prof-about { font-size:12.5px; color:#2D2D3F; line-height:1.75; margin:0; }
+
+    .prof-section { margin-bottom:12px; background:#FAFAFA; border-radius:12px; padding:14px 16px; border:1px solid rgba(0,0,0,0.04); }
+    .prof-label { font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#8B5CF6; margin:0 0 10px; }
+    .prof-about { font-size:15px !important; color:#2D2D3F; line-height:1.8; margin:0; }
+
     .prof-pills { display:flex; flex-wrap:wrap; gap:6px; }
-    .prof-pill { background:#F3F0FF; color:#6D28D9; font-size:12px; font-weight:600; padding:4px 12px; border-radius:20px; border:1px solid rgba(109,40,217,0.15); }
-    .prof-thought { font-size:13.5px; color:#4A4A5A; font-style:italic; line-height:1.65; padding-left:12px; border-left:2px solid #D8D0F5; margin-bottom:8px; }
-    .prof-thought:last-child { margin-bottom:0; }
+    .prof-pill {
+        background: linear-gradient(135deg, #F3F0FF, #EDE8FF);
+        color:#6D28D9; font-size:12px; font-weight:600;
+        padding:5px 14px; border-radius:20px;
+        border:1px solid rgba(109,40,217,0.18);
+        box-shadow: 0 1px 3px rgba(109,40,217,0.08);
+    }
+
+    .prof-thoughts-wrap { display:flex; flex-direction:column; gap:8px; }
+    .prof-thought {
+        font-size:13px; color:#78350F; font-style:italic; line-height:1.7;
+        padding: 10px 14px; margin: 0;
+        border-left: 3px solid #F97316;
+        background: rgba(249,115,22,0.06);
+        border-radius: 0 10px 10px 0;
+    }
+
+    .prof-how { font-size:15px !important; color:#2D2D3F; line-height:1.8; margin:0; }
+
     div[data-testid="stExpander"] { background:#FFFFFF !important; border:1px solid #EBEBEB !important; border-radius:12px !important; box-shadow:none !important; margin-bottom:0 !important; }
     div[data-testid="stExpander"] summary { background:#FFFFFF !important; font-size:13px !important; font-weight:600 !important; color:#4A4A5A !important; text-transform:none !important; letter-spacing:0 !important; padding:12px 16px !important; border-radius:12px !important; }
     div[data-testid="stExpander"] summary:hover { background:#F7F5FF !important; color:#6D28D9 !important; }
     div[data-testid="stExpander"] svg { color:#8B5CF6 !important; }
     div[data-testid="stDialog"] [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:first-child { margin-top:-16px !important; }
+
+    div[data-testid="stDialog"] button[kind="primary"] {
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
+        border: none !important;
+        box-shadow: 0 4px 14px rgba(249,115,22,0.35) !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.02em !important;
+        border-radius: 14px !important;
+        padding: 14px 28px !important;
+        transition: all 0.2s ease !important;
+    }
+    div[data-testid="stDialog"] button[kind="primary"]:hover {
+        box-shadow: 0 6px 20px rgba(249,115,22,0.45) !important;
+        transform: translateY(-1px) !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
     score_item = f'<span class="prof-meta-score">✦ {score:.1f}%</span>' if score else ""
     _translate = '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5A5A6E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>'
+    age    = c.get("age", "")
+    gender = c.get("gender", "")
     meta_html = (
-        f'<span class="prof-meta-item">💼 {exp} yrs exp</span>'
+        (f'<span class="prof-meta-item">👤 {gender}</span>' if gender else "")
+        + (f'<span class="prof-meta-item">🎂 Age {age}</span>' if age else "")
+        + f'<span class="prof-meta-item">💼 {exp} yrs exp</span>'
         + (f'<span class="prof-meta-item">{_translate}{lang}</span>' if lang and lang != "—" else "")
     )
     st.markdown(
+        f'<div class="prof-header-band">'
         f'<div class="prof-header">{av}'
-        f'<div style="padding-left:6px;">'
+        f'<div style="padding-left:4px;">'
         f'<div style="display:flex;align-items:baseline;gap:10px;">'
         f'<div class="prof-name">{name}</div>{score_item}</div>'
         f'<div class="prof-role">Licensed Counselor</div>'
-        f'<div class="prof-meta">{meta_html}</div></div></div>'
-        f'<hr class="prof-rule">',
+        f'<div class="prof-meta">{meta_html}</div></div></div></div>'
+        f'<div style="height:12px;"></div>',
         unsafe_allow_html=True,
     )
 
+    left_col = ""
+    right_col = ""
+
     if about.strip():
-        st.markdown(
+        left_col += (
             f'<div class="prof-section"><div class="prof-label">About</div>'
-            f'<p class="prof-about">{about}</p></div>',
-            unsafe_allow_html=True,
+            f'<p class="prof-about">{about}</p></div>'
+        )
+    if modality_desc.strip():
+        left_col += (
+            f'<div class="prof-section"><div class="prof-label">How I work with you</div>'
+            f'<p class="prof-how">{modality_desc}</p></div>'
         )
 
     if pills:
         pills_html = "".join(f'<span class="prof-pill">{p}</span>' for p in pills)
-        st.markdown(
+        right_col += (
             f'<div class="prof-section"><div class="prof-label">Areas of Expertise</div>'
-            f'<div class="prof-pills">{pills_html}</div></div>',
-            unsafe_allow_html=True,
+            f'<div class="prof-pills">{pills_html}</div></div>'
         )
-
     if thoughts:
         rows = "".join(f'<div class="prof-thought">"{t}"</div>' for t in thoughts)
-        st.markdown(
-            f'<div class="prof-section"><div class="prof-label">You might be thinking...</div>{rows}</div>',
-            unsafe_allow_html=True,
+        right_col += (
+            f'<div class="prof-section"><div class="prof-label">You might be thinking...</div>'
+            f'<div class="prof-thoughts-wrap">{rows}</div></div>'
         )
 
-    if modality_desc.strip():
+    if left_col or right_col:
         st.markdown(
-            f'<div class="prof-section"><div class="prof-label">How I work with you</div>'
-            f'<p class="prof-about">{modality_desc}</p></div>',
+            f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px;">'
+            f'<div>{left_col}</div><div>{right_col}</div></div>',
             unsafe_allow_html=True,
         )
 
     st.write("")
 
-    req_state_key = f"req_{c.get('counselor_id')}"
+    counselor_id  = c.get("counselor_id")
+    req_state_key = f"req_{counselor_id}"
+
     if req_state_key not in st.session_state:
         st.session_state[req_state_key] = False
 
     def toggle_req(val):
         st.session_state[req_state_key] = val
+
+    # Session display: show confirmation if a request was sent this session
+    already_sent_to = st.session_state.get("_global_sent_to")
+    if already_sent_to:
+        same = already_sent_to == name
+        sent_title = "Request already sent" if same else "You already have a pending request"
+        sent_body  = (f"We'll connect you with {name} soon." if same
+                      else f"Please wait to hear back from {already_sent_to} before reaching out to another counselor.")
+        st.markdown(
+            f'<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);'
+            f'border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+            f'<span style="font-size:22px;">✅</span>'
+            f'<div>'
+            f'<div style="font-size:13px;font-weight:600;color:#065F46;">{sent_title}</div>'
+            f'<div style="font-size:12px;color:#5A5A6E;margin-top:2px;">{sent_body}</div>'
+            f'</div></div>',
+            unsafe_allow_html=True,
+        )
+        st.write("")
+        return
 
     if not st.session_state[req_state_key]:
         st.button(f"✉️ Get to know {name}", use_container_width=True, type="primary",
@@ -481,19 +630,95 @@ def show_profile_dialog(c: dict, score=None):
         if col2.button("Send Request", use_container_width=True, type="primary"):
             if not client_name.strip() or not client_email.strip():
                 st.error("Please fill in both your name and email.")
+            elif check_pending_request(client_email.strip()):
+                st.error(
+                    "This email already has a pending request. "
+                    "Please wait to hear back before sending another."
+                )
             else:
                 save_intro_request(
                     client_name.strip(), client_email.strip(),
-                    int(c.get("counselor_id")), float(score) if score else 0.0,
+                    int(counselor_id), float(score) if score else 0.0,
                 )
-                st.success(f"Request sent! We will connect you with {name} soon.")
-                time.sleep(2)
-                st.session_state.quiz_step = 0
-                st.session_state[req_state_key] = False
+                st.session_state["_global_sent_to"] = name
+                st.session_state["_success_name"] = name
                 st.rerun()
 
 
+# ── Request success dialog ────────────────────────────────────────────────────
+@st.dialog("Request Sent!")
+def show_request_success_dialog(name: str):
+    st.markdown(
+        f"""
+        <style>
+        div[data-testid="stDialog"] button[kind="primary"] {{
+            background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
+            border: none !important;
+            box-shadow: 0 4px 14px rgba(249,115,22,0.30) !important;
+            font-size: 15px !important; font-weight: 700 !important;
+            border-radius: 12px !important; padding: 12px 28px !important;
+        }}
+        div[data-testid="stDialog"] button[kind="primary"]:hover {{
+            box-shadow: 0 6px 20px rgba(249,115,22,0.45) !important;
+            transform: translateY(-1px) !important;
+        }}
+        </style>
+        <div style="text-align:center; padding:12px 0 20px;">
+            <div style="width:68px;height:68px;background:linear-gradient(135deg,#F97316,#EA580C);
+                border-radius:50%;display:flex;align-items:center;justify-content:center;
+                margin:0 auto 18px;box-shadow:0 8px 24px rgba(249,115,22,0.35);">
+                <span style="font-size:30px;line-height:1;">✉️</span>
+            </div>
+            <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#1A1A2E;margin-bottom:10px;">
+                Your request is on its way!
+            </div>
+            <div style="font-size:13px;color:#5A5A6E;line-height:1.75;max-width:280px;margin:0 auto;">
+                We've received your request and will connect you with
+                <strong style="color:#1A1A2E;">{name}</strong> via email within 1–2 business days.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    if st.button("Done", use_container_width=True, type="primary"):
+        st.rerun()
+
+
 # ── Gemini match explanation ──────────────────────────────────────────────────
+def _fallback_explanation(c, client_issue, preferred_modality, previous_exp) -> str:
+    name       = c.get("name", "Your counselor")
+    first      = name.split()[0]
+    spec       = c.get("specialization", client_issue)
+    exp        = int(c.get("experience_years") or 0)
+    modality   = c.get("counselor_modality", "")
+    mod_match  = c.get("modality_match") == 1
+    gender     = c.get("gender", "").lower()
+    pronoun    = "She" if gender in ["female", "woman"] else ("He" if gender in ["male", "man"] else "They")
+    pron_their = "her" if gender in ["female", "woman"] else ("his" if gender in ["male", "man"] else "their")
+
+    if spec == client_issue:
+        s1 = f"{first} specialises in {spec}, which means your concerns will be met with genuine understanding and targeted care."
+    else:
+        s1 = f"Although {first}'s primary specialisation is {spec}, this area closely overlaps with {client_issue} — {pron_their} experience puts you in very capable hands."
+
+    if mod_match:
+        s2 = f"{pronoun} practises {modality}, which matches your preferred approach, so you can feel at ease with how sessions are structured."
+    else:
+        s2 = f"{pronoun} works with {modality} rather than {preferred_modality}, but many clients find this approach equally effective, and {first} will guide you through it at your own pace."
+
+    if exp >= 8:
+        s3 = f"With {exp} years of experience, {first} brings a depth of insight that can make a real difference in your journey."
+    else:
+        s3 = f"{first} brings {exp} years of dedicated practice, offering a fresh and attentive approach to supporting your wellbeing."
+
+    if previous_exp:
+        s4 = f"Since you've engaged with counseling before, {first} can build on that foundation and help you continue growing with confidence."
+    else:
+        s4 = f"If this is a new step for you, {first} will create a safe, welcoming space so you can open up at whatever pace feels right."
+
+    return f"{s1} {s2} {s3} {s4}"
+
+
 def _counselor_summary(c) -> str:
     gender = c.get("gender", "").lower()
     pronoun = "she/her" if gender in ["female", "woman"] else ("he/him" if gender in ["male", "man"] else "they/them")
@@ -539,7 +764,7 @@ Respond with plain text only. No JSON, no markdown."""
 
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-2.5-flash-lite")
+        model = genai.GenerativeModel("gemini-2.0-flash-lite")
         response = model.generate_content(prompt)
         return response.text.strip()
     except Exception:
@@ -580,6 +805,11 @@ def _start_over_dialog(reset_fn):
 def show_matching_page():
     inject_styles()
 
+    if "_success_name" in st.session_state:
+        _sname = st.session_state["_success_name"]
+        del st.session_state["_success_name"]
+        show_request_success_dialog(_sname)
+
     ref = get_reference_data()
 
     if "quiz_step" not in st.session_state:
@@ -597,6 +827,7 @@ def show_matching_page():
     if "preferred_c_gender" not in st.session_state:  st.session_state.preferred_c_gender = ref["preferred_counselor_gender"][0] if ref["preferred_counselor_gender"] else ""
 
     render_hero_new()
+    render_disclaimer()
     st.markdown('<div class="form-card">', unsafe_allow_html=True)
 
     components.html(
@@ -669,6 +900,35 @@ def show_matching_page():
         col_btn.button("Find My Counselor →", use_container_width=True, type="primary",
                        on_click=lambda: st.session_state.update(quiz_step=1))
 
+        st.markdown(
+            """
+            <div style="text-align:center; margin-top:14px; margin-bottom:28px;">
+                <span style="font-size:13px; color:#9090A8;">⏱ Takes about 2 minutes &nbsp;·&nbsp; 🔒 Free &amp; confidential</span>
+            </div>
+            <div style="border-top: 1px solid rgba(0,0,0,0.07); margin: 0 auto 28px; max-width: 480px;"></div>
+            <div style="display:flex; justify-content:center; align-items:center; gap:0; max-width:480px; margin:0 auto 8px;">
+                <div style="flex:1; text-align:center; padding:12px 8px;">
+                    <div style="font-size:20px; margin-bottom:6px;">🧩</div>
+                    <div style="font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:3px;">3 Quick Steps</div>
+                    <div style="font-size:12px; color:#8B8B9A; line-height:1.5;">Answer a few short questions about yourself</div>
+                </div>
+                <div style="width:1px; height:60px; background:rgba(0,0,0,0.08); flex-shrink:0;"></div>
+                <div style="flex:1; text-align:center; padding:12px 8px;">
+                    <div style="font-size:20px; margin-bottom:6px;">🤖</div>
+                    <div style="font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:3px;">AI-Powered Matching</div>
+                    <div style="font-size:12px; color:#8B8B9A; line-height:1.5;">Our model ranks counselors by predicted fit</div>
+                </div>
+                <div style="width:1px; height:60px; background:rgba(0,0,0,0.08); flex-shrink:0;"></div>
+                <div style="flex:1; text-align:center; padding:12px 8px;">
+                    <div style="font-size:20px; margin-bottom:6px;">✨</div>
+                    <div style="font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:3px;">Personalised Results</div>
+                    <div style="font-size:12px; color:#8B8B9A; line-height:1.5;">See why each counselor is right for you</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
     # ── STEP 1: Demographics ─────────────────────────────────────────────────
     elif st.session_state.quiz_step == 1:
         render_step_progress(1)
@@ -731,6 +991,8 @@ def show_matching_page():
         def _full_reset():
             st.session_state.quiz_step = 0
             st.session_state.excluded_counselor_ids = []
+            st.session_state.pop("_global_sent_to", None)
+            st.session_state.pop("_success_name", None)
             # Clear all match caches so dismissed counselors re-enter the pool
             for k in list(st.session_state.keys()):
                 if k.startswith("match_") or k.startswith("gemini_single_"):
@@ -793,7 +1055,7 @@ def show_matching_page():
 
         best_c   = ranked_list[0]
         second_c = ranked_list[1] if len(ranked_list) > 1 else None
-        best_features = result.get("best_features", {})
+        best_features = best_c.get("features") or result.get("best_features", {})
 
         if not best_c:
             st.error("No counselors available for matching.")
@@ -803,56 +1065,120 @@ def show_matching_page():
         st.markdown('<div id="match-results-anchor"></div>', unsafe_allow_html=True)
         scroll_to_results()
 
-        st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">YOUR MATCHES</p>', unsafe_allow_html=True)
-
-
         def _dismiss(idx):
             dismissed_id = ranked_list[idx]["counselor_id"]
             st.session_state.excluded_counselor_ids = (
                 st.session_state.excluded_counselor_ids + [dismissed_id]
             )
 
+        # ── Match Explanation + SHAP (Gemini AI) ─────────────────────────────
+        def _get_explanation(c):
+            key = f"gemini_single_{c.get('counselor_id')}"
+            if key not in st.session_state:
+                text = get_gemini_explanation(
+                    c, client_issue, preferred_language, preferred_modality,
+                    preferred_c_gender, client_age, int(previous_exp),
+                )
+                if not text:
+                    text = _fallback_explanation(c, client_issue, preferred_modality, int(previous_exp))
+                st.session_state[key] = text
+            return st.session_state[key]
+
+        with st.spinner("Generating your personalised match insight..."):
+            explanation = _get_explanation(best_c)
+
+        counselor_name = best_c.get("name", "Your Top Match").upper()
+
+        # Paired header row
+        st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">YOUR MATCHES</p>', unsafe_allow_html=True)
+
         col1, col2 = st.columns(2, gap="large")
         with col1:
             render_counselor_card(best_c, best_c["compatibility_score"], is_primary=True, dismiss_key="dismiss_0")
-            # Hidden Streamlit button wired to X via JS
             if st.button("__dismiss0__", key="dismiss_0", use_container_width=True):
                 _dismiss(0)
                 st.rerun()
         with col2:
-            if second_c:
-                render_counselor_card(second_c, second_c["compatibility_score"], is_primary=False, dismiss_key="dismiss_1")
-                if st.button("__dismiss1__", key="dismiss_1", use_container_width=True):
-                    _dismiss(1)
-                    st.rerun()
-            else:
+            if explanation:
                 st.markdown(
-                    """
-                    <div style="
-                        background: linear-gradient(160deg, #F8F5FF 0%, #FDFCFF 100%);
-                        border-radius: 20px;
-                        padding: 44px 32px;
-                        border: 1.5px solid rgba(139,92,246,0.35);
-                        min-height: 370px;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: center;
-                        text-align: center;
-                    ">
-                        <div style="font-size: 36px; margin-bottom: 24px; opacity: 0.3; line-height:1;">❝</div>
-                        <p style="font-family: 'DM Serif Display', serif; font-size: 18px; color: #3D1D8A; font-style: italic; line-height: 1.7; margin: 0 0 14px; max-width: 260px;">
-                            You deserve to feel heard, supported, and understood. Reaching out takes courage.
-                        </p>
-                        <p style="font-size: 11.5px; color: #B0A9C0; letter-spacing: 0.07em; text-transform: uppercase; margin: 0 0 24px;">— A reminder for you</p>
-                        <div style="width: 40px; height: 1px; background: rgba(139,92,246,0.2); margin-bottom: 24px;"></div>
-                        <p style="font-size: 11px; color: #E8637A; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; margin: 0;">
-                            No more counselors available.
-                        </p>
-                    </div>
-                    """,
+                    f'<div class="ai-explanation-box" style="margin-bottom:16px;">'
+                    f'<div class="ai-badge">✦ Why {counselor_name}?</div>'
+                    f'<p class="ai-explanation-text">{explanation}</p>'
+                    f'</div>',
                     unsafe_allow_html=True,
                 )
+
+        # ── SHAP full-width below both cards ─────────────────────────────────
+        st.markdown('<div style="height:24px;"></div>', unsafe_allow_html=True)
+        with st.expander("Technical details — SHAP feature contributions", expanded=False):
+            _shap_cache_key = "shap_" + hashlib.md5(
+                _json.dumps(sorted(best_features.items())).encode()
+            ).hexdigest()
+            if _shap_cache_key not in st.session_state:
+                st.session_state[_shap_cache_key] = post_shap(best_features)
+            shap_result = st.session_state[_shap_cache_key]
+            if shap_result.get("error"):
+                st.info(shap_result["error"])
+            else:
+                readable_names = {
+                    "issue_score":        "Issue Similarity",
+                    "modality_issue_fit": "Issue-Modality Fit",
+                    "modality_match":     "Preferred Modality Match",
+                    "gender_match":       "Preferred Gender Match",
+                    "exp_issue_weight":   "Counselor Seniority",
+                    "ethnicity_match":    "Ethnicity Match",
+                    "prev_exp":           "Client Previous Experience",
+                    "age_gap":            "Age Gap",
+                    "counselor_age":      "Counselor Age",
+                }
+                try:
+                    names  = shap_result["feature_names"]
+                    values = shap_result["shap_values"]
+                    fvals  = shap_result["feature_values"]
+                    order  = sorted(range(len(values)), key=lambda i: abs(values[i]), reverse=True)
+                    max_abs = max(abs(v) for v in values) or 1.0
+
+                    rows_html = ""
+                    for i in order:
+                        label = readable_names.get(names[i], names[i])
+                        fval  = fvals[i]
+                        sv    = values[i]
+                        pct   = abs(sv) / max_abs * 100
+                        color = "#10B981" if sv >= 0 else "#EF4444"
+                        sign  = f"+{sv:.3f}" if sv >= 0 else f"{sv:.3f}"
+                        fval_str = f"{fval:.2f}" if isinstance(fval, float) else str(fval)
+
+                        rows_html += f"""
+                        <div style="display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #F3F0F8;">
+                            <div style="width:200px; font-size:12.5px; color:#4A4A5A; text-align:right; flex-shrink:0;">{label}</div>
+                            <div style="width:36px; font-size:11px; color:#9090A8; text-align:right; flex-shrink:0;">{fval_str}</div>
+                            <div style="flex:1; position:relative; height:10px; background:#F3F0F8; border-radius:6px; overflow:hidden;">
+                                <div style="position:absolute; top:0; height:10px; width:{pct/2:.1f}%; background:{color}; border-radius:6px;
+                                    {'left:50%' if sv >= 0 else f'right:50%'};"></div>
+                                <div style="position:absolute; top:0; left:50%; width:1px; height:10px; background:rgba(0,0,0,0.15);"></div>
+                            </div>
+                            <div style="width:52px; font-size:12.5px; font-weight:700; color:{color}; flex-shrink:0;">{sign}</div>
+                        </div>"""
+
+                    st.markdown(
+                        f"""
+                        <div style="font-size:11px; font-weight:600; color:#8B5CF6; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;">Feature contributions</div>
+                        <div style="display:flex; align-items:center; gap:10px; padding:0 0 6px; border-bottom:2px solid #E8E4F0;">
+                            <div style="width:200px; font-size:11px; color:#A0A0B8; text-align:right; flex-shrink:0;">Feature</div>
+                            <div style="width:36px; font-size:11px; color:#A0A0B8; text-align:right; flex-shrink:0;">Value</div>
+                            <div style="flex:1; font-size:11px; color:#A0A0B8; text-align:center;">Impact</div>
+                            <div style="width:52px; font-size:11px; color:#A0A0B8; flex-shrink:0;">SHAP</div>
+                        </div>
+                        {rows_html}
+                        <div style="display:flex; gap:16px; margin-top:12px; font-size:11px; color:#8B8B9A;">
+                            <span><span style="display:inline-block;width:10px;height:10px;background:#10B981;border-radius:2px;margin-right:5px;vertical-align:middle;"></span>Increases match</span>
+                            <span><span style="display:inline-block;width:10px;height:10px;background:#EF4444;border-radius:2px;margin-right:5px;vertical-align:middle;"></span>Decreases match</span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                except Exception as exc:
+                    st.info(f"Could not render feature contributions: {exc}")
 
         components.html(
             """
@@ -921,136 +1247,24 @@ def show_matching_page():
         </script>
         """, height=0, width=0)
 
-        st.write("")
-
-        # ── Match Explanation (Gemini AI) — generate only for visible 2, cache by ID ──
-        def _get_explanation(c):
-            key = f"gemini_single_{c.get('counselor_id')}"
-            if key not in st.session_state:
-                st.session_state[key] = get_gemini_explanation(
-                    c, client_issue, preferred_language, preferred_modality,
-                    preferred_c_gender, client_age, int(previous_exp),
-                )
-            return st.session_state[key]
-
-        with st.spinner("Generating your personalised match insight..."):
-            explanation = _get_explanation(best_c)
-        explanation_2 = None
+        # ── 2nd option below ─────────────────────────────────────────────────
         if second_c:
-            with st.spinner("Generating insight for your 2nd option..."):
-                explanation_2 = _get_explanation(second_c)
-
-        st.markdown('<div class="explain-card">', unsafe_allow_html=True)
-        st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THIS MATCH ?</p>', unsafe_allow_html=True)
-
-        if explanation:
             st.markdown(
-                f'<div class="ai-explanation-box">'
-                f'<div class="ai-badge">✦ AI Insight</div>'
-                f'<p class="ai-explanation-text">{explanation}</p>'
-                f'</div>',
+                """
+                <div style="display:flex; align-items:center; gap:16px; margin: 16px 0 32px;">
+                    <div style="flex:1; height:1px; background:rgba(0,0,0,0.10);"></div>
+                    <span style="font-size:11px; font-weight:600; color:#B0A9C0; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap;">Also consider</span>
+                    <div style="flex:1; height:1px; background:rgba(0,0,0,0.10);"></div>
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
-        else:
-            # Fallback to static bullets when Gemini is unavailable
-            positive_points, negative_points = [], []
-            positive_points.append(f"Supports your preferred language ({preferred_language})")
-            if best_c["modality_match"] == 1:
-                positive_points.append(f"Modality matches your preference ({preferred_modality})")
-            else:
-                negative_points.append(f"Modality does not match ({preferred_modality})")
-            if best_c["issue_score"] >= 0.99:
-                positive_points.append(f"Direct specialization in {client_issue}")
-            elif best_c["issue_score"] >= 0.6:
-                positive_points.append(f"Related experience with {client_issue}")
-            else:
-                negative_points.append(f"Specialization less aligned with {client_issue}")
-            if preferred_c_gender != "No preference":
-                if best_c["gender_match"] == 1:
-                    positive_points.append(f"Preferred gender matched ({preferred_c_gender})")
-                else:
-                    negative_points.append(f"Preferred gender not matched ({preferred_c_gender})")
-
-            exp_col1, exp_col2 = st.columns(2, gap="large")
-            with exp_col1:
-                st.markdown("<p style='font-size:15px; font-weight:600; color:#10B981; margin-bottom:0;'>Strengths</p>", unsafe_allow_html=True)
-                st.markdown('<div class="point-row-wrap">', unsafe_allow_html=True)
-                for item in positive_points[:4]:
-                    st.markdown(
-                        f'<div class="point-row point-row-green"><div class="icon-circle green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>{item}</span></div>',
-                        unsafe_allow_html=True,
-                    )
-                st.markdown('</div>', unsafe_allow_html=True)
-            with exp_col2:
-                st.markdown("<p style='font-size:15px; font-weight:600; color:#F59E0B; margin-bottom:0;'>Things to note</p>", unsafe_allow_html=True)
-                st.markdown('<div class="point-row-wrap">', unsafe_allow_html=True)
-                if negative_points:
-                    for item in negative_points[:4]:
-                        st.markdown(
-                            f'<div class="point-row point-row-amber"><div class="icon-circle amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span>{item}</span></div>',
-                            unsafe_allow_html=True,
-                        )
-                else:
-                    st.markdown(
-                        '<div class="point-row point-row-green"><div class="icon-circle green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>No major concerns detected</span></div>',
-                        unsafe_allow_html=True,
-                    )
-                st.markdown('</div>', unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        # ── SHAP expander ─────────────────────────────────────────────────────
-        with st.expander("Technical details — SHAP feature contributions", expanded=False):
-            _shap_cache_key = "shap_" + hashlib.md5(
-                _json.dumps(sorted(best_features.items())).encode()
-            ).hexdigest()
-            if _shap_cache_key not in st.session_state:
-                st.session_state[_shap_cache_key] = post_shap(best_features)
-            shap_result = st.session_state[_shap_cache_key]
-            if shap_result.get("error"):
-                st.info(shap_result["error"])
-            else:
-                readable_names = {
-                    "issue_score":        "Issue Similarity",
-                    "modality_issue_fit": "Issue-Modality Fit",
-                    "modality_match":     "Preferred Modality Match",
-                    "gender_match":       "Preferred Gender Match",
-                    "exp_issue_weight":   "Counselor Seniority",
-                    "ethnicity_match":    "Ethnicity Match",
-                    "prev_exp":           "Client Previous Experience",
-                    "age_gap":            "Age Gap",
-                    "exp_years":          "Counselor Experience (Years)",
-                    "client_age":         "Client Age",
-                    "counselor_age":      "Counselor Age",
-                }
-                try:
-                    import matplotlib.pyplot as plt
-                    import shap
-                    feature_labels = [readable_names.get(f, f) for f in shap_result["feature_names"]]
-                    explanation = shap.Explanation(
-                        values=np.array(shap_result["shap_values"]),
-                        base_values=shap_result["base_value"],
-                        data=np.array(shap_result["feature_values"]),
-                        feature_names=feature_labels,
-                    )
-                    fig_wf = plt.figure(figsize=(11, 5))
-                    shap.plots.waterfall(explanation, max_display=10, show=False)
-                    st.pyplot(fig_wf, clear_figure=True)
-                except Exception as exc:
-                    st.info(f"Could not render SHAP charts: {exc}")
-
-        # ── Second Match Explanation ──────────────────────────────────────────
-        if second_c and explanation_2:
-            st.markdown('<div class="explain-card">', unsafe_allow_html=True)
-            st.markdown('<p class="explain-title" style="color:#6B7280; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">WHY THE 2ND OPTION ?</p>', unsafe_allow_html=True)
-            st.markdown(
-                f'<div class="ai-explanation-box-alt">'
-                f'<div class="ai-badge-alt">✦ AI Insight</div>'
-                f'<p class="ai-explanation-text-alt">{explanation_2}</p>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-            st.markdown("</div>", unsafe_allow_html=True)
+            sec_col, _ = st.columns([1, 1], gap="large")
+            with sec_col:
+                render_counselor_card(second_c, second_c["compatibility_score"], is_primary=False, dismiss_key="dismiss_1")
+                if st.button("__dismiss1__", key="dismiss_1", use_container_width=True):
+                    _dismiss(1)
+                    st.rerun()
 
         # ── Start Over ───────────────────────────────────────────────────────
         st.markdown("""

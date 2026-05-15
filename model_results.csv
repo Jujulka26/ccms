@@ -1,7 +1,0 @@
-Model,Accuracy,F1,ROC-AUC
-Logistic Reg,0.862,0.836,0.956
-Random Forest,0.864,0.833,0.945
-KNN,0.848,0.818,0.925
-Neural Network,0.86,0.828,0.948
-LightGBM,0.873,0.842,0.954
-CatBoost,0.874,0.842,0.953

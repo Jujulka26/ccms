@@ -110,6 +110,7 @@ class MatchedCounselor(BaseModel):
     issue_score: float
     modality_match: int
     gender_match: int
+    ethnicity_match: int
 
 
 class MatchResponse(BaseModel):

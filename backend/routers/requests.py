@@ -14,6 +14,14 @@ def get_requests():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/check-pending")
+def check_pending(email: str):
+    try:
+        return {"has_pending": db.has_pending_request(email)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/", status_code=201)
 def create_request(payload: IntroRequestCreate):
     try:

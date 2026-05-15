@@ -778,7 +778,7 @@ else:
         '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Client Navigation</div>',
         unsafe_allow_html=True
     )
-    page = st.sidebar.radio("Navigation", ["Find a Counselor", "Our Counselors", "Chat with Mira", "Frequently Asked Questions", "About Us", "Contact Us", "Privacy Policy"], label_visibility="collapsed")
+    page = st.sidebar.radio("Navigation", ["Find a Counselor", "Our Counselors", "Chat with Mira", "About Us", "Contact Us"], label_visibility="collapsed")
 
 # Invisible spacer — pushes the footer to the bottom of the sidebar
 st.sidebar.markdown('<div class="sidebar-spacer" style="flex-grow: 1; min-height: 50px;"></div>', unsafe_allow_html=True)
@@ -807,13 +807,9 @@ elif page == "Model Performance":
     show_model_performance_page()
 elif page == "Our Counselors":
     show_counselors_page()
-elif page == "Frequently Asked Questions":
-    show_faq_page()
 elif page == "Chat with Mira":
     show_chatbot_page()
 elif page == "About Us":
     show_aboutus_page()
 elif page == "Contact Us":
     show_contactus_page()
-elif page == "Privacy Policy":
-    show_privacypolicy_page()

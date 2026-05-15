@@ -4,7 +4,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from frontend.utils.api import get_counselors
-from frontend.views.matching import show_profile_dialog
+from frontend.views.matching import show_profile_dialog, show_request_success_dialog
 
 
 _SPEC_COLORS = {
@@ -113,9 +113,14 @@ def inject_styles():
 def show_counselors_page():
     inject_styles()
 
+    if "_success_name" in st.session_state:
+        _sname = st.session_state["_success_name"]
+        del st.session_state["_success_name"]
+        show_request_success_dialog(_sname)
+
     if "hero_img_1_b64" not in st.session_state:
         try:
-            with open(os.path.join("assets", "ourcounselor.png"), "rb") as f:
+            with open(os.path.join("frontend", "assets", "ourcounselor.png"), "rb") as f:
                 st.session_state["hero_img_1_b64"] = base64.b64encode(f.read()).decode()
         except FileNotFoundError:
             st.session_state["hero_img_1_b64"] = None
@@ -129,7 +134,7 @@ def show_counselors_page():
                 <div class="dir-hero-text">
                     <div class="dir-eyebrow">Our Team</div>
                     <div class="dir-title">Meet Our Counselors</div>
-                    <p class="dir-subtitle">Browse our qualified counselors and find someone who resonates with you — then use the matching system for a personalised recommendation.</p>
+                    <p class="dir-subtitle">Get to know our counselors before you match.</p>
                 </div>
                 <div class="dir-hero-image-wrap">{img_tag}</div>
             </div>
@@ -190,7 +195,7 @@ def show_counselors_page():
         return
 
     # ── Pagination ───────────────────────────────────────────────────────────
-    PAGE_SIZE = 12
+    PAGE_SIZE = 9
     total_pages = max(1, -(-len(filtered) // PAGE_SIZE))  # ceiling division
 
     if "dir_page" not in st.session_state or st.session_state.get("dir_last_total") != len(filtered):
@@ -243,20 +248,55 @@ def show_counselors_page():
 
     # ── Pagination controls ───────────────────────────────────────────────────
     if total_pages > 1:
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+        st.markdown(
+            """
+            <style>
+            .st-key-dir_prev button, .st-key-dir_next button {
+                background: #FFFFFF !important;
+                border: 1.5px solid rgba(109,40,217,0.25) !important;
+                color: #6D28D9 !important;
+                border-radius: 50px !important;
+                font-family: 'DM Sans', sans-serif !important;
+                font-size: 13px !important;
+                font-weight: 600 !important;
+                letter-spacing: 0.04em !important;
+                padding: 10px 24px !important;
+                transition: all 0.2s ease !important;
+                box-shadow: 0 1px 4px rgba(109,40,217,0.08) !important;
+            }
+            .st-key-dir_prev button:hover:not(:disabled), .st-key-dir_next button:hover:not(:disabled) {
+                background: rgba(109,40,217,0.06) !important;
+                border-color: #6D28D9 !important;
+                box-shadow: 0 2px 10px rgba(109,40,217,0.15) !important;
+            }
+            .st-key-dir_prev button:disabled, .st-key-dir_next button:disabled {
+                opacity: 0.35 !important;
+                cursor: not-allowed !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
         pcol1, pcol2, pcol3 = st.columns([1, 2, 1])
         with pcol1:
-            if st.button("← Previous", disabled=(page == 0), use_container_width=True):
+            if st.button("← Previous", key="dir_prev", disabled=(page == 0), use_container_width=True):
                 st.session_state["dir_page"] -= 1
                 st.rerun()
         with pcol2:
+            dots = "".join(
+                f'<span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin:0 4px;background:{"#8B5CF6" if i == page else "#D8D0F5"};"></span>'
+                for i in range(total_pages)
+            )
             st.markdown(
-                f'<div style="text-align:center;font-size:13px;color:#8B5CF6;font-weight:600;padding-top:10px;">'
-                f'Page {page + 1} of {total_pages}</div>',
+                f'<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-top:8px;">'
+                f'<div style="display:flex;align-items:center;gap:4px;">{dots}</div>'
+                f'<span style="font-size:12px;color:#8B8B9A;">{page+1} / {total_pages}</span>'
+                f'</div>',
                 unsafe_allow_html=True,
             )
         with pcol3:
-            if st.button("Next →", disabled=(page >= total_pages - 1), use_container_width=True):
+            if st.button("Next →", key="dir_next", disabled=(page >= total_pages - 1), use_container_width=True):
                 st.session_state["dir_page"] += 1
                 st.rerun()
 
