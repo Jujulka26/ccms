@@ -202,7 +202,12 @@ def get_history():
 
 def _run_training(job_id: str, payload: RetrainRequest):
     job = _jobs[job_id]
+    version_dir = None
     try:
+        # Ensure store dirs exist before any file operations
+        STORE_DIR.mkdir(exist_ok=True)
+        VERSIONS_DIR.mkdir(exist_ok=True)
+
         job["step"] = "Backing up current model..."
         job["progress"] = 0.05
         if _ENSEMBLE.exists():
@@ -211,12 +216,9 @@ def _run_training(job_id: str, payload: RetrainRequest):
             shutil.copy2(str(_TUNED_CSV), str(_TUNED_CSV_BAK))
 
         old_metrics = _ensemble_metrics(_TUNED_CSV_BAK)
-
-        STORE_DIR.mkdir(exist_ok=True)
-        VERSIONS_DIR.mkdir(exist_ok=True)
         version_id  = "v_" + datetime.now().strftime("%Y%m%d_%H%M%S")
         version_dir = VERSIONS_DIR / version_id
-        version_dir.mkdir()
+        version_dir.mkdir(exist_ok=True)
 
         scripts = [ML_DIR / "datascript.py", ML_DIR / "trainmodels.py", ML_DIR / "tunemodels.py"]
         labels  = [
@@ -293,6 +295,8 @@ def _run_training(job_id: str, payload: RetrainRequest):
             "mode":        mode,
         }
     except Exception as e:
+        if version_dir and version_dir.exists():
+            shutil.rmtree(str(version_dir), ignore_errors=True)
         job["status"] = "error"
         job["error"]  = str(e)
 
@@ -325,6 +329,7 @@ def deploy_version(version_id: str):
     if not pkl.exists():
         raise HTTPException(status_code=404, detail="ensemble.pkl not found in this version.")
 
+    STORE_DIR.mkdir(exist_ok=True)
     if _ENSEMBLE.exists():
         shutil.copy2(str(_ENSEMBLE), str(_ENSEMBLE_BAK))
     shutil.copy2(str(pkl), str(_ENSEMBLE))

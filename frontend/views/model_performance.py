@@ -357,7 +357,6 @@ def _render_model_management(data):
         with col_save:
             if st.button("Save to history", type="primary", use_container_width=True):
                 st.session_state.pop("retrain_result", None)
-                st.success(f"Version {version_id} saved. Deploy it from the history list below.")
                 st.rerun()
         with col_dis:
             if st.button("Discard", use_container_width=True):
@@ -454,8 +453,6 @@ def show_model_performance_page():
         unsafe_allow_html=True,
     )
 
-    data = get_model_performance()
-
     # ── Training progress lives at PAGE level — never inside a tab ────────────
     # st.empty() while-loop: only placeholders update, zero full-page blink.
     # Safe here because no tabs exist on this render path.
@@ -506,6 +503,8 @@ def show_model_performance_page():
         return  # skip tabs entirely while training
 
     # ── Normal view: tabs ─────────────────────────────────────────────────────
+    data = get_model_performance()
+
     tab_metrics, tab_outcomes, tab_management = st.tabs([
         "📊  Performance",
         "📋  Outcome Data",
