@@ -216,14 +216,11 @@ report_lines = [
     "5-FOLD CROSS-VALIDATION",
     "-" * 60,
 ]
-for cv_label, cv_pipe in [("LightGBM", lgbm_pipe), ("CatBoost", cat_pipe)]:
-    cv_model  = cv_pipe.named_steps["model"]
-    cv_scaled = cv_pipe.named_steps["prep"].transform(X)
-    cv_res = cross_validate(cv_model, cv_scaled, y, cv=cv,
-                            scoring=["accuracy", "f1", "roc_auc"], return_train_score=False)
+for cv_label in ["LightGBM", "CatBoost"]:
+    res = cv_results[cv_label]
     report_lines.append(f"  {cv_label}")
     for metric in ["accuracy", "f1", "roc_auc"]:
-        s = cv_res[f"test_{metric}"]
+        s = res[f"test_{metric}"]
         report_lines.append(f"    {metric.upper():<10}: mean={s.mean():.4f} ± {s.std():.4f}  "
                             f"[{s.min():.4f}–{s.max():.4f}]")
 report_lines += [
