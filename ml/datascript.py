@@ -113,7 +113,7 @@ for i in range(NUM_COUNSELORS):
 rows = []
 
 S_MIN = 33.3
-S_MAX = 80.0
+S_MAX = 90.0
 
 EXP_BONUS = {"Trauma": 11, "Anxiety": 8, "Depression": 8, "Stress": 5}
 
@@ -129,7 +129,7 @@ for client in clients:
 
         # Issue similarity (d=0.75)
         sim = ISSUE_SIMILARITY[client["client_issue"]][counselor["specialization"]]
-        S += 35 * sim
+        S += 40 * sim
 
         # Modality preference match (d=0.27, Swift et al. 2018)
         modality_match = client["preferred_modality"] == counselor["counselor_modality"]
