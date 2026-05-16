@@ -599,6 +599,10 @@ def show_profile_dialog(c: dict, score=None):
         )
         client_name  = st.text_input("Your Full Name")
         client_email = st.text_input("Your Email Address")
+        consent = st.checkbox(
+            "I consent to my match outcome being recorded anonymously to help improve the system.",
+            value=False,
+        )
         st.write("")
 
         col1, col2 = st.columns(2)
@@ -615,6 +619,15 @@ def show_profile_dialog(c: dict, score=None):
                 save_intro_request(
                     client_name.strip(), client_email.strip(),
                     int(counselor_id), float(score) if score else 0.0,
+                    consent,
+                    client_age=st.session_state.get("client_age"),
+                    client_gender=st.session_state.get("client_gender"),
+                    client_ethnicity=st.session_state.get("client_ethnicity"),
+                    client_issue=st.session_state.get("client_issue"),
+                    prev_exp=st.session_state.get("previous_exp"),
+                    preferred_language=st.session_state.get("preferred_language"),
+                    preferred_modality=st.session_state.get("preferred_modality"),
+                    preferred_c_gender=st.session_state.get("preferred_c_gender"),
                 )
                 st.session_state["_global_sent_to"] = name
                 st.session_state["_success_name"] = name

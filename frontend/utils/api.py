@@ -41,6 +41,23 @@ def _post(path: str, body: dict) -> dict:
         st.stop()
 
 
+def _patch(path: str, body: dict) -> dict:
+    try:
+        r = requests.patch(f"{BASE_URL}{path}", json=body, timeout=10)
+        r.raise_for_status()
+        return r.json()
+    except requests.exceptions.ConnectionError:
+        st.error(_BACKEND_CONN_ERROR)
+        st.stop()
+    except requests.exceptions.HTTPError as e:
+        try:
+            detail = e.response.json().get("detail", str(e))
+        except Exception:
+            detail = str(e)
+        st.error(f"Backend error: {detail}")
+        st.stop()
+
+
 def _put(path: str, body: dict) -> dict:
     try:
         r = requests.put(f"{BASE_URL}{path}", json=body, timeout=10)
@@ -113,17 +130,44 @@ def check_pending_request(email: str) -> bool:
     return result.get("has_pending", False) if result else False
 
 
-def save_intro_request(client_name: str, client_email: str, counselor_id: int, compatibility_score: float):
+def save_intro_request(
+    client_name: str, client_email: str, counselor_id: int, compatibility_score: float,
+    outcome_consent: bool = False,
+    client_age: int = None, client_gender: str = None, client_ethnicity: str = None,
+    client_issue: str = None, prev_exp: int = None, preferred_language: str = None,
+    preferred_modality: str = None, preferred_c_gender: str = None,
+):
     _post("/requests/", {
         "client_name": client_name,
         "client_email": client_email,
         "counselor_id": counselor_id,
         "compatibility_score": compatibility_score,
+        "outcome_consent": outcome_consent,
+        "client_age": client_age,
+        "client_gender": client_gender,
+        "client_ethnicity": client_ethnicity,
+        "client_issue": client_issue,
+        "prev_exp": prev_exp,
+        "preferred_language": preferred_language,
+        "preferred_modality": preferred_modality,
+        "preferred_c_gender": preferred_c_gender,
     })
 
 
 def approve_request(request_id: int):
     _put(f"/requests/{request_id}/approve", {"status": "Approved"})
+
+
+def update_match_outcome(request_id: int, outcome: str):
+    _patch(f"/requests/{request_id}/outcome", {"outcome": outcome})
+
+
+def get_outcome_stats() -> dict:
+    return _get("/requests/outcome-stats")
+
+
+def get_consented_outcomes() -> list[dict]:
+    return _get("/requests/export-outcomes")
 
 
 def send_approval_email(request_id: int, client_name: str, client_email: str, counselor_name: str):
@@ -169,3 +213,93 @@ def post_shap(features: dict) -> dict:
 @st.cache_data(ttl=600)
 def get_model_performance() -> dict:
     return _get("/model-performance/")
+
+
+def trigger_retrain(real_data: list = None) -> dict:
+    try:
+        r = requests.post(
+            f"{BASE_URL}/model-performance/retrain",
+            json={"real_data": real_data or []},
+            timeout=30,
+        )
+        r.raise_for_status()
+        return r.json()
+    except requests.exceptions.ConnectionError:
+        st.error(_BACKEND_CONN_ERROR)
+        st.stop()
+    except requests.exceptions.HTTPError as e:
+        detail = ""
+        try:
+            detail = e.response.json().get("detail", str(e))
+        except Exception:
+            detail = str(e)
+        st.error(f"Retraining failed: {detail}")
+        st.stop()
+
+
+def get_retrain_status(job_id: str) -> dict | None:
+    try:
+        r = requests.get(f"{BASE_URL}/model-performance/retrain/status/{job_id}", timeout=10)
+        if r.status_code == 404:
+            return None
+        r.raise_for_status()
+        return r.json()
+    except requests.exceptions.ConnectionError:
+        st.error(_BACKEND_CONN_ERROR)
+        st.stop()
+    except requests.exceptions.HTTPError as e:
+        try:
+            detail = e.response.json().get("detail", str(e))
+        except Exception:
+            detail = str(e)
+        st.error(f"Backend error: {detail}")
+        st.stop()
+
+
+def discard_version(version_id: str) -> dict:
+    try:
+        r = requests.delete(f"{BASE_URL}/model-performance/versions/{version_id}", timeout=15)
+        r.raise_for_status()
+        return r.json()
+    except Exception:
+        pass
+
+
+def get_model_history() -> list[dict]:
+    return _get("/model-performance/history")
+
+
+def deploy_version(version_id: str) -> dict:
+    try:
+        r = requests.post(f"{BASE_URL}/model-performance/deploy/{version_id}", timeout=30)
+        r.raise_for_status()
+        return r.json()
+    except requests.exceptions.ConnectionError:
+        st.error(_BACKEND_CONN_ERROR)
+        st.stop()
+    except requests.exceptions.HTTPError as e:
+        detail = ""
+        try:
+            detail = e.response.json().get("detail", str(e))
+        except Exception:
+            detail = str(e)
+        st.error(f"Deploy failed: {detail}")
+        st.stop()
+
+
+def trigger_rollback() -> dict:
+    try:
+        r = requests.post(f"{BASE_URL}/model-performance/rollback", timeout=30)
+        r.raise_for_status()
+        return r.json()
+    except requests.exceptions.ConnectionError:
+        st.error(_BACKEND_CONN_ERROR)
+        st.stop()
+    except requests.exceptions.HTTPError as e:
+        detail = ""
+        try:
+            detail = e.response.json().get("detail", str(e))
+        except Exception:
+            detail = str(e)
+        st.error(f"Rollback failed: {detail}")
+        st.stop()

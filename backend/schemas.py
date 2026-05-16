@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 
 
@@ -49,6 +49,15 @@ class IntroRequestCreate(BaseModel):
     client_email: str
     counselor_id: int
     compatibility_score: float
+    outcome_consent: bool = False
+    client_age: Optional[int] = None
+    client_gender: Optional[str] = None
+    client_ethnicity: Optional[str] = None
+    client_issue: Optional[str] = None
+    prev_exp: Optional[int] = None
+    preferred_language: Optional[str] = None
+    preferred_modality: Optional[str] = None
+    preferred_c_gender: Optional[str] = None
 
 
 class RequestResponse(BaseModel):
@@ -59,10 +68,24 @@ class RequestResponse(BaseModel):
     compatibility_score: Optional[float] = None
     status: str
     created_at: Optional[datetime] = None
+    match_outcome: Optional[str] = None
+    outcome_consent: Optional[int] = None
 
 
 class UpdateRequestStatus(BaseModel):
     status: str
+
+
+class UpdateMatchOutcome(BaseModel):
+    outcome: str
+
+    @field_validator("outcome")
+    @classmethod
+    def valid_outcome(cls, v):
+        allowed = {"Successful", "Unsuccessful"}
+        if v not in allowed:
+            raise ValueError(f"outcome must be one of {allowed}")
+        return v
 
 
 class EnquiryRequest(BaseModel):

@@ -167,14 +167,25 @@ def has_pending_request(email: str) -> bool:
         conn.close()
 
 
-def save_intro_request(client_name, client_email, counselor_id, compatibility_score):
+def save_intro_request(
+    client_name, client_email, counselor_id, compatibility_score, outcome_consent=False,
+    client_age=None, client_gender=None, client_ethnicity=None, client_issue=None,
+    prev_exp=None, preferred_language=None, preferred_modality=None, preferred_c_gender=None,
+):
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            """INSERT INTO tbl_request (client_name, client_email, counselor_id, compatibility_score, status)
-               VALUES (%s, %s, %s, %s, 'Pending')""",
-            (client_name, client_email, counselor_id, compatibility_score),
+            """INSERT INTO tbl_request
+               (client_name, client_email, counselor_id, compatibility_score, status, outcome_consent,
+                client_age, client_gender, client_ethnicity, client_issue,
+                prev_exp, preferred_language, preferred_modality, preferred_c_gender)
+               VALUES (%s, %s, %s, %s, 'Pending', %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+            (
+                client_name, client_email, counselor_id, compatibility_score, int(outcome_consent),
+                client_age, client_gender, client_ethnicity, client_issue,
+                prev_exp, preferred_language, preferred_modality, preferred_c_gender,
+            ),
         )
         conn.commit()
     finally:
@@ -188,7 +199,7 @@ def get_all_requests() -> list[dict]:
     try:
         cursor.execute(
             """SELECT r.request_id, r.client_name, r.client_email, r.compatibility_score,
-                      r.status, r.created_at, c.name as counselor_name
+                      r.status, r.created_at, r.match_outcome, r.outcome_consent, c.name as counselor_name
                FROM tbl_request r
                JOIN tbl_counselor c ON r.counselor_id = c.counselor_id
                ORDER BY r.request_id DESC"""
@@ -200,12 +211,68 @@ def get_all_requests() -> list[dict]:
         conn.close()
 
 
+def update_match_outcome(request_id: int, outcome: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE tbl_request SET match_outcome=%s WHERE request_id=%s", (outcome, request_id))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def update_request_status(request_id: int, status: str):
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute("UPDATE tbl_request SET status=%s WHERE request_id=%s", (status, request_id))
         conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_outcome_stats() -> dict:
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total_consented,
+                SUM(match_outcome = 'Successful') AS successful,
+                SUM(match_outcome = 'Unsuccessful') AS unsuccessful,
+                SUM(match_outcome = 'Ongoing') AS ongoing,
+                SUM(match_outcome IS NULL) AS not_recorded
+            FROM tbl_request
+            WHERE outcome_consent = 1
+        """)
+        row = cursor.fetchone()
+        return {k: int(v) if v is not None else 0 for k, v in row.items()}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_consented_outcomes() -> list[dict]:
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT
+                r.client_age, r.client_gender, r.client_ethnicity, r.client_issue,
+                r.prev_exp, r.preferred_language, r.preferred_modality, r.preferred_c_gender,
+                c.age AS counselor_age, c.gender AS counselor_gender,
+                c.ethnicity AS counselor_ethnicity, c.specialization,
+                c.counselor_language, c.counselor_modality, c.experience_years,
+                r.compatibility_score, r.match_outcome
+            FROM tbl_request r
+            JOIN tbl_counselor c ON r.counselor_id = c.counselor_id
+            WHERE r.outcome_consent = 1 AND r.match_outcome IN ('Successful', 'Unsuccessful')
+            ORDER BY r.request_id DESC
+        """)
+        rows = cursor.fetchall()
+        return [_clean_row(r) for r in rows]
     finally:
         cursor.close()
         conn.close()

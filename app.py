@@ -759,7 +759,7 @@ if role == "admin":
         '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Admin Navigation</div>',
         unsafe_allow_html=True
     )
-    page = st.sidebar.radio("Navigation", ["Match a Client", "Counselor Management", "Our Counselors", "Review Requests", "Model Performance"], label_visibility="collapsed")
+    page = st.sidebar.radio("Navigation", ["Match a Client", "Counselor Management", "Our Counselors", "Review Requests", "Model Management"], label_visibility="collapsed")
 else:
     st.sidebar.markdown(
         '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Client Navigation</div>',
@@ -790,7 +790,7 @@ elif page == "Counselor Management":
     show_manage_page()
 elif page == "Review Requests":
     show_manage_request_page()
-elif page == "Model Performance":
+elif page == "Model Management":
     show_model_performance_page()
 elif page == "Our Counselors":
     show_counselors_page()
