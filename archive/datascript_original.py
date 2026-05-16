@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).parent
 # ======================================================
 NUM_CLIENTS = 900 # 900
 NUM_COUNSELORS = 180   # 180
-COUNSELORS_PER_CLIENT = 60  # 60
+COUNSELORS_PER_CLIENT = 60  #60
 
 random.seed(42)
 np.random.seed(42)
@@ -128,36 +128,20 @@ for i in range(NUM_COUNSELORS):
     })
 
 # ======================================================
-# 7. GENERATE PAIRS & LABEL
+# 7. GENERATE PAIRS & LABEL (FIXED)
 # ======================================================
 rows = []
-
-# S_MIN: Anxiety + Depression counselor (sim=0.6) + no modality match + no prev_exp
-#        + no gender/ethnicity match + non-senior + worst fit (Anxiety+Humanistic=0.4) + large age gap
-# = 35*0.6 + (3+0.6) + 1.5 + 1 + 2 + 0 + 9*0.4 + 0 = 32.7
-S_MIN = 32.7
-
-# S_MAX kept at 80 (original normalization anchor).
-# Theoretical max with new interactions is 86; the rare best-case Trauma+senior+all-match
-# pairs get base_prob > 1.0, which clips to 1.0 (always label=1). This affects < 2% of
-# pairs and does not distort the distribution. Keeping S_MAX=80 preserves the same
-# prob thresholds as the validated original formula (~44% positive rate at 900 clients).
-S_MAX = 80.0
-
-# Issue-stratified experience bonus (replaces flat 7).
-# Clinical basis: ISTSS guidelines identify therapist experience as especially critical
-# for Trauma (complex presentations); Stress responds well to structured techniques
-# even from newer counselors.
-EXP_BONUS = {"Trauma": 11, "Anxiety": 8, "Depression": 8, "Stress": 5}
+S_MIN = 32.7  # worst pair: 35*0.6 + (3+0.6) + 1.5 + 1 + 2 + 0 + 9*0.4 + 0
+S_MAX = 80.0  # best pair:  35*1.0 + (11+1.0) + 5 + 5 + 5 + 7 + 9*1.0 + 2
 
 for client in clients:
     for counselor in random.sample(counselors, COUNSELORS_PER_CLIENT):
 
-        # Language filter
+        # ✅ FIXED LANGUAGE FILTER
         counselor_langs = counselor["counselor_language"].split(", ")
 
         if client["preferred_language"] not in counselor_langs:
-            continue
+            continue  # REMOVE invalid pairs
 
         S = 0
 
@@ -166,19 +150,13 @@ for client in clients:
         S += 35 * sim
 
         # Modality preference match (d=0.27, Swift et al. 2018)
-        modality_match = client["preferred_modality"] == counselor["counselor_modality"]
-        if modality_match:
+        if client["preferred_modality"] == counselor["counselor_modality"]:
             S += 11 + sim
         else:
             S += 3 + sim
 
-        # Previous counseling experience × modality match interaction.
-        # Clients with prior counseling know what works for them; receiving their
-        # preferred modality amplifies that benefit (synergistic, not merely additive).
-        if client["previous_counseling_experience"] == 1:
-            S += 5 + 2 * int(modality_match)
-        else:
-            S += 1.5
+        # Previous experience (d~0.10, weak evidence)
+        S += 5 if client["previous_counseling_experience"] == 1 else 1.5
 
         # Gender (d=0.12, Cabral & Smith 2011)
         preferred = client["preferred_counselor_gender"]
@@ -196,17 +174,17 @@ for client in clients:
         else:
             S += 2
 
-        # Experience × issue specificity (d=0.21 base, issue-stratified)
+        # Senior counselor bonus (d=0.21) — binary: exp >= 8 yrs = senior
         if counselor["experience_years"] >= 8:
-            S += EXP_BONUS[client["client_issue"]]
+            S += 7
 
         # Clinical modality-issue fit (d=0.175)
         fit = MODALITY_ISSUE_FIT[client["client_issue"]][counselor["counselor_modality"]]
-        S += 9 * fit
+        S += 9 * fit  # up to 9 pts
 
         # Age gap (Lehane 2025, small directional effect)
         age_gap = abs(client["client_age"] - counselor["counselor_age"])
-        S += max(0, 20 - age_gap) * 0.10
+        S += max(0, 20 - age_gap) * 0.10  # up to 2 pts for close age pairs
 
         # ======================================================
         # FINAL LABEL

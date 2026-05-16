@@ -1,8 +1,8 @@
 """
-Tune LightGBM + CatBoost, then ensemble the tuned models.
+Tune LightGBM + CatBoost, deploy the best one.
 Run: python tunemodels.py
-Outputs: tuned_lgbm.pkl, tuned_cat.pkl, ensemble.pkl,
-         tuning_comparison.csv, tuning_comparison.png
+Outputs: tuned_lgbm.pkl, tuned_cat.pkl, best_model.pkl,
+         tuned_result.csv, tuned_result.png
 """
 
 import warnings
@@ -30,8 +30,8 @@ BASE_DIR = Path(__file__).parent
 
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
-    "Stress":     {"Stress": 1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.6},
-    "Trauma":     {"Trauma": 1.0, "Stress": 0.6, "Anxiety": 0.6, "Depression": 0.6},
+    "Stress":     {"Stress":  1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.6},
+    "Trauma":     {"Trauma":  1.0, "Stress":  0.6, "Anxiety": 0.6, "Depression": 0.6},
     "Depression": {"Depression": 1.0, "Anxiety": 0.6, "Stress": 0.6, "Trauma": 0.6},
 }
 
@@ -43,21 +43,21 @@ MODALITY_ISSUE_FIT = {
 }
 
 FEATURES = [
-    'issue_score', 'modality_issue_fit', 'modality_match', 'gender_match',
-    'exp_issue_weight', 'ethnicity_match', 'prev_exp', 'age_gap', 'counselor_age',
+    'issue_match', 'modality_issue_fit', 'modality_match', 'gender_match',
+    'exp_issue_fit', 'ethnicity_match', 'prev_exp', 'age_gap',
 ]
 
 
 def engineer_features(df):
     df = df.copy()
-    df['modality_match']    = (df['preferred_modality'] == df['counselor_modality']).astype(int)
-    df['gender_match']      = ((df['preferred_counselor_gender'] == "No preference") |
-                               (df['preferred_counselor_gender'] == df['counselor_gender'])).astype(int)
-    df['ethnicity_match']   = (df['client_ethnicity'] == df['counselor_ethnicity']).astype(int)
-    df['issue_score']       = df.apply(lambda r: ISSUE_SIMILARITY[r['client_issue']][r['specialization']], axis=1)
-    df['prev_exp']          = df['previous_counseling_experience']
-    df['age_gap']           = abs(df['client_age'] - df['counselor_age'])
-    df['exp_issue_weight']  = (df['experience_years'] >= 8).astype(int)
+    df['modality_match']     = (df['preferred_modality'] == df['counselor_modality']).astype(int)
+    df['gender_match']       = ((df['preferred_counselor_gender'] == "No preference") |
+                                (df['preferred_counselor_gender'] == df['counselor_gender'])).astype(int)
+    df['ethnicity_match']    = (df['client_ethnicity'] == df['counselor_ethnicity']).astype(int)
+    df['issue_match']        = df.apply(lambda r: ISSUE_SIMILARITY[r['client_issue']][r['specialization']], axis=1)
+    df['exp_issue_fit']      = (df['experience_years'] >= 8).astype(int)
+    df['prev_exp']           = df['previous_counseling_experience']
+    df['age_gap']            = (df['client_age'] - df['counselor_age']).abs()
     df['modality_issue_fit'] = df.apply(
         lambda r: MODALITY_ISSUE_FIT.get(r['client_issue'], {}).get(
             str(r['counselor_modality']).split(',')[0].strip(), 0.5), axis=1)
@@ -76,7 +76,7 @@ def evaluate(pipeline, X_t, y_t):
 
 # ── Load data ──────────────────────────────────────────────────────────────────
 print("Loading dataset...")
-df_raw = pd.read_csv(str(BASE_DIR / "client_counselor_dataset.csv"))
+df_raw = pd.read_csv(BASE_DIR / "client_counselor_dataset.csv")
 X = engineer_features(df_raw)
 y = df_raw["match_success"].values
 
@@ -89,8 +89,8 @@ cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 # ── Baselines ──────────────────────────────────────────────────────────────────
 print("\nEvaluating baselines...")
-base_lgbm = joblib.load(str(BASE_DIR / "baseline_lgbm.pkl"))
-base_cat  = joblib.load(str(BASE_DIR / "baseline_cat.pkl"))
+base_lgbm = joblib.load(BASE_DIR / "baseline_lgbm.pkl")
+base_cat  = joblib.load(BASE_DIR / "baseline_cat.pkl")
 scores_base_lgbm, _ = evaluate(base_lgbm, X_test, y_test)
 scores_base_cat,  _ = evaluate(base_cat,  X_test, y_test)
 print(f"  Baseline LightGBM : {scores_base_lgbm}")
@@ -120,10 +120,10 @@ lgbm_search = RandomizedSearchCV(
 )
 lgbm_search.fit(X_train, y_train)
 tuned_lgbm = lgbm_search.best_estimator_
-scores_tuned_lgbm, y_prob_lgbm = evaluate(tuned_lgbm, X_test, y_test)
+scores_tuned_lgbm, _ = evaluate(tuned_lgbm, X_test, y_test)
 print(f"  Best params : {lgbm_search.best_params_}")
 print(f"  Tuned LightGBM : {scores_tuned_lgbm}")
-joblib.dump(tuned_lgbm, str(BASE_DIR / "tuned_lgbm.pkl"))
+joblib.dump(tuned_lgbm, BASE_DIR / "tuned_lgbm.pkl")
 print("  Saved: tuned_lgbm.pkl")
 
 # ── Tune CatBoost ─────────────────────────────────────────────────────────────
@@ -148,24 +148,11 @@ cat_search = RandomizedSearchCV(
 )
 cat_search.fit(X_train, y_train)
 tuned_cat = cat_search.best_estimator_
-scores_tuned_cat, y_prob_cat = evaluate(tuned_cat, X_test, y_test)
+scores_tuned_cat, _ = evaluate(tuned_cat, X_test, y_test)
 print(f"  Best params : {cat_search.best_params_}")
 print(f"  Tuned CatBoost : {scores_tuned_cat}")
-joblib.dump(tuned_cat, str(BASE_DIR / "tuned_cat.pkl"))
+joblib.dump(tuned_cat, BASE_DIR / "tuned_cat.pkl")
 print("  Saved: tuned_cat.pkl")
-
-# ── Ensemble: average probabilities ───────────────────────────────────────────
-print("\nBuilding ensemble (soft voting: tuned LGBM + tuned CatBoost)...")
-y_prob_ens  = (y_prob_lgbm + y_prob_cat) / 2
-y_pred_ens  = (y_prob_ens >= 0.5).astype(int)
-scores_ens  = {
-    "Accuracy": round(float(accuracy_score(y_test, y_pred_ens)), 3),
-    "F1":       round(float(f1_score(y_test, y_pred_ens)), 3),
-    "ROC-AUC":  round(float(roc_auc_score(y_test, y_prob_ens)), 3),
-}
-print(f"  Ensemble : {scores_ens}")
-joblib.dump({"lgbm": tuned_lgbm, "cat": tuned_cat}, str(BASE_DIR / "ensemble.pkl"))
-print("  Saved: ensemble.pkl")
 
 # ── Save comparison CSV ────────────────────────────────────────────────────────
 rows = [
@@ -173,27 +160,25 @@ rows = [
     {"Model": "Baseline CatBoost", **scores_base_cat},
     {"Model": "Tuned LightGBM",    **scores_tuned_lgbm},
     {"Model": "Tuned CatBoost",    **scores_tuned_cat},
-    {"Model": "Ensemble",          **scores_ens},
 ]
-pd.DataFrame(rows).to_csv(str(BASE_DIR / "tuning_comparison.csv"), index=False)
-print("\nSaved: tuning_comparison.csv")
+pd.DataFrame(rows).to_csv(BASE_DIR / "tuned_result.csv", index=False)
+print("Saved: tuned_result.csv")
 
 # ── Chart ──────────────────────────────────────────────────────────────────────
 print("Generating chart...")
 metrics = ["Accuracy", "F1", "ROC-AUC"]
 plot_data = {
-    "Baseline LightGBM": (scores_base_lgbm,  "#C4B5FD"),
-    "Baseline CatBoost": (scores_base_cat,   "#FCA5A5"),
+    "Baseline LightGBM": (scores_base_lgbm, "#C4B5FD"),
+    "Baseline CatBoost": (scores_base_cat,  "#FCA5A5"),
     "Tuned LightGBM":    (scores_tuned_lgbm, "#7C3AED"),
     "Tuned CatBoost":    (scores_tuned_cat,  "#DC2626"),
-    "Ensemble":          (scores_ens,        "#059669"),
 }
 
-x      = np.arange(len(metrics))
-width  = 0.15
-offsets = [-2, -1, 0, 1, 2]
+x       = np.arange(len(metrics))
+width   = 0.18
+offsets = [-1.5, -0.5, 0.5, 1.5]
 
-fig, ax = plt.subplots(figsize=(13, 6))
+fig, ax = plt.subplots(figsize=(12, 6))
 fig.patch.set_facecolor("#FAFAF8")
 ax.set_facecolor("#FAFAF8")
 
@@ -211,7 +196,7 @@ ax.set_xticklabels(metrics, fontsize=13, fontweight="bold")
 all_vals = [s[m] for _, (s, _) in plot_data.items() for m in metrics]
 ax.set_ylim(max(0.0, min(all_vals) - 0.08), min(1.0, max(all_vals) + 0.07))
 ax.set_ylabel("Score", fontsize=12)
-ax.set_title("Baseline vs Tuned vs Ensemble\nClient-Counselor Matching System",
+ax.set_title("Baseline vs Tuned — LightGBM & CatBoost\nClient-Counselor Matching System",
              fontsize=14, fontweight="bold", pad=14)
 ax.legend(fontsize=9, framealpha=0.9, loc="lower right")
 ax.yaxis.grid(True, linestyle="--", alpha=0.4, zorder=0)
@@ -220,9 +205,9 @@ for spine in ["top", "right"]:
     ax.spines[spine].set_visible(False)
 
 plt.tight_layout()
-plt.savefig(str(BASE_DIR / "tuning_comparison.png"), dpi=150,
+plt.savefig(BASE_DIR / "tuned_result.png", dpi=150,
             bbox_inches="tight", facecolor="#FAFAF8")
-print("Saved: tuning_comparison.png")
+print("Saved: tuned_result.png")
 
 # ── Summary ────────────────────────────────────────────────────────────────────
 print("\n" + "=" * 65)
@@ -231,4 +216,4 @@ print("-" * 65)
 for row in rows:
     print(f"{row['Model']:<30} {row['Accuracy']:>9.3f} {row['F1']:>9.3f} {row['ROC-AUC']:>9.3f}")
 print("=" * 65)
-print(f"\nDeployment model: ensemble.pkl  (keys: 'lgbm', 'cat')")
+print(f"\nDeployment model: tuned_lgbm.pkl")

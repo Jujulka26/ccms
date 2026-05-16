@@ -305,7 +305,7 @@ def render_hero_new():
                 <div class="hero-image-wrap">{img_tag}</div>
             </div>
             <div class="hero-stats">
-                <div><div class="hero-stat-num">9</div><div class="hero-stat-label">Match factors</div></div>
+                <div><div class="hero-stat-num">8</div><div class="hero-stat-label">Match factors</div></div>
                 <div><div class="hero-stat-num">Match</div><div class="hero-stat-label">Personalised</div></div>
                 <div><div class="hero-stat-num">SHAP</div><div class="hero-stat-label">Explainability</div></div>
             </div>
@@ -347,14 +347,14 @@ def render_disclaimer():
 def _match_badges(c: dict, primary: bool) -> str:
     feats = c.get("features") or {}
     badges = []
-    issue = c.get("issue_score", 0)
+    issue = c.get("issue_match", 0)
     if issue >= 1.0:
         badges.append(("Issue Match", True))
     elif issue >= 0.6:
         badges.append(("Related Issue", None))
     if c.get("modality_match"):
         badges.append(("Modality Match", True))
-    if feats.get("exp_issue_weight") or c.get("experience_years", 0) >= 8:
+    if feats.get("exp_issue_fit") or c.get("experience_years", 0) >= 8:
         badges.append(("Senior Counselor", True))
     if c.get("gender_match"):
         badges.append(("Gender Match", True))
@@ -958,6 +958,7 @@ def show_matching_page():
             horizontal=True,
             key="previous_exp",
         )
+        st.caption(f"[DEBUG step2] previous_exp in session = {st.session_state.get('previous_exp')}")
         st.markdown("<br>", unsafe_allow_html=True)
         col1, col2 = st.columns([1, 1])
         col1.button("← Back", use_container_width=True,
@@ -989,13 +990,16 @@ def show_matching_page():
     # ── STEP 4: Results ──────────────────────────────────────────────────────
     elif st.session_state.quiz_step == 4:
         def _full_reset():
+            # Remove form values so steps 1-3 re-initialise to defaults
+            for fk in ["client_age", "client_gender", "client_ethnicity", "client_issue",
+                       "previous_exp", "preferred_modality", "preferred_language", "preferred_c_gender"]:
+                st.session_state.pop(fk, None)
             st.session_state.quiz_step = 0
             st.session_state.excluded_counselor_ids = []
             st.session_state.pop("_global_sent_to", None)
             st.session_state.pop("_success_name", None)
-            # Clear all match caches so dismissed counselors re-enter the pool
             for k in list(st.session_state.keys()):
-                if k.startswith("match_") or k.startswith("gemini_single_"):
+                if k.startswith("match_") or k.startswith("shap_") or k.startswith("gemini_single_"):
                     del st.session_state[k]
 
         client_age = st.session_state.client_age
@@ -1014,7 +1018,7 @@ def show_matching_page():
             "client_gender": client_gender,
             "client_ethnicity": client_ethnicity,
             "client_issue": client_issue,
-            "previous_exp": int(previous_exp),
+            "prev_exp": int(previous_exp),
             "preferred_language": preferred_language,
             "preferred_modality": preferred_modality,
             "preferred_c_gender": preferred_c_gender,
@@ -1025,8 +1029,7 @@ def show_matching_page():
 
         if _match_cache_key not in st.session_state:
             with st.spinner("Analyzing compatibility factors to find your ideal match..."):
-                pass
-            st.session_state[_match_cache_key] = post_match({**_match_payload, "exclude_ids": []})
+                st.session_state[_match_cache_key] = post_match({**_match_payload, "exclude_ids": []})
 
         result = st.session_state[_match_cache_key]
 
@@ -1121,15 +1124,14 @@ def show_matching_page():
                 st.info(shap_result["error"])
             else:
                 readable_names = {
-                    "issue_score":        "Issue Similarity",
+                    "issue_match":        "Issue Similarity",
                     "modality_issue_fit": "Issue-Modality Fit",
                     "modality_match":     "Preferred Modality Match",
                     "gender_match":       "Preferred Gender Match",
-                    "exp_issue_weight":   "Counselor Seniority",
+                    "exp_issue_fit":      "Counselor Seniority",
                     "ethnicity_match":    "Ethnicity Match",
                     "prev_exp":           "Client Previous Experience",
                     "age_gap":            "Age Gap",
-                    "counselor_age":      "Counselor Age",
                 }
                 try:
                     names  = shap_result["feature_names"]

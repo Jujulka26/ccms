@@ -1,5 +1,6 @@
 from pathlib import Path
 from functools import lru_cache
+import warnings
 import numpy as np
 import pandas as pd
 import joblib
@@ -21,21 +22,19 @@ MODALITY_ISSUE_FIT = {
 }
 
 FEATURE_ORDER = [
-    "issue_score", "modality_issue_fit", "modality_match", "gender_match",
-    "exp_issue_weight", "ethnicity_match", "prev_exp", "age_gap",
-    "counselor_age",
+    "issue_match", "modality_issue_fit", "modality_match", "gender_match",
+    "exp_issue_fit", "ethnicity_match", "prev_exp", "age_gap",
 ]
 
 
 @lru_cache(maxsize=1)
 def load_resources():
-    # ensemble.pkl is a dict {"lgbm": pipeline, "cat": pipeline}
-    ensemble = joblib.load(str(BASE_DIR / "ensemble.pkl"))
+    lgbm = joblib.load(str(BASE_DIR / "tuned_lgbm.pkl"))
     df_ref = pd.read_csv(str(BASE_DIR / "client_counselor_dataset.csv"))
-    return ensemble, df_ref
+    return lgbm, df_ref
 
 
-def _issue_score(client_issue: str, specialization: str) -> float:
+def _issue_match(client_issue: str, specialization: str) -> float:
     return ISSUE_SIMILARITY.get(client_issue, {}).get(specialization, 0.0)
 
 
@@ -44,18 +43,18 @@ def _modality_fit(client_issue: str, counselor_modality: str) -> float:
     return MODALITY_ISSUE_FIT.get(client_issue, {}).get(primary, 0.5)
 
 
-def _exp_issue_weight(experience_years) -> int:
+def _exp_issue_fit(exp_year) -> int:
     try:
-        return 1 if float(experience_years) >= 8 else 0
+        return 1 if float(exp_year) >= 8 else 0
     except (TypeError, ValueError):
         return 0
 
 
-def _prev_exp_value(val) -> float:
+def _prev_exp_value(val) -> int:
     try:
-        return float(val)
+        return int(val)
     except (TypeError, ValueError):
-        return 0.0
+        return 0
 
 
 def _exp_years_value(val) -> float:
@@ -69,13 +68,13 @@ def run_match(match_req, counselors: list[dict]) -> dict:
     client_age        = match_req.client_age
     client_issue      = match_req.client_issue
     client_ethnicity  = match_req.client_ethnicity
-    previous_exp      = match_req.previous_exp
+    prev_exp          = match_req.prev_exp
     preferred_language  = match_req.preferred_language
     preferred_modality  = match_req.preferred_modality
     preferred_c_gender  = match_req.preferred_c_gender
     exclude_ids = set(getattr(match_req, "exclude_ids", []) or [])
 
-    ensemble, _ = load_resources()
+    lgbm, _ = load_resources()
 
     rows = []
     for c in counselors:
@@ -87,16 +86,15 @@ def run_match(match_req, counselors: list[dict]) -> dict:
         counselor_modalities = [v.strip() for v in str(c.get("counselor_modality", "")).split(",") if v.strip()]
         exp_yrs = _exp_years_value(c.get("experience_years"))
         rows.append({
-            "counselor_id":      c["counselor_id"],
-            "issue_score":       _issue_score(client_issue, c.get("specialization", "")),
+            "counselor_id":       c["counselor_id"],
+            "issue_match":        _issue_match(client_issue, c.get("specialization", "")),
             "modality_issue_fit": _modality_fit(client_issue, c.get("counselor_modality", "")),
-            "modality_match":    int(preferred_modality in counselor_modalities),
-            "gender_match":      1 if preferred_c_gender == "No preference" else int(preferred_c_gender == c.get("gender", "")),
-            "exp_issue_weight":  _exp_issue_weight(exp_yrs),
-            "ethnicity_match":   int(client_ethnicity == c.get("ethnicity", "")),
-            "prev_exp":          _prev_exp_value(previous_exp),
-            "age_gap":           abs(float(client_age) - float(c.get("age", 0))),
-            "counselor_age":     float(c.get("age", 0)),
+            "modality_match":     int(preferred_modality in counselor_modalities),
+            "gender_match":       1 if preferred_c_gender == "No preference" else int(preferred_c_gender == c.get("gender", "")),
+            "exp_issue_fit":      _exp_issue_fit(exp_yrs),
+            "ethnicity_match":    int(client_ethnicity == c.get("ethnicity", "")),
+            "prev_exp":           _prev_exp_value(prev_exp),
+            "age_gap":            abs(float(client_age) - float(c.get("age", 0))),
         })
 
     if not rows:
@@ -105,16 +103,14 @@ def run_match(match_req, counselors: list[dict]) -> dict:
     df = pd.DataFrame(rows)
     X = df[FEATURE_ORDER]
 
-    # Soft-vote ensemble: average probabilities from LightGBM + CatBoost
-    prob_lgbm = ensemble["lgbm"].predict_proba(X)[:, 1]
-    prob_cat  = ensemble["cat"].predict_proba(X)[:, 1]
-    avg = (prob_lgbm + prob_cat) / 2
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="X does not have valid feature names")
+        prob = lgbm.predict_proba(X)[:, 1]
 
-    # Temperature scaling T=1.2: divide logits by T to spread high-confidence scores
-    # without a hard ceiling. ECE stays at ~0.042 (well-calibrated).
+    # Temperature scaling T=1.5: spreads scores without hard ceiling
     T = 1.5
-    avg = np.clip(avg, 1e-7, 1 - 1e-7)
-    logits = np.log(avg / (1 - avg))
+    prob = np.clip(prob, 1e-7, 1 - 1e-7)
+    logits = np.log(prob / (1 - prob))
     df["compatibility"] = (1 / (1 + np.exp(-logits / T))) * 100
 
     ranked = df.sort_values("compatibility", ascending=False)
@@ -123,38 +119,38 @@ def run_match(match_req, counselors: list[dict]) -> dict:
     def build_match(row) -> dict:
         c = counselor_map[row["counselor_id"]]
         return {
-            "counselor_id":       int(c["counselor_id"]),
-            "name":               c.get("name"),
-            "age":                int(c.get("age", 0)),
-            "gender":             c.get("gender"),
-            "ethnicity":          c.get("ethnicity"),
-            "specialization":     c.get("specialization"),
-            "counselor_language": c.get("counselor_language"),
-            "counselor_modality": c.get("counselor_modality"),
-            "experience_years":   int(c.get("experience_years", 0)),
-            "about_me":           c.get("about_me"),
-            "expertise_tags":     c.get("expertise_tags"),
-            "helpful_thought_1":  c.get("helpful_thought_1"),
-            "helpful_thought_2":  c.get("helpful_thought_2"),
-            "modality_desc":      c.get("modality_desc"),
-            "image":              c.get("image"),
+            "counselor_id":        int(c["counselor_id"]),
+            "name":                c.get("name"),
+            "age":                 int(c.get("age", 0)),
+            "gender":              c.get("gender"),
+            "ethnicity":           c.get("ethnicity"),
+            "specialization":      c.get("specialization"),
+            "counselor_language":  c.get("counselor_language"),
+            "counselor_modality":  c.get("counselor_modality"),
+            "experience_years":    int(c.get("experience_years", 0)),
+            "about_me":            c.get("about_me"),
+            "expertise_tags":      c.get("expertise_tags"),
+            "helpful_thought_1":   c.get("helpful_thought_1"),
+            "helpful_thought_2":   c.get("helpful_thought_2"),
+            "modality_desc":       c.get("modality_desc"),
+            "image":               c.get("image"),
             "compatibility_score": float(row["compatibility"]),
-            "issue_score":        float(row["issue_score"]),
-            "modality_match":     int(row["modality_match"]),
-            "gender_match":       int(row["gender_match"]),
-            "ethnicity_match":    int(row["ethnicity_match"]),
-            "features":           {f: float(row[f]) for f in FEATURE_ORDER},
+            "issue_match":         float(row["issue_match"]),
+            "modality_match":      int(row["modality_match"]),
+            "gender_match":        int(row["gender_match"]),
+            "ethnicity_match":     int(row["ethnicity_match"]),
+            "features":            {f: float(row[f]) for f in FEATURE_ORDER},
         }
 
-    best_row    = ranked.iloc[0]
+    best_row      = ranked.iloc[0]
     best_features = {f: float(best_row[f]) for f in FEATURE_ORDER}
-    top_n       = min(5, len(ranked))
-    matches     = [build_match(ranked.iloc[i]) for i in range(top_n)]
+    top_n         = min(5, len(ranked))
+    matches       = [build_match(ranked.iloc[i]) for i in range(top_n)]
 
     return {
-        "top_match":    matches[0],
-        "second_match": matches[1] if len(matches) > 1 else None,
-        "matches":      matches,
+        "top_match":     matches[0],
+        "second_match":  matches[1] if len(matches) > 1 else None,
+        "matches":       matches,
         "best_features": best_features,
     }
 
@@ -179,21 +175,20 @@ def engineer_features_from_df(df: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for _, row in df.iterrows():
         try:
-            client_issue       = row.get("client_issue", "")
-            preferred_modality = row.get("preferred_modality", "")
-            preferred_c_gender = row.get("preferred_counselor_gender", "No preference")
+            client_issue         = row.get("client_issue", "")
+            preferred_modality   = row.get("preferred_modality", "")
+            preferred_c_gender   = row.get("preferred_counselor_gender", "No preference")
             counselor_modalities = [v.strip() for v in str(row.get("counselor_modality", "")).split(",") if v.strip()]
             exp_yrs = _exp_years_value(row.get("experience_years", 0))
             rows.append({
-                "issue_score":        _issue_score(client_issue, row.get("specialization", "")),
+                "issue_match":        _issue_match(client_issue, row.get("specialization", "")),
                 "modality_issue_fit": _modality_fit(client_issue, row.get("counselor_modality", "")),
                 "modality_match":     int(preferred_modality in counselor_modalities),
                 "gender_match":       1 if preferred_c_gender == "No preference" else int(preferred_c_gender == row.get("counselor_gender", "")),
-                "exp_issue_weight":   _exp_issue_weight(exp_yrs),
+                "exp_issue_fit":      _exp_issue_fit(exp_yrs),
                 "ethnicity_match":    int(row.get("client_ethnicity", "") == row.get("counselor_ethnicity", "")),
                 "prev_exp":           _prev_exp_value(row.get("previous_counseling_experience", 0)),
                 "age_gap":            abs(float(row.get("client_age", 0)) - float(row.get("counselor_age", 0))),
-                "counselor_age":      float(row.get("counselor_age", 0)),
             })
         except Exception:
             continue
@@ -207,8 +202,8 @@ def _get_shap_explainer():
     global _shap_explainer
     if _shap_explainer is None:
         import shap
-        ensemble, _ = load_resources()
-        _shap_explainer = shap.TreeExplainer(ensemble["lgbm"].named_steps['model'])
+        lgbm, _ = load_resources()
+        _shap_explainer = shap.TreeExplainer(lgbm.named_steps["model"])
     return _shap_explainer
 
 
@@ -219,13 +214,13 @@ def compute_shap(features: dict) -> dict:
         return {"error": "SHAP not installed. Run: pip install shap", "shap_values": [], "base_value": 0.0, "feature_names": [], "feature_values": []}
 
     try:
-        ensemble, _ = load_resources()
+        lgbm, _ = load_resources()
         explainer = _get_shap_explainer()
 
         feature_values = [features.get(f, 0.0) for f in FEATURE_ORDER]
         x_row = pd.DataFrame([{f: features.get(f, 0.0) for f in FEATURE_ORDER}])
 
-        x_scaled = ensemble["lgbm"].named_steps['prep'].transform(x_row[FEATURE_ORDER])
+        x_scaled = lgbm.named_steps["prep"].transform(x_row[FEATURE_ORDER])
         shap_vals = explainer.shap_values(x_scaled)
 
         if isinstance(shap_vals, list):
@@ -240,11 +235,11 @@ def compute_shap(features: dict) -> dict:
             base_value = float(expected)
 
         return {
-            "shap_values":   row_contrib,
-            "base_value":    base_value,
-            "feature_names": list(FEATURE_ORDER),
+            "shap_values":    row_contrib,
+            "base_value":     base_value,
+            "feature_names":  list(FEATURE_ORDER),
             "feature_values": feature_values,
-            "error": None,
+            "error":          None,
         }
     except Exception as exc:
         return {"error": str(exc), "shap_values": [], "base_value": 0.0, "feature_names": [], "feature_values": []}

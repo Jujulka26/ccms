@@ -159,7 +159,7 @@ def show_model_performance_page():
 
     model_count = data["model_count"]
     best_roc = data["best_roc_auc"] * 100
-    deployed_model = data.get("deployed_model", "Ensemble (LGBM+Cat)")
+    deployed_model = data.get("deployed_model", "Tuned LightGBM")
     df = pd.DataFrame(data["models"])
     tuning_models = data.get("tuning_models", [])
 
@@ -193,16 +193,16 @@ def show_model_performance_page():
         """
         <div class="pm-card">
             <div class="pm-card-title">Baseline model comparison</div>
-            <p class="pm-card-copy">All four candidate models evaluated at default settings before tuning.</p>
+            <p class="pm-card-copy">All candidate models evaluated at default settings before tuning.</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
     st.markdown(
-        '<div class="pm-note">Random Forest has a marginally higher overall average at baseline, '
-        'but this difference is within noise. Tuning was applied to the top two candidates to determine '
-        'the final deployment choice.</div>',
+        '<div class="pm-note">Differences between top baseline models are within noise. '
+        'LightGBM and CatBoost were selected for tuning. Tuned LightGBM achieved the best ROC-AUC '
+        'and was chosen as the final deployed model.</div>',
         unsafe_allow_html=True,
     )
 
@@ -220,8 +220,8 @@ def show_model_performance_page():
         st.markdown(
             """
             <div class="pm-card">
-                <div class="pm-card-title">Ensemble evaluation — LightGBM vs CatBoost</div>
-                <p class="pm-card-copy">LightGBM and CatBoost were identified as the top two models with complementary strengths — LightGBM achieved higher ROC-AUC while CatBoost achieved higher Accuracy. A soft-voting ensemble combining both was selected as the final deployed model.</p>
+                <div class="pm-card-title">Tuning comparison — LightGBM vs CatBoost</div>
+                <p class="pm-card-copy">LightGBM and CatBoost were the top two baseline models and were both tuned with RandomizedSearchCV (50 iterations). Tuned LightGBM achieved the best overall ROC-AUC and was selected as the deployed model.</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -243,10 +243,9 @@ def show_model_performance_page():
             <div class="pm-recommend-badge">&#10003; &nbsp;Deployed Model</div>
             <div class="pm-recommend-title">{deployed_model} is the active model</div>
             <p class="pm-recommend-copy">
-                LightGBM and CatBoost were the top two performers at baseline. A soft-voting ensemble
-                averaging their predicted probabilities achieved the best overall results — matching peak F1
-                while combining both models' strengths — and was selected as the deployed model for
-                client-counselor matching.
+                LightGBM and CatBoost were the top two performers at baseline and were both tuned with
+                RandomizedSearchCV. Tuned LightGBM achieved the highest ROC-AUC after tuning and was
+                selected as the final deployed model for client-counselor matching.
             </p>
         </div>
         """,

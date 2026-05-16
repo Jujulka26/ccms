@@ -83,7 +83,7 @@ class MatchRequest(BaseModel):
     client_gender: str
     client_ethnicity: str
     client_issue: str
-    previous_exp: int
+    prev_exp: int
     preferred_language: str
     preferred_modality: str
     preferred_c_gender: str
@@ -107,10 +107,11 @@ class MatchedCounselor(BaseModel):
     modality_desc: Optional[str] = None
     image: Optional[str] = None
     compatibility_score: float
-    issue_score: float
+    issue_match: float
     modality_match: int
     gender_match: int
     ethnicity_match: int
+    features: Optional[Dict[str, float]] = None
 
 
 class MatchResponse(BaseModel):

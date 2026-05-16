@@ -7,16 +7,16 @@ router = APIRouter(prefix="/model-performance", tags=["model-performance"])
 
 BASE_DIR = Path(__file__).parent.parent.parent
 
-DEPLOYED_MODEL = "Ensemble (LGBM+Cat)"
+DEPLOYED_MODEL = "Tuned LightGBM"
 
 
 @router.get("/", response_model=ModelPerformanceResponse)
 def get_model_performance():
-    csv_path        = BASE_DIR / "model_results.csv"
-    ensemble_csv    = BASE_DIR / "ensemble_comparison.csv"
+    csv_path     = BASE_DIR / "ml" / "train_result.csv"
+    tuning_csv   = BASE_DIR / "ml" / "tuned_result.csv"
 
     if not csv_path.exists():
-        raise HTTPException(status_code=404, detail="model_results.csv not found. Please run training first.")
+        raise HTTPException(status_code=404, detail="train_result.csv not found. Please run trainmodels.py first.")
 
     try:
         df = pd.read_csv(str(csv_path))
@@ -27,12 +27,12 @@ def get_model_performance():
         tuning_models = []
         best_roc = float(df["ROC-AUC"].max())
 
-        if ensemble_csv.exists():
-            df_ensemble = pd.read_csv(str(ensemble_csv))
-            tuning_models = df_ensemble.to_dict(orient="records")
-            ens_row = df_ensemble[df_ensemble["Model"].str.contains("Ensemble", case=False)]
-            if not ens_row.empty:
-                best_roc = float(ens_row["ROC-AUC"].iloc[0])
+        if tuning_csv.exists():
+            df_tuning    = pd.read_csv(str(tuning_csv))
+            tuning_models = df_tuning.to_dict(orient="records")
+            tuned_row = df_tuning[df_tuning["Model"].str.contains("Tuned LightGBM", case=False)]
+            if not tuned_row.empty:
+                best_roc = float(tuned_row["ROC-AUC"].iloc[0])
 
         return {
             "models": df.drop(columns=["Overall"]).to_dict(orient="records"),

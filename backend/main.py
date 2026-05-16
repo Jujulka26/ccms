@@ -1,10 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 import os
 
 from backend.routers import counselors, auth, requests, matching, model_performance, contact
+from backend.ml import load_resources
 
-app = FastAPI(title="Client-Counselor Matching System API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    load_resources()
+    yield
+
+app = FastAPI(title="Client-Counselor Matching System API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

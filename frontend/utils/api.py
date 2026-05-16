@@ -25,7 +25,7 @@ def _get(path: str) -> dict | list:
 
 def _post(path: str, body: dict) -> dict:
     try:
-        r = requests.post(f"{BASE_URL}{path}", json=body, timeout=30)
+        r = requests.post(f"{BASE_URL}{path}", json=body, timeout=60)
         r.raise_for_status()
         return r.json()
     except requests.exceptions.ConnectionError:

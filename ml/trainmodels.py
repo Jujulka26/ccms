@@ -2,23 +2,23 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from pathlib import Path
+import numpy as np
 import pandas as pd
 import joblib
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
 
-from sklearn.base import clone
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.compose import ColumnTransformer
-
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.linear_model import LogisticRegression
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 
@@ -26,16 +26,16 @@ from catboost import CatBoostClassifier
 # 1. LOAD DATA
 # ============================================================
 BASE_DIR = Path(__file__).parent
-df = pd.read_csv(str(BASE_DIR / "client_counselor_dataset.csv"))
+df = pd.read_csv(BASE_DIR / "client_counselor_dataset.csv")
 
 # ============================================================
-# 2. ISSUE SIMILARITY
+# 2. LOOKUP TABLES
 # ============================================================
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
-    "Stress":     {"Stress": 1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.6},
-    "Trauma":     {"Trauma": 1.0, "Stress": 0.6, "Anxiety": 0.6, "Depression": 0.6},
-    "Depression": {"Depression": 1.0, "Anxiety": 0.6, "Stress": 0.6, "Trauma": 0.6}
+    "Stress":     {"Stress":  1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.6},
+    "Trauma":     {"Trauma":  1.0, "Stress":  0.6, "Anxiety": 0.6, "Depression": 0.6},
+    "Depression": {"Depression": 1.0, "Anxiety": 0.6, "Stress": 0.6, "Trauma": 0.6},
 }
 
 MODALITY_ISSUE_FIT = {
@@ -55,25 +55,17 @@ df['gender_match'] = (
     (df['preferred_counselor_gender'] == df['counselor_gender'])
 ).astype(int)
 
-df['ethnicity_match'] = (
-    df['client_ethnicity'] == df['counselor_ethnicity']
-).astype(int)
+df['ethnicity_match'] = (df['client_ethnicity'] == df['counselor_ethnicity']).astype(int)
 
-df['issue_score'] = df.apply(
-    lambda row: ISSUE_SIMILARITY[row['client_issue']][row['specialization']],
-    axis=1
+df['issue_match'] = df.apply(
+    lambda row: ISSUE_SIMILARITY[row['client_issue']][row['specialization']], axis=1
 )
 
-df['exact_spec_match'] = (df['client_issue'] == df['specialization']).astype(int)
+df['exp_issue_fit'] = (df['experience_years'] >= 8).astype(int)
 
 df['prev_exp'] = df['previous_counseling_experience']
-df['exp_years'] = df['experience_years']
-df['age_gap'] = abs(df['client_age'] - df['counselor_age'])
 
-def _exp_issue_weight(row):
-    return 1 if float(row['experience_years']) >= 8 else 0
-
-df['exp_issue_weight'] = df.apply(_exp_issue_weight, axis=1)
+df['age_gap'] = (df['client_age'] - df['counselor_age']).abs()
 
 df['modality_issue_fit'] = df.apply(
     lambda row: MODALITY_ISSUE_FIT.get(row['client_issue'], {}).get(
@@ -86,46 +78,31 @@ df['modality_issue_fit'] = df.apply(
 # 4. FEATURES
 # ============================================================
 features = [
-    'issue_score',
-    'modality_issue_fit',
-    'modality_match',
-    'gender_match',
-    'exp_issue_weight',
-    'ethnicity_match',
-    'prev_exp',
-    'age_gap',
-    'counselor_age',
+    'issue_match', 'modality_issue_fit', 'modality_match', 'gender_match',
+    'exp_issue_fit', 'ethnicity_match', 'prev_exp', 'age_gap',
 ]
 
 X = df[features]
 y = df['match_success']
 
 # ============================================================
-# 5. PREPROCESSING
-# ============================================================
-preprocessor = ColumnTransformer([
-    ('num', StandardScaler(), features),
-])
-
-# ============================================================
-# 6. SPLIT
+# 5. SPLIT
 # ============================================================
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
 # ============================================================
-# 7. FEATURE CORRELATION WITH TARGET
+# 6. FEATURE CORRELATION WITH TARGET
 # ============================================================
-corr = df[features + ['match_success']].corr()['match_success'].drop('match_success')
+corr = df[features + ['match_success']].corr(numeric_only=True)['match_success'].drop('match_success')
 print("\n===== FEATURE CORRELATION WITH TARGET =====")
 print(corr.sort_values(ascending=False))
 
 # ============================================================
-# 8. MODELS + SAVE NAMES
+# 7. MODELS
 # ============================================================
 models = {
-    "Logistic Reg":   LogisticRegression(max_iter=1000, random_state=42),
     "Random Forest":  RandomForestClassifier(n_estimators=100, random_state=42),
     "KNN":            KNeighborsClassifier(n_neighbors=5),
     "Neural Network": MLPClassifier(hidden_layer_sizes=(64, 32), max_iter=500, random_state=42),
@@ -134,7 +111,6 @@ models = {
 }
 
 save_names = {
-    "Logistic Reg":   "baseline_logreg.pkl",
     "Random Forest":  "baseline_rf.pkl",
     "KNN":            "baseline_knn.pkl",
     "Neural Network": "baseline_nn.pkl",
@@ -142,16 +118,16 @@ save_names = {
     "CatBoost":       "baseline_cat.pkl",
 }
 
-results = []
-
 # ============================================================
 # 8. TRAIN + EVALUATE + SAVE
 # ============================================================
+results = []
+
 for name, model in models.items():
     print(f"\nTraining {name}...")
 
     pipeline = ImbPipeline([
-        ('prep',  clone(preprocessor)),
+        ('prep',  StandardScaler()),
         ('smote', SMOTE(random_state=42)),
         ('model', model),
     ])
@@ -161,27 +137,129 @@ for name, model in models.items():
     y_pred = pipeline.predict(X_test)
     y_prob = pipeline.predict_proba(X_test)[:, 1]
 
-    acc = float(accuracy_score(y_test, y_pred))
-    f1  = float(f1_score(y_test, y_pred))
-    roc = float(roc_auc_score(y_test, y_prob))
-
     results.append({
         "Model":    name,
-        "Accuracy": round(acc, 3),
-        "F1":       round(f1,  3),
-        "ROC-AUC":  round(roc, 3),
+        "Accuracy": round(float(accuracy_score(y_test, y_pred)), 3),
+        "F1":       round(float(f1_score(y_test, y_pred)), 3),
+        "ROC-AUC":  round(float(roc_auc_score(y_test, y_prob)), 3),
     })
 
-    joblib.dump(pipeline, str(BASE_DIR / save_names[name]))
+    joblib.dump(pipeline, BASE_DIR / save_names[name])
     print(f"  Saved: {save_names[name]}")
 
 # ============================================================
-# 9. SAVE RESULTS
+# 9. SAVE RESULTS CSV
 # ============================================================
 results_df = pd.DataFrame(results)
-results_df.to_csv(str(BASE_DIR / "model_results.csv"), index=False)
+results_df.to_csv(BASE_DIR / "train_result.csv", index=False)
 
 print("\n===== FINAL RESULTS =====")
 print(results_df)
+
+# ============================================================
+# 10. CHART
+# ============================================================
+print("\nGenerating chart...")
+
+model_names = results_df["Model"].tolist()
+metrics     = ["Accuracy", "F1", "ROC-AUC"]
+colors      = ["#6D28D9", "#7C3AED", "#A78BFA", "#C4B5FD", "#DDD6FE"]
+
+x      = np.arange(len(metrics))
+width  = 0.15
+gap    = 0.02
+n      = len(model_names)
+starts = -(n - 1) / 2 * (width + gap)
+
+fig, axes = plt.subplots(1, 2, figsize=(18, 6))
+fig.patch.set_facecolor("#FAFAF8")
+
+# Left: grouped bar chart
+ax = axes[0]
+ax.set_facecolor("#FAFAF8")
+
+for i, (model, color) in enumerate(zip(model_names, colors)):
+    offset = starts + i * (width + gap)
+    vals   = [results_df.loc[results_df["Model"] == model, m].values[0] for m in metrics]
+    bars   = ax.bar(x + offset, vals, width, color=color, label=model,
+                    zorder=3, edgecolor="white", linewidth=0.5)
+    for bar, val in zip(bars, vals):
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.005,
+                f"{val:.3f}", ha="center", va="bottom",
+                fontsize=7.5, fontweight="bold", color="#374151")
+
+ax.set_xticks(x)
+ax.set_xticklabels(metrics, fontsize=12, fontweight="bold")
+all_vals = results_df[metrics].values.flatten()
+ax.set_ylim(max(0.0, all_vals.min() - 0.08), min(1.0, all_vals.max() + 0.07))
+ax.set_ylabel("Score", fontsize=11)
+ax.set_title("Baseline Model Comparison\n(Accuracy · F1 · ROC-AUC)",
+             fontsize=13, fontweight="bold", pad=12)
+ax.legend(loc="lower right", framealpha=0.9, fontsize=9)
+ax.yaxis.grid(True, linestyle="--", alpha=0.5, zorder=0)
+ax.set_axisbelow(True)
+for spine in ["top", "right"]:
+    ax.spines[spine].set_visible(False)
+
+for m_idx, metric in enumerate(metrics):
+    best_val   = results_df[metric].max()
+    best_model = results_df.loc[results_df[metric].idxmax(), "Model"]
+    m_i        = model_names.index(best_model)
+    bar_x      = x[m_idx] + starts + m_i * (width + gap) + width / 2
+    ax.text(bar_x, best_val + 0.022, "★", ha="center", va="bottom",
+            fontsize=9, color="#F59E0B")
+
+ax.text(0.98, 0.02, "★ = best in metric", transform=ax.transAxes,
+        ha="right", va="bottom", fontsize=8, color="#6B7280")
+
+# Right: summary table
+ax2 = axes[1]
+ax2.set_facecolor("#FAFAF8")
+ax2.axis("off")
+
+df_display = results_df.copy()
+df_display["Overall"] = df_display[metrics].mean(axis=1).round(4)
+df_display = df_display.sort_values("Overall", ascending=False).reset_index(drop=True)
+
+col_labels = ["Model", "Accuracy", "F1", "ROC-AUC", "Overall"]
+table_data = [
+    [row["Model"], f"{row['Accuracy']:.3f}", f"{row['F1']:.3f}",
+     f"{row['ROC-AUC']:.3f}", f"{row['Overall']:.4f}"]
+    for _, row in df_display.iterrows()
+]
+
+tbl = ax2.table(cellText=table_data, colLabels=col_labels,
+                cellLoc="center", loc="center", bbox=[0, 0.15, 1, 0.7])
+tbl.auto_set_font_size(False)
+tbl.set_fontsize(11)
+
+for j in range(len(col_labels)):
+    tbl[0, j].set_facecolor("#6D28D9")
+    tbl[0, j].set_text_props(color="white", fontweight="bold")
+    tbl[0, j].set_height(0.12)
+
+row_colors = ["#EDE9FE", "#F5F3FF", "#FAF8FF", "#FFFFFF", "#FFFFFF"]
+for i, row_color in enumerate(row_colors):
+    for j in range(len(col_labels)):
+        tbl[i + 1, j].set_facecolor(row_color)
+        tbl[i + 1, j].set_height(0.10)
+        if i == 0:
+            tbl[i + 1, j].set_text_props(fontweight="bold")
+
+metric_col_map = {"Accuracy": 1, "F1": 2, "ROC-AUC": 3, "Overall": 4}
+for metric, col_idx in metric_col_map.items():
+    best_row = df_display[metric].idxmax() + 1
+    tbl[best_row, col_idx].set_text_props(color="#6D28D9", fontweight="bold")
+
+ax2.set_title("Model Performance Summary\n(sorted by Overall score)",
+              fontsize=13, fontweight="bold", pad=12)
+ax2.text(0.5, 0.08, "Overall = mean(Accuracy, F1, ROC-AUC)  |  Purple = best in column",
+         ha="center", va="center", transform=ax2.transAxes, fontsize=8.5, color="#6B7280")
+
+plt.suptitle("Baseline Model Benchmark — Client-Counselor Matching System",
+             fontsize=14, fontweight="bold", y=1.01)
+plt.tight_layout()
+plt.savefig(BASE_DIR / "train_result.png", dpi=150, bbox_inches="tight", facecolor="#FAFAF8")
+print("Saved: train_result.png")
 
 print("\nDONE")
