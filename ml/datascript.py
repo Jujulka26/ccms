@@ -111,7 +111,6 @@ for i in range(NUM_COUNSELORS):
             ETHNICITIES, weights=[0.6, 0.25, 0.1, 0.05]
         )[0],
 
-        # ✅ MULTI-LANGUAGE (MAX 2)
         "counselor_language": ", ".join(
             random.sample(LANGUAGES, k=random.choice([1, 2]))
         ),
@@ -132,22 +131,9 @@ for i in range(NUM_COUNSELORS):
 # ======================================================
 rows = []
 
-# S_MIN: Anxiety + Depression counselor (sim=0.6) + no modality match + no prev_exp
-#        + no gender/ethnicity match + non-senior + worst fit (Anxiety+Humanistic=0.4) + large age gap
-# = 35*0.6 + (3+0.6) + 1.5 + 1 + 2 + 0 + 9*0.4 + 0 = 32.7
-S_MIN = 32.7
-
-# S_MAX kept at 80 (original normalization anchor).
-# Theoretical max with new interactions is 86; the rare best-case Trauma+senior+all-match
-# pairs get base_prob > 1.0, which clips to 1.0 (always label=1). This affects < 2% of
-# pairs and does not distort the distribution. Keeping S_MAX=80 preserves the same
-# prob thresholds as the validated original formula (~44% positive rate at 900 clients).
+S_MIN = 33.3
 S_MAX = 80.0
 
-# Issue-stratified experience bonus (replaces flat 7).
-# Clinical basis: ISTSS guidelines identify therapist experience as especially critical
-# for Trauma (complex presentations); Stress responds well to structured techniques
-# even from newer counselors.
 EXP_BONUS = {"Trauma": 11, "Anxiety": 8, "Depression": 8, "Stress": 5}
 
 for client in clients:
@@ -172,37 +158,35 @@ for client in clients:
         else:
             S += 3 + sim
 
-        # Previous counseling experience × modality match interaction.
-        # Clients with prior counseling know what works for them; receiving their
-        # preferred modality amplifies that benefit (synergistic, not merely additive).
+        # Previous counseling experience x modality match interaction
         if client["previous_counseling_experience"] == 1:
             S += 5 + 2 * int(modality_match)
         else:
             S += 1.5
 
-        # Gender (d=0.12, Cabral & Smith 2011)
+        # Gender (d=0.21, PMC11750298 RCT — larger effect than ethnicity)
         preferred = client["preferred_counselor_gender"]
         c_gender = counselor["counselor_gender"]
         if preferred == "No preference":
-            S += 5
+            S += 6
         elif preferred == c_gender:
-            S += 5
+            S += 6
         else:
             S += 1
 
-        # Ethnicity (d=0.09, Cabral & Smith 2011)
+        # Ethnicity (d=0.09, Cabral & Smith 2011 — smaller effect than gender)
         if client["client_ethnicity"] == counselor["counselor_ethnicity"]:
-            S += 5
+            S += 4
         else:
-            S += 2
+            S += 1
 
-        # Experience × issue specificity (d=0.21 base, issue-stratified)
+        # Experience x issue specificity (d=0.21 base, issue-stratified)
         if counselor["experience_years"] >= 8:
             S += EXP_BONUS[client["client_issue"]]
 
         # Clinical modality-issue fit (d=0.175)
         fit = MODALITY_ISSUE_FIT[client["client_issue"]][counselor["counselor_modality"]]
-        S += 9 * fit
+        S += 13 * fit
 
         # Age gap (Lehane 2025, small directional effect)
         age_gap = abs(client["client_age"] - counselor["counselor_age"])
@@ -211,7 +195,7 @@ for client in clients:
         # ======================================================
         # FINAL LABEL
         # ======================================================
-        base_prob = (S - S_MIN) / (S_MAX - S_MIN)  # normalized [0, 1]
+        base_prob = (S - S_MIN) / (S_MAX - S_MIN)
         base_prob += random.uniform(-0.05, 0.05)
         final_prob = max(0.0, min(1.0, base_prob))
 

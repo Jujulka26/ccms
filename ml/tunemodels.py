@@ -28,6 +28,24 @@ from catboost import CatBoostClassifier
 
 BASE_DIR = Path(__file__).parent
 
+
+class SoftVotingEnsemble:
+    """Average predict_proba from two ImbPipelines. Named_steps proxies to LightGBM for SHAP."""
+
+    def __init__(self, lgbm_pipe, cat_pipe):
+        self._lgbm = lgbm_pipe
+        self._cat  = cat_pipe
+
+    def predict_proba(self, X):
+        return (self._lgbm.predict_proba(X) + self._cat.predict_proba(X)) / 2
+
+    def predict(self, X):
+        return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
+
+    @property
+    def named_steps(self):
+        return self._lgbm.named_steps
+
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
     "Stress":     {"Stress":  1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.6},
@@ -154,12 +172,21 @@ print(f"  Tuned CatBoost : {scores_tuned_cat}")
 joblib.dump(tuned_cat, BASE_DIR / "tuned_cat.pkl")
 print("  Saved: tuned_cat.pkl")
 
+# ── Ensemble ───────────────────────────────────────────────────────────────────
+print("\nBuilding soft-voting ensemble (LightGBM + CatBoost)...")
+ensemble = SoftVotingEnsemble(tuned_lgbm, tuned_cat)
+scores_ensemble, _ = evaluate(ensemble, X_test, y_test)
+print(f"  Ensemble : {scores_ensemble}")
+joblib.dump(ensemble, BASE_DIR / "ensemble.pkl")
+print("  Saved: ensemble.pkl")
+
 # ── Save comparison CSV ────────────────────────────────────────────────────────
 rows = [
     {"Model": "Baseline LightGBM", **scores_base_lgbm},
     {"Model": "Baseline CatBoost", **scores_base_cat},
     {"Model": "Tuned LightGBM",    **scores_tuned_lgbm},
     {"Model": "Tuned CatBoost",    **scores_tuned_cat},
+    {"Model": "Ensemble",          **scores_ensemble},
 ]
 pd.DataFrame(rows).to_csv(BASE_DIR / "tuned_result.csv", index=False)
 print("Saved: tuned_result.csv")
@@ -168,15 +195,16 @@ print("Saved: tuned_result.csv")
 print("Generating chart...")
 metrics = ["Accuracy", "F1", "ROC-AUC"]
 plot_data = {
-    "Baseline LightGBM": (scores_base_lgbm, "#C4B5FD"),
-    "Baseline CatBoost": (scores_base_cat,  "#FCA5A5"),
+    "Baseline LightGBM": (scores_base_lgbm,  "#C4B5FD"),
+    "Baseline CatBoost": (scores_base_cat,   "#FCA5A5"),
     "Tuned LightGBM":    (scores_tuned_lgbm, "#7C3AED"),
     "Tuned CatBoost":    (scores_tuned_cat,  "#DC2626"),
+    "Ensemble":          (scores_ensemble,   "#059669"),
 }
 
 x       = np.arange(len(metrics))
-width   = 0.18
-offsets = [-1.5, -0.5, 0.5, 1.5]
+width   = 0.15
+offsets = [-2, -1, 0, 1, 2]
 
 fig, ax = plt.subplots(figsize=(12, 6))
 fig.patch.set_facecolor("#FAFAF8")
@@ -216,4 +244,4 @@ print("-" * 65)
 for row in rows:
     print(f"{row['Model']:<30} {row['Accuracy']:>9.3f} {row['F1']:>9.3f} {row['ROC-AUC']:>9.3f}")
 print("=" * 65)
-print(f"\nDeployment model: tuned_lgbm.pkl")
+print(f"\nDeployment model: ensemble.pkl  (Soft-Voting: Tuned LightGBM + Tuned CatBoost)")
