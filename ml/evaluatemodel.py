@@ -1,9 +1,3 @@
-"""
-ML Model Evaluation — Deployed Model (Tuned LightGBM)
-Run: python ml/evaluatemodel.py
-Outputs: evaluation_report.txt + evaluation_plots.png
-"""
-
 import sys
 import warnings
 warnings.filterwarnings("ignore")

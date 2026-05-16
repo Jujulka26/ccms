@@ -22,15 +22,9 @@ from sklearn.neural_network import MLPClassifier
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 
-# ============================================================
-# 1. LOAD DATA
-# ============================================================
 BASE_DIR = Path(__file__).parent
 df = pd.read_csv(BASE_DIR / "client_counselor_dataset.csv")
 
-# ============================================================
-# 2. LOOKUP TABLES
-# ============================================================
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
     "Stress":     {"Stress":  1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.6},
@@ -45,9 +39,6 @@ MODALITY_ISSUE_FIT = {
     "Trauma":     {"CBT": 1.0, "Humanistic": 0.5, "Mindfulness": 0.5, "REBT": 0.5},
 }
 
-# ============================================================
-# 3. FEATURE ENGINEERING
-# ============================================================
 df['modality_match'] = (df['preferred_modality'] == df['counselor_modality']).astype(int)
 
 df['gender_match'] = (
@@ -74,9 +65,6 @@ df['modality_issue_fit'] = df.apply(
     axis=1
 )
 
-# ============================================================
-# 4. FEATURES
-# ============================================================
 features = [
     'issue_match', 'modality_issue_fit', 'modality_match', 'gender_match',
     'exp_issue_fit', 'ethnicity_match', 'prev_exp', 'age_gap',
@@ -85,23 +73,14 @@ features = [
 X = df[features]
 y = df['match_success']
 
-# ============================================================
-# 5. SPLIT
-# ============================================================
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# ============================================================
-# 6. FEATURE CORRELATION WITH TARGET
-# ============================================================
 corr = df[features + ['match_success']].corr(numeric_only=True)['match_success'].drop('match_success')
 print("\n===== FEATURE CORRELATION WITH TARGET =====")
 print(corr.sort_values(ascending=False))
 
-# ============================================================
-# 7. MODELS
-# ============================================================
 models = {
     "Random Forest":  RandomForestClassifier(n_estimators=100, random_state=42),
     "KNN":            KNeighborsClassifier(n_neighbors=5),
@@ -118,9 +97,6 @@ save_names = {
     "CatBoost":       "baseline_cat.pkl",
 }
 
-# ============================================================
-# 8. TRAIN + EVALUATE + SAVE
-# ============================================================
 results = []
 
 for name, model in models.items():
@@ -147,18 +123,12 @@ for name, model in models.items():
     joblib.dump(pipeline, BASE_DIR / save_names[name])
     print(f"  Saved: {save_names[name]}")
 
-# ============================================================
-# 9. SAVE RESULTS CSV
-# ============================================================
 results_df = pd.DataFrame(results)
 results_df.to_csv(BASE_DIR / "train_result.csv", index=False)
 
 print("\n===== FINAL RESULTS =====")
 print(results_df)
 
-# ============================================================
-# 10. CHART
-# ============================================================
 print("\nGenerating chart...")
 
 model_names = results_df["Model"].tolist()

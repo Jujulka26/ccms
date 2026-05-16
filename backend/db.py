@@ -14,7 +14,6 @@ def get_connection():
 
 
 def _clean(val):
-    """Convert NaN/None to None for JSON-safe serialization."""
     if val is None:
         return None
     if isinstance(val, float) and math.isnan(val):

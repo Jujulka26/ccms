@@ -2,10 +2,8 @@ import base64
 import hashlib
 import json as _json
 import os
-import numpy as np
 import streamlit as st
 import streamlit.components.v1 as components
-import time
 import google.generativeai as genai
 
 from frontend.utils.api import get_reference_data, post_match, post_shap, save_intro_request, check_pending_request
@@ -61,7 +59,6 @@ def inject_styles():
         .step-chip { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124,58,237,0.35); flex-shrink: 0; }
         .step-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: #1A1A2E; line-height: 1.2; }
         .step-copy { font-size: 14px; color: #5A5A6E; margin: 4px 0 16px 48px; line-height: 1.55; }
-        .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #8B5CF6; margin: 0 0 20px; }
         .section-divider { border: none; border-top: 1px solid #E5E5E5; margin: 0px 0 20px 0 !important; position: relative; z-index: 10; }
 
         [data-testid="block-container"] [data-testid="stVerticalBlock"] { gap: 0.5rem !important; }
@@ -93,7 +90,6 @@ def inject_styles():
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] { background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; color: #FFFFFF !important; border: none !important; box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover { box-shadow: 0 6px 20px rgba(124,58,237,0.45) !important; transform: translateY(-1px); }
 
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
         .result-card { position: relative; background: #FFFFFF; border-radius: 20px; padding: 28px 28px 0; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; overflow: hidden; }
         .dismiss-x { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s ease; line-height: 1; z-index: 10; }
         .dismiss-x:hover { background: rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.5); color: #EF4444; }
@@ -125,22 +121,9 @@ def inject_styles():
         .info-val { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 500; }
         .info-val-secondary { font-size: 13px; color: #2D2D3F; font-weight: 500; }
 
-        .explain-card { background: #FFFFFF; border-radius: 20px; padding: 32px 36px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 24px; }
-        .explain-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: #1A1A2E; margin: 0 0 24px; }
-        .point-row-wrap { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
-        .point-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 14px; font-size: 14.5px; font-weight: 500; transition: all 0.2s ease; }
-        .point-row-green { background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.15); color: #065F46; }
-        .point-row-amber { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); color: #92400E; }
-        .icon-circle { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; }
-        .icon-circle.green { background: #10B981; color: #fff; }
-        .icon-circle.amber { background: #F59E0B; color: #fff; }
-
         .ai-explanation-box { background: linear-gradient(135deg, #F8F5FF 0%, #FDF9FF 100%); border: 1px solid rgba(139,92,246,0.15); border-left: 3px solid #8B5CF6; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
-        .ai-explanation-box-alt { background: #FAFAF8; border: 1px solid rgba(0,0,0,0.06); border-left: 3px solid #A0A0B0; border-radius: 0 16px 16px 0; padding: 20px 24px; margin-top: 4px; }
         .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; }
-        .ai-badge-alt { display: inline-flex; align-items: center; gap: 6px; background: #6B7280; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
         .ai-explanation-text { font-size: 15.5px; color: #2D2D3F; line-height: 1.85; font-weight: 400; margin: 0; font-style: italic; }
-        .ai-explanation-text-alt { font-size: 14.5px; color: #4A4A5A; line-height: 1.8; font-weight: 400; margin: 0; font-style: italic; }
 
         div[data-testid="stTabs"] button { font-family: 'DM Sans', sans-serif !important; font-size: 14px !important; font-weight: 500 !important; }
 
@@ -207,10 +190,6 @@ def inject_styles():
         """,
         unsafe_allow_html=True,
     )
-
-
-def sorted_options(lst):
-    return sorted([v for v in lst if str(v).strip()])
 
 
 def modality_help_text(modality_options):
@@ -444,8 +423,6 @@ def show_profile_dialog(c: dict, score=None):
     name         = c.get("name", "Counselor")
     exp          = c.get("experience_years", "—")
     lang         = c.get("counselor_language", "—")
-    spec         = c.get("specialization", "")
-    modality     = c.get("counselor_modality", "—")
     about        = c.get("about_me") or ""
     ht1          = c.get("helpful_thought_1") or ""
     ht2          = c.get("helpful_thought_2") or ""
@@ -594,7 +571,6 @@ def show_profile_dialog(c: dict, score=None):
     def toggle_req(val):
         st.session_state[req_state_key] = val
 
-    # Session display: show confirmation if a request was sent this session
     already_sent_to = st.session_state.get("_global_sent_to")
     if already_sent_to:
         same = already_sent_to == name
@@ -735,7 +711,6 @@ def _counselor_summary(c) -> str:
 
 
 def get_gemini_explanation(c, client_issue, preferred_language, preferred_modality, preferred_c_gender, client_age, previous_exp) -> str | None:
-    """Generate a single counselor explanation. Cache by counselor_id externally."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         return None
@@ -771,7 +746,6 @@ Respond with plain text only. No JSON, no markdown."""
         return None
 
 
-
 @st.dialog("Start over?")
 def _start_over_dialog(reset_fn):
     st.markdown("""<style>
@@ -801,6 +775,77 @@ def _start_over_dialog(reset_fn):
             st.rerun()
 
 
+# ── Quiz step fragments (partial rerun → no full-page flash on input change) ──
+@st.fragment
+def _step1_form(ref):
+    render_step_progress(1)
+    render_step_header(1, "Tell us about yourself", "A few quick details help us tailor your best match.")
+    st.number_input("What is your age?", min_value=18, max_value=80, key="_age_ui")
+    st.session_state.client_age = int(st.session_state._age_ui)
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    st.radio("How do you identify?", ref["client_gender"], horizontal=True, key="_gender_ui")
+    st.session_state.client_gender = st.session_state._gender_ui
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    st.selectbox("What is your cultural background or ethnicity?", ref["client_ethnicity"], key="_ethnicity_ui")
+    st.session_state.client_ethnicity = st.session_state._ethnicity_ui
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2 = st.columns([1, 1])
+    if col1.button("← Back", use_container_width=True):
+        st.session_state.quiz_step = 0
+        st.rerun()
+    if col2.button("Next →", use_container_width=True, type="primary"):
+        st.session_state.quiz_step = 2
+        st.rerun()
+
+
+@st.fragment
+def _step2_form(ref):
+    render_step_progress(2)
+    render_step_header(2, "What brings you here?", "Share the main challenge you'd like support with today.")
+    st.radio("Primary focus area", ref["client_issue"], horizontal=True, key="_issue_ui")
+    st.session_state.client_issue = st.session_state._issue_ui
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    st.radio(
+        "Have you ever tried counseling before?",
+        ["No, this is my first time", "Yes, I have"],
+        horizontal=True,
+        key="_prev_exp_ui",
+    )
+    st.session_state.previous_exp = 1 if st.session_state._prev_exp_ui == "Yes, I have" else 0
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2 = st.columns([1, 1])
+    if col1.button("← Back", use_container_width=True):
+        st.session_state.quiz_step = 1
+        st.rerun()
+    if col2.button("Next →", use_container_width=True, type="primary"):
+        st.session_state.quiz_step = 3
+        st.rerun()
+
+
+@st.fragment
+def _step3_form(ref):
+    render_step_progress(3)
+    render_step_header(3, "Your preferences", "Almost done — let us know what works best for you.")
+    st.selectbox(
+        "Preferred counseling approach (Modality)",
+        ref["preferred_modality"],
+        help=modality_help_text(ref["preferred_modality"]),
+        key="preferred_modality",
+    )
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    st.radio("Preferred language for sessions", ref["preferred_language"], horizontal=True, key="preferred_language")
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    st.radio("Preferred counselor gender", ref["preferred_counselor_gender"], horizontal=True, key="preferred_c_gender")
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2 = st.columns([1, 1])
+    if col1.button("← Back", use_container_width=True):
+        st.session_state.quiz_step = 2
+        st.rerun()
+    if col2.button("Find My Best Match ✨", use_container_width=True, type="primary"):
+        st.session_state.quiz_step = 4
+        st.rerun()
+
+
 # ── Main page ─────────────────────────────────────────────────────────────────
 def show_matching_page():
     inject_styles()
@@ -822,6 +867,11 @@ def show_matching_page():
     if "client_ethnicity" not in st.session_state:    st.session_state.client_ethnicity = ref["client_ethnicity"][0] if ref["client_ethnicity"] else ""
     if "client_issue" not in st.session_state:        st.session_state.client_issue = ref["client_issue"][0] if ref["client_issue"] else ""
     if "previous_exp" not in st.session_state:        st.session_state.previous_exp = 0
+    if "_age_ui" not in st.session_state:             st.session_state._age_ui = 25
+    if "_gender_ui" not in st.session_state:          st.session_state._gender_ui = ref["client_gender"][0] if ref["client_gender"] else ""
+    if "_ethnicity_ui" not in st.session_state:       st.session_state._ethnicity_ui = ref["client_ethnicity"][0] if ref["client_ethnicity"] else ""
+    if "_issue_ui" not in st.session_state:           st.session_state._issue_ui = ref["client_issue"][0] if ref["client_issue"] else ""
+    if "_prev_exp_ui" not in st.session_state:        st.session_state._prev_exp_ui = "No, this is my first time"
     if "preferred_modality" not in st.session_state:  st.session_state.preferred_modality = ref["preferred_modality"][0] if ref["preferred_modality"] else ""
     if "preferred_language" not in st.session_state:  st.session_state.preferred_language = ref["preferred_language"][0] if ref["preferred_language"] else ""
     if "preferred_c_gender" not in st.session_state:  st.session_state.preferred_c_gender = ref["preferred_counselor_gender"][0] if ref["preferred_counselor_gender"] else ""
@@ -931,68 +981,22 @@ def show_matching_page():
 
     # ── STEP 1: Demographics ─────────────────────────────────────────────────
     elif st.session_state.quiz_step == 1:
-        render_step_progress(1)
-        render_step_header(1, "Tell us about yourself", "A few quick details help us tailor your best match.")
-        st.number_input("What is your age?", min_value=18, max_value=80, key="client_age")
-        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-        st.radio("How do you identify?", ref["client_gender"], horizontal=True, key="client_gender")
-        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-        st.selectbox("What is your cultural background or ethnicity?", ref["client_ethnicity"], key="client_ethnicity")
-        st.markdown("<br>", unsafe_allow_html=True)
-        col1, col2 = st.columns([1, 1])
-        col1.button("← Back", use_container_width=True,
-                    on_click=lambda: st.session_state.update(quiz_step=0))
-        col2.button("Next →", use_container_width=True, type="primary",
-                    on_click=lambda: st.session_state.update(quiz_step=2))
+        _step1_form(ref)
 
     # ── STEP 2: Clinical Needs ───────────────────────────────────────────────
     elif st.session_state.quiz_step == 2:
-        render_step_progress(2)
-        render_step_header(2, "What brings you here?", "Share the main challenge you'd like support with today.")
-        st.radio("Primary focus area", ref["client_issue"], horizontal=True, key="client_issue")
-        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-        st.radio(
-            "Have you ever tried counseling before?",
-            [0, 1],
-            format_func=lambda v: "Yes, I have" if int(v) == 1 else "No, this is my first time",
-            horizontal=True,
-            key="previous_exp",
-        )
-        st.caption(f"[DEBUG step2] previous_exp in session = {st.session_state.get('previous_exp')}")
-        st.markdown("<br>", unsafe_allow_html=True)
-        col1, col2 = st.columns([1, 1])
-        col1.button("← Back", use_container_width=True,
-                    on_click=lambda: st.session_state.update(quiz_step=1))
-        col2.button("Next →", use_container_width=True, type="primary",
-                    on_click=lambda: st.session_state.update(quiz_step=3))
+        _step2_form(ref)
 
     # ── STEP 3: Preferences ──────────────────────────────────────────────────
     elif st.session_state.quiz_step == 3:
-        render_step_progress(3)
-        render_step_header(3, "Your preferences", "Almost done — let us know what works best for you.")
-        st.selectbox(
-            "Preferred counseling approach (Modality)",
-            ref["preferred_modality"],
-            help=modality_help_text(ref["preferred_modality"]),
-            key="preferred_modality",
-        )
-        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-        st.radio("Preferred language for sessions", ref["preferred_language"], horizontal=True, key="preferred_language")
-        st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-        st.radio("Preferred counselor gender", ref["preferred_counselor_gender"], horizontal=True, key="preferred_c_gender")
-        st.markdown("<br>", unsafe_allow_html=True)
-        col1, col2 = st.columns([1, 1])
-        col1.button("← Back", use_container_width=True,
-                    on_click=lambda: st.session_state.update(quiz_step=2))
-        col2.button("Find My Best Match ✨", use_container_width=True, type="primary",
-                    on_click=lambda: st.session_state.update(quiz_step=4))
+        _step3_form(ref)
 
     # ── STEP 4: Results ──────────────────────────────────────────────────────
     elif st.session_state.quiz_step == 4:
         def _full_reset():
-            # Remove form values so steps 1-3 re-initialise to defaults
             for fk in ["client_age", "client_gender", "client_ethnicity", "client_issue",
-                       "previous_exp", "preferred_modality", "preferred_language", "preferred_c_gender"]:
+                       "previous_exp", "preferred_modality", "preferred_language", "preferred_c_gender",
+                       "_age_ui", "_gender_ui", "_ethnicity_ui", "_issue_ui", "_prev_exp_ui"]:
                 st.session_state.pop(fk, None)
             st.session_state.quiz_step = 0
             st.session_state.excluded_counselor_ids = []
@@ -1011,8 +1015,6 @@ def show_matching_page():
         preferred_modality = st.session_state.preferred_modality
         preferred_c_gender = st.session_state.preferred_c_gender
 
-        # Cache key based on quiz answers only — exclude_ids filtered locally so
-        # dismissals are instant (no new API call needed)
         _match_payload = {
             "client_age": client_age,
             "client_gender": client_gender,
@@ -1038,14 +1040,12 @@ def show_matching_page():
             st.markdown("</div>", unsafe_allow_html=True)
             return
 
-        # Store the full ranked list once; dismissals filter it locally — no API re-call
         ranked_key = _match_cache_key + "_all"
         if ranked_key not in st.session_state:
             st.session_state[ranked_key] = result.get("matches") or (
                 [result["top_match"]] + ([result["second_match"]] if result.get("second_match") else [])
             )
 
-        # Filter out dismissed counselors on every render (instant, no API call)
         excluded_set = set(st.session_state.excluded_counselor_ids)
         ranked_list = [c for c in st.session_state[ranked_key] if c["counselor_id"] not in excluded_set]
 
@@ -1059,11 +1059,6 @@ def show_matching_page():
         best_c   = ranked_list[0]
         second_c = ranked_list[1] if len(ranked_list) > 1 else None
         best_features = best_c.get("features") or result.get("best_features", {})
-
-        if not best_c:
-            st.error("No counselors available for matching.")
-            st.markdown("</div>", unsafe_allow_html=True)
-            return
 
         st.markdown('<div id="match-results-anchor"></div>', unsafe_allow_html=True)
         scroll_to_results()
@@ -1092,8 +1087,54 @@ def show_matching_page():
 
         counselor_name = best_c.get("name", "Your Top Match").upper()
 
+        # ── Your profile summary card ─────────────────────────────────────────
+        _c_gender_label = "Any gender" if preferred_c_gender == "No preference" else preferred_c_gender
+        _exp_label = "Prior experience" if int(previous_exp) == 1 else "New to counseling"
+        def _col(label, value, last=False):
+            br = "" if last else "border-right:1px solid #EDE9F6;"
+            return f"""<div style="padding:20px 26px;{br}min-width:0;">
+                <div style="font-size:10px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;
+                            color:#B0A8CC;margin-bottom:7px;">{label}</div>
+                <div style="font-size:15px;font-weight:700;color:#18122B;
+                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{value}</div>
+            </div>"""
+        _user_icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+        st.markdown(
+            f"""
+            <div style="background:#FFFFFF;border-radius:16px;margin-bottom:24px;
+                        border:1px solid #E8E4F3;
+                        box-shadow:0 4px 16px rgba(109,40,217,0.07),0 1px 4px rgba(0,0,0,0.04);
+                        overflow:hidden;">
+                <div style="background:#F8F5FF;border-bottom:1px solid #EDE9F6;
+                            padding:13px 26px;display:flex;align-items:center;gap:10px;">
+                    <div style="width:28px;height:28px;border-radius:8px;flex-shrink:0;
+                                background:linear-gradient(135deg,#7C3AED 0%,#A78BFA 100%);
+                                display:flex;align-items:center;justify-content:center;">
+                        {_user_icon}
+                    </div>
+                    <span style="font-size:12px;font-weight:700;letter-spacing:0.1em;
+                                 text-transform:uppercase;color:#4C2A91;">Your Profile</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);">
+                    {_col("Age", f"{client_age} yrs")}
+                    {_col("Gender", client_gender)}
+                    {_col("Ethnicity", client_ethnicity)}
+                    {_col("Focus Area", client_issue, last=True)}
+                </div>
+                <div style="height:1px;background:#EDE9F6;"></div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);">
+                    {_col("Language", preferred_language)}
+                    {_col("Approach", preferred_modality)}
+                    {_col("Counselor Gender", _c_gender_label)}
+                    {_col("Experience", _exp_label, last=True)}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
         # Paired header row
-        st.markdown('<p class="explain-title" style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin-top:8px;">YOUR MATCHES</p>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin:8px 0 24px;">YOUR MATCHES</p>', unsafe_allow_html=True)
 
         col1, col2 = st.columns(2, gap="large")
         with col1:

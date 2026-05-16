@@ -5,9 +5,6 @@ import numpy as np
 
 BASE_DIR = Path(__file__).parent
 
-# ======================================================
-# 1. GLOBAL SETTINGS
-# ======================================================
 NUM_CLIENTS = 900 # 900
 NUM_COUNSELORS = 180   # 180
 COUNSELORS_PER_CLIENT = 60  # 60
@@ -15,18 +12,13 @@ COUNSELORS_PER_CLIENT = 60  # 60
 random.seed(42)
 np.random.seed(42)
 
-# ======================================================
-# 2. VALUE POOLS
-# ======================================================
 GENDERS = ["Male", "Female"]
 ETHNICITIES = ["Malay", "Chinese", "Indian", "Other"]
 LANGUAGES = ["English", "Malay", "Mandarin", "Tamil"]
 ISSUES = ["Anxiety", "Depression", "Stress", "Trauma"]
 MODALITIES = ["CBT", "Humanistic", "Mindfulness", "REBT"]
 
-# ======================================================
-# 3. HELPER FUNCTIONS
-# ======================================================
+
 def generate_experience_years(age):
     max_exp = max(1, age - 23)
 
@@ -38,9 +30,7 @@ def generate_experience_years(age):
     else:
         return random.randint(8, min(20, max_exp))
 
-# ======================================================
-# 4. ISSUE SIMILARITY
-# ======================================================
+
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety":1.0,"Stress":0.7,"Trauma":0.6,"Depression":0.6},
     "Stress":     {"Stress":1.0,"Anxiety":0.7,"Trauma":0.6,"Depression":0.6},
@@ -56,9 +46,6 @@ MODALITY_ISSUE_FIT = {
     "Trauma":     {"CBT": 1.0, "Humanistic": 0.5, "Mindfulness": 0.5, "REBT": 0.5},
 }
 
-# ======================================================
-# 5. GENERATE CLIENTS
-# ======================================================
 clients = []
 
 for i in range(NUM_CLIENTS):
@@ -89,9 +76,6 @@ for i in range(NUM_CLIENTS):
         "preferred_counselor_gender": random.choice(["No preference", "Male", "Female"]),
     })
 
-# ======================================================
-# 6. GENERATE COUNSELORS (FIXED)
-# ======================================================
 counselors = []
 
 for i in range(NUM_COUNSELORS):
@@ -126,9 +110,6 @@ for i in range(NUM_COUNSELORS):
         "experience_years": exp
     })
 
-# ======================================================
-# 7. GENERATE PAIRS & LABEL
-# ======================================================
 rows = []
 
 S_MIN = 33.3
@@ -139,7 +120,6 @@ EXP_BONUS = {"Trauma": 11, "Anxiety": 8, "Depression": 8, "Stress": 5}
 for client in clients:
     for counselor in random.sample(counselors, COUNSELORS_PER_CLIENT):
 
-        # Language filter
         counselor_langs = counselor["counselor_language"].split(", ")
 
         if client["preferred_language"] not in counselor_langs:
@@ -192,9 +172,6 @@ for client in clients:
         age_gap = abs(client["client_age"] - counselor["counselor_age"])
         S += max(0, 20 - age_gap) * 0.10
 
-        # ======================================================
-        # FINAL LABEL
-        # ======================================================
         base_prob = (S - S_MIN) / (S_MAX - S_MIN)
         base_prob += random.uniform(-0.05, 0.05)
         final_prob = max(0.0, min(1.0, base_prob))
@@ -212,9 +189,6 @@ for client in clients:
             "match_success": match_success
         })
 
-# ======================================================
-# 8. SAVE DATASET
-# ======================================================
 df = pd.DataFrame(rows)
 df.to_csv(BASE_DIR / "client_counselor_dataset.csv", index=False)
 

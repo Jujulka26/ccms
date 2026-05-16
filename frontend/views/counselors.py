@@ -4,6 +4,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from frontend.utils.api import get_counselors
+from frontend.utils.avatar import avatar_html
 from frontend.views.matching import show_profile_dialog, show_request_success_dialog
 
 
@@ -216,7 +217,6 @@ def show_counselors_page():
 
         spec_bg, spec_color = _SPEC_COLORS.get(spec, ("#F3F4F6", "#374151"))
         mod_icon = _MODALITY_ICONS.get(modality.split(",")[0].strip(), "💬")
-        from frontend.utils.avatar import avatar_html
         av = avatar_html(name, c.get("image"), size=56, radius=12)
 
         with cols[i % 3]:

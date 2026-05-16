@@ -45,17 +45,13 @@ def show_chatbot_page():
     )
     st.markdown('<div class="chat-subheader">Ask any general questions or receive guidance about counseling, mental health, and the process. Powered by Gemini AI.</div>', unsafe_allow_html=True)
 
-    # API Key Configuration
     import os
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         st.error("Developer Setup Required: Please set the GEMINI_API_KEY environment variable to activate the chatbot.")
         return
 
-    # Initialize Gemini
     genai.configure(api_key=api_key)
-    
-    # Give the model a personality and context specific to your app
     app_context_prompt = """
 You are Mira, a warm and knowledgeable assistant for the Client-Counselor Matching System — a platform that uses machine learning to help clients find the right mental health counselor.
 
@@ -85,13 +81,11 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
 """
     model = genai.GenerativeModel("gemini-2.5-flash-lite", system_instruction=app_context_prompt)
 
-    # Initialize Chat History
     if "messages" not in st.session_state:
         st.session_state.messages = [
             {"role": "assistant", "content": "Hi, I'm Mira 👋 How can I help you today?"}
         ]
 
-    # Render Chat History
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
@@ -293,17 +287,11 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
             height=1,
         )
 
-    # Chat Input
     if prompt := st.chat_input("Ask a question..."):
-        # Append user message
         st.session_state.messages.append({"role": "user", "content": prompt})
-        
-        # Display user message
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Build context for Gemini (Gemini's generate_content expects specific format or plain string)
-        # Using chat session pattern:
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
             
@@ -325,8 +313,6 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
                     message_placeholder.markdown(full_response + "▌")
                 
                 message_placeholder.markdown(full_response)
-                
-                # Add to session_state
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
                 
             except Exception as e:

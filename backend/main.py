@@ -29,7 +29,6 @@ app.include_router(model_performance.router)
 app.include_router(contact.router)
 
 
-
 @app.get("/")
 def root():
     return {"message": "Client-Counselor Matching System API is running."}

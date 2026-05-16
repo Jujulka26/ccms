@@ -1,9 +1,3 @@
-"""
-Exploratory Data Analysis — Client-Counselor Matching Dataset
-Run: python ml/eda.py
-Outputs: eda_output/ folder with PNG plots + printed summary to console
-"""
-
 import warnings
 warnings.filterwarnings("ignore")
 

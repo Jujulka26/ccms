@@ -7,7 +7,7 @@ router = APIRouter(prefix="/model-performance", tags=["model-performance"])
 
 BASE_DIR = Path(__file__).parent.parent.parent
 
-DEPLOYED_MODEL = "Tuned LightGBM"
+DEPLOYED_MODEL = "Ensemble (LightGBM + CatBoost)"
 
 
 @router.get("/", response_model=ModelPerformanceResponse)
@@ -30,9 +30,7 @@ def get_model_performance():
         if tuning_csv.exists():
             df_tuning    = pd.read_csv(str(tuning_csv))
             tuning_models = df_tuning.to_dict(orient="records")
-            tuned_row = df_tuning[df_tuning["Model"].str.contains("Tuned LightGBM", case=False)]
-            if not tuned_row.empty:
-                best_roc = float(tuned_row["ROC-AUC"].iloc[0])
+            best_roc = float(df_tuning["ROC-AUC"].max())
 
         return {
             "models": df.drop(columns=["Overall"]).to_dict(orient="records"),

@@ -27,11 +27,27 @@ FEATURE_ORDER = [
 ]
 
 
+class SoftVotingEnsemble:
+    def __init__(self, lgbm_pipe, cat_pipe):
+        self._lgbm = lgbm_pipe
+        self._cat  = cat_pipe
+
+    def predict_proba(self, X):
+        return (self._lgbm.predict_proba(X) + self._cat.predict_proba(X)) / 2
+
+    def predict(self, X):
+        return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
+
+    @property
+    def named_steps(self):
+        return self._lgbm.named_steps
+
+
 @lru_cache(maxsize=1)
 def load_resources():
-    lgbm = joblib.load(str(BASE_DIR / "tuned_lgbm.pkl"))
+    model = joblib.load(str(BASE_DIR / "ensemble.pkl"))
     df_ref = pd.read_csv(str(BASE_DIR / "client_counselor_dataset.csv"))
-    return lgbm, df_ref
+    return model, df_ref
 
 
 def _issue_match(client_issue: str, specialization: str) -> float:
@@ -74,7 +90,7 @@ def run_match(match_req, counselors: list[dict]) -> dict:
     preferred_c_gender  = match_req.preferred_c_gender
     exclude_ids = set(getattr(match_req, "exclude_ids", []) or [])
 
-    lgbm, _ = load_resources()
+    model, _ = load_resources()
 
     rows = []
     for c in counselors:
@@ -105,7 +121,7 @@ def run_match(match_req, counselors: list[dict]) -> dict:
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="X does not have valid feature names")
-        prob = lgbm.predict_proba(X)[:, 1]
+        prob = model.predict_proba(X)[:, 1]
 
     # Temperature scaling T=1.5: spreads scores without hard ceiling
     T = 1.5
@@ -202,8 +218,8 @@ def _get_shap_explainer():
     global _shap_explainer
     if _shap_explainer is None:
         import shap
-        lgbm, _ = load_resources()
-        _shap_explainer = shap.TreeExplainer(lgbm.named_steps["model"])
+        model, _ = load_resources()
+        _shap_explainer = shap.TreeExplainer(model.named_steps["model"])
     return _shap_explainer
 
 
@@ -214,13 +230,13 @@ def compute_shap(features: dict) -> dict:
         return {"error": "SHAP not installed. Run: pip install shap", "shap_values": [], "base_value": 0.0, "feature_names": [], "feature_values": []}
 
     try:
-        lgbm, _ = load_resources()
+        model, _ = load_resources()
         explainer = _get_shap_explainer()
 
         feature_values = [features.get(f, 0.0) for f in FEATURE_ORDER]
         x_row = pd.DataFrame([{f: features.get(f, 0.0) for f in FEATURE_ORDER}])
 
-        x_scaled = lgbm.named_steps["prep"].transform(x_row[FEATURE_ORDER])
+        x_scaled = model.named_steps["prep"].transform(x_row[FEATURE_ORDER])
         shap_vals = explainer.shap_values(x_scaled)
 
         if isinstance(shap_vals, list):

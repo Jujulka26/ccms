@@ -594,19 +594,6 @@ def inject_app_styles():
     )
 
 
-def render_hero(title, copy, eyebrow="Client-Counselor Matching System"):
-    st.markdown(
-        f"""
-        <div class="app-hero">
-            <div class="eyebrow">{eyebrow}</div>
-            <div class="hero-title">{title}</div>
-            <p class="hero-copy">{copy}</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
 st.set_page_config(page_title="Client-Counselor Matching System", layout="wide")
 inject_app_styles()
 

@@ -1,10 +1,3 @@
-"""
-Tune LightGBM + CatBoost, deploy the best one.
-Run: python tunemodels.py
-Outputs: tuned_lgbm.pkl, tuned_cat.pkl, best_model.pkl,
-         tuned_result.csv, tuned_result.png
-"""
-
 import warnings
 import os
 warnings.filterwarnings("ignore")
@@ -28,23 +21,7 @@ from catboost import CatBoostClassifier
 
 BASE_DIR = Path(__file__).parent
 
-
-class SoftVotingEnsemble:
-    """Average predict_proba from two ImbPipelines. Named_steps proxies to LightGBM for SHAP."""
-
-    def __init__(self, lgbm_pipe, cat_pipe):
-        self._lgbm = lgbm_pipe
-        self._cat  = cat_pipe
-
-    def predict_proba(self, X):
-        return (self._lgbm.predict_proba(X) + self._cat.predict_proba(X)) / 2
-
-    def predict(self, X):
-        return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
-
-    @property
-    def named_steps(self):
-        return self._lgbm.named_steps
+from backend.ml import SoftVotingEnsemble
 
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
@@ -92,7 +69,6 @@ def evaluate(pipeline, X_t, y_t):
     }, y_prob
 
 
-# ── Load data ──────────────────────────────────────────────────────────────────
 print("Loading dataset...")
 df_raw = pd.read_csv(BASE_DIR / "client_counselor_dataset.csv")
 X = engineer_features(df_raw)
@@ -105,7 +81,6 @@ print(f"Split: {len(X_train):,} train / {len(X_test):,} test")
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-# ── Baselines ──────────────────────────────────────────────────────────────────
 print("\nEvaluating baselines...")
 base_lgbm = joblib.load(BASE_DIR / "baseline_lgbm.pkl")
 base_cat  = joblib.load(BASE_DIR / "baseline_cat.pkl")
@@ -114,7 +89,6 @@ scores_base_cat,  _ = evaluate(base_cat,  X_test, y_test)
 print(f"  Baseline LightGBM : {scores_base_lgbm}")
 print(f"  Baseline CatBoost : {scores_base_cat}")
 
-# ── Tune LightGBM ─────────────────────────────────────────────────────────────
 print("\nTuning LightGBM (n_iter=50)...")
 lgbm_pipe = ImbPipeline([
     ("prep",  StandardScaler()),
@@ -144,7 +118,6 @@ print(f"  Tuned LightGBM : {scores_tuned_lgbm}")
 joblib.dump(tuned_lgbm, BASE_DIR / "tuned_lgbm.pkl")
 print("  Saved: tuned_lgbm.pkl")
 
-# ── Tune CatBoost ─────────────────────────────────────────────────────────────
 print("\nTuning CatBoost (n_iter=50)...")
 cat_pipe = ImbPipeline([
     ("prep",  StandardScaler()),
@@ -172,7 +145,6 @@ print(f"  Tuned CatBoost : {scores_tuned_cat}")
 joblib.dump(tuned_cat, BASE_DIR / "tuned_cat.pkl")
 print("  Saved: tuned_cat.pkl")
 
-# ── Ensemble ───────────────────────────────────────────────────────────────────
 print("\nBuilding soft-voting ensemble (LightGBM + CatBoost)...")
 ensemble = SoftVotingEnsemble(tuned_lgbm, tuned_cat)
 scores_ensemble, _ = evaluate(ensemble, X_test, y_test)
@@ -180,7 +152,6 @@ print(f"  Ensemble : {scores_ensemble}")
 joblib.dump(ensemble, BASE_DIR / "ensemble.pkl")
 print("  Saved: ensemble.pkl")
 
-# ── Save comparison CSV ────────────────────────────────────────────────────────
 rows = [
     {"Model": "Baseline LightGBM", **scores_base_lgbm},
     {"Model": "Baseline CatBoost", **scores_base_cat},
@@ -191,7 +162,6 @@ rows = [
 pd.DataFrame(rows).to_csv(BASE_DIR / "tuned_result.csv", index=False)
 print("Saved: tuned_result.csv")
 
-# ── Chart ──────────────────────────────────────────────────────────────────────
 print("Generating chart...")
 metrics = ["Accuracy", "F1", "ROC-AUC"]
 plot_data = {
@@ -237,7 +207,6 @@ plt.savefig(BASE_DIR / "tuned_result.png", dpi=150,
             bbox_inches="tight", facecolor="#FAFAF8")
 print("Saved: tuned_result.png")
 
-# ── Summary ────────────────────────────────────────────────────────────────────
 print("\n" + "=" * 65)
 print(f"{'Model':<30} {'Accuracy':>9} {'F1':>9} {'ROC-AUC':>9}")
 print("-" * 65)

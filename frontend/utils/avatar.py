@@ -9,13 +9,11 @@ _AVATAR_COLORS = [
 
 _IMG_DIR = Path(__file__).parent.parent.parent / "backend" / "static" / "counselors"
 
-# Cache: filename -> base64 data URL of the resized thumbnail
 _IMG_CACHE: dict[str, str] = {}
 _THUMB_SIZE = 160  # px — more than enough for 84px display
 
 
 def _load_thumbnail(img_path: Path) -> str:
-    """Read, resize to thumbnail, return as base64 data URL."""
     try:
         from PIL import Image
         img = Image.open(img_path).convert("RGB")
@@ -43,7 +41,6 @@ def _color(name: str) -> str:
 
 
 def avatar_html(name: str, image: str | None, size: int = 72, radius: int = 14) -> str:
-    """Return an <img> tag (thumbnail base64) or a styled initials div."""
     if image:
         if image not in _IMG_CACHE:
             img_path = _IMG_DIR / image
