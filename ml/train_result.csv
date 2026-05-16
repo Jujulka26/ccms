@@ -1,6 +1,0 @@
-Model,Accuracy,F1,ROC-AUC
-Random Forest,0.766,0.756,0.855
-KNN,0.782,0.766,0.863
-Neural Network,0.809,0.788,0.891
-LightGBM,0.814,0.795,0.895
-CatBoost,0.808,0.791,0.896
