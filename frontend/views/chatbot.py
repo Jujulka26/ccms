@@ -296,10 +296,14 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
             message_placeholder = st.empty()
             
             try:
-                # We skip the very first system greeting since Gemini history must start with "user"
+                # Skip any initial assistant greeting — Gemini history must start with "user"
+                _SKIP = {
+                    "Hello! I am your AI mental health assistant. How can I help you today?",
+                    "Hi, I'm Mira 👋 How can I help you today?",
+                }
                 valid_history = []
                 for m in st.session_state.messages[:-1]:
-                    if m["content"] == "Hello! I am your AI mental health assistant. How can I help you today?":
+                    if m["content"] in _SKIP:
                         continue
                     valid_history.append({"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]})
 

@@ -264,7 +264,7 @@ def show_aboutus_page():
 
         steps = [
             ("Answer a short questionnaire", "Tell us about yourself — your concerns, preferences, language, and therapy style. It takes under 2 minutes."),
-            ("Our AI finds your best match", "The model evaluates 9 compatibility factors across our counselor directory and calculates a personalised score for each."),
+            ("Our AI finds your best match", "The model evaluates 8 compatibility factors across our counselor directory and calculates a personalised score for each."),
             ("Review your top matches", "See your top recommended counselors with full profiles and a clear breakdown of why each one was suggested."),
             ("Send a request", "Express interest in a counselor directly from the platform. Our team will be in touch within 24–48 hours to get you started."),
         ]

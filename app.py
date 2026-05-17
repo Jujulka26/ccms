@@ -3,7 +3,6 @@ from frontend.views.manage import show_manage_page
 from frontend.views.matching import show_matching_page
 from frontend.views.model_performance import show_model_performance_page
 from frontend.views.login import show_login_page
-from frontend.views.faq import show_faq_page
 from frontend.views.chatbot import show_chatbot_page
 from frontend.views.manage_request import render as show_manage_request_page
 from frontend.views.aboutus import show_aboutus_page
