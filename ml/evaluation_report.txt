@@ -1,0 +1,49 @@
+ML MODEL EVALUATION REPORT
+============================================================
+Dataset       : client_counselor_dataset.csv
+Total samples : 19,854
+Features      : 8
+Target        : match_success (binary)
+Class balance : match=1 (45.8%), match=0 (54.2%)
+Model         : Ensemble (LightGBM + CatBoost)
+Pipeline      : Soft-voting ensemble of two tuned pipelines
+
+TEST SET RESULTS (20% held-out, stratified split, seed=42)
+------------------------------------------------------------
+Accuracy      : 0.8023
+Precision     : 0.7951
+Recall        : 0.7658
+F1 Score      : 0.7802
+ROC-AUC       : 0.8919
+
+BASELINE COMPARISON
+------------------------------------------------------------
+Majority-class : Accuracy=0.5419  F1=0.0000
+Ensemble       : Accuracy=0.8023  F1=0.7802
+Lift over baseline: +26.04% accuracy
+
+5-FOLD CROSS-VALIDATION
+------------------------------------------------------------
+  LightGBM
+    ACCURACY  : mean=0.7972 ± 0.0048  [0.7900–0.8048]
+    F1        : mean=0.7680 ± 0.0056  [0.7620–0.7766]
+    ROC_AUC   : mean=0.8876 ± 0.0021  [0.8841–0.8904]
+  CatBoost
+    ACCURACY  : mean=0.7991 ± 0.0053  [0.7892–0.8046]
+    F1        : mean=0.7695 ± 0.0064  [0.7589–0.7762]
+    ROC_AUC   : mean=0.8880 ± 0.0019  [0.8849–0.8905]
+
+FEATURE IMPORTANCE (highest to lowest, LightGBM + CatBoost averaged)
+------------------------------------------------------------
+  Issue Similarity              : 0.4354  (43.5%)
+  Preferred Modality Match      : 0.1870  (18.7%)
+  Issue-Modality Fit            : 0.1095  (11.0%)
+  Counselor Seniority           : 0.1003  (10.0%)
+  Preferred Gender Match        : 0.0565  (5.6%)
+  Client Previous Experience    : 0.0557  (5.6%)
+  Ethnicity Match               : 0.0408  (4.1%)
+  Age Gap                       : 0.0148  (1.5%)
+
+VERDICT
+------------------------------------------------------------
+Model performance is GOOD — suitable for deployment.
