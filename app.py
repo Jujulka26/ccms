@@ -7,7 +7,6 @@ from frontend.views.chatbot import show_chatbot_page
 from frontend.views.manage_request import render as show_manage_request_page
 from frontend.views.aboutus import show_aboutus_page
 from frontend.views.contactus import show_contactus_page
-from frontend.views.privacypolicy import show_privacypolicy_page
 from frontend.views.counselors import show_counselors_page
 
 
