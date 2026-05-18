@@ -36,7 +36,7 @@ def inject_styles():
         }
         .dir-hero-content { display: flex; align-items: center; position: relative; z-index: 2; }
         .dir-hero-text { flex: 1; min-width: 0; max-width: 60%; }
-        .dir-hero-image-wrap { position: absolute; top: -48px; bottom: -48px; right: 40px; width: 38%; pointer-events: none; z-index: 1; }
+        .dir-hero-image-wrap { position: absolute; top: -48px; bottom: -48px; right: 0; width: 38%; pointer-events: none; z-index: 1; }
         .dir-hero-img { width: 100%; height: 100%; object-fit: contain; object-position: right center; opacity: 0.9; mix-blend-mode: multiply; -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 30%, black 60%); mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 30%, black 60%); }
         .dir-eyebrow {
             display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.12em;

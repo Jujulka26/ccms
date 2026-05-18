@@ -315,7 +315,7 @@ def render_disclaimer():
             </svg>
             <span style="font-size:13px; color:#5A5A6E; line-height:1.6;">
                 <strong style="color:#B45309;">Disclaimer:</strong>
-                Compatibility scores are AI-generated estimates based on stated preferences — not clinical assessments. Results should not replace the advice of a qualified mental health professional.
+                Compatibility scores are AI-generated estimates based on your preferences, not clinical assessments. They should not replace advice from a qualified mental health professional.
             </span>
         </div>
         """,
