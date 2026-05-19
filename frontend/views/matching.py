@@ -4,7 +4,6 @@ import json as _json
 import os
 import streamlit as st
 import streamlit.components.v1 as components
-import google.generativeai as genai
 
 from frontend.utils.api import get_reference_data, post_match, post_shap, save_intro_request, check_pending_request
 from frontend.utils.avatar import avatar_html
@@ -673,8 +672,8 @@ def show_request_success_dialog(name: str):
         st.rerun()
 
 
-# ── Gemini match explanation ──────────────────────────────────────────────────
-def _fallback_explanation(c, client_issue, preferred_modality, previous_exp) -> str:
+# ── Match explanation ─────────────────────────────────────────────────────────
+def _generate_explanation(c, client_issue, preferred_modality, previous_exp) -> str:
     name       = c.get("name", "Your counselor")
     first      = name.split()[0]
     spec       = c.get("specialization", client_issue)
@@ -706,57 +705,6 @@ def _fallback_explanation(c, client_issue, preferred_modality, previous_exp) -> 
         s4 = f"If this is a new step for you, {first} will create a safe, welcoming space so you can open up at whatever pace feels right."
 
     return f"{s1} {s2} {s3} {s4}"
-
-
-def _counselor_summary(c) -> str:
-    gender = c.get("gender", "").lower()
-    pronoun = "she/her" if gender in ["female", "woman"] else ("he/him" if gender in ["male", "man"] else "they/them")
-    modality_match = "Yes" if c.get("modality_match") == 1 else "No"
-    gender_match = "Yes" if c.get("gender_match") == 1 else "No"
-    return (
-        f"- Name: {c.get('name')}, {pronoun}, {c.get('experience_years')} years experience\n"
-        f"- Specialization: {c.get('specialization')}\n"
-        f"- Session modality: {c.get('counselor_modality')} (matches client preference: {modality_match})\n"
-        f"- Language: {c.get('counselor_language')}\n"
-        f"- About: {c.get('about_me') or 'N/A'}\n"
-        f"- Gender preference matched: {gender_match}"
-    )
-
-
-def get_gemini_explanation(c, client_issue, preferred_language, preferred_modality, preferred_c_gender, client_age, previous_exp) -> str | None:
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        return None
-
-    prev_text = "has previously tried counseling" if previous_exp else "is new to counseling"
-    gender_pref_text = (
-        f"prefers a {preferred_c_gender} counselor"
-        if preferred_c_gender not in ["No preference", ""]
-        else "has no gender preference"
-    )
-
-    prompt = f"""You are a warm, empathetic counseling match assistant for a mental health platform in Malaysia.
-
-A client is seeking support for: {client_issue}
-Client profile:
-- Age: {client_age}, {prev_text}, {gender_pref_text}
-- Preferred language: {preferred_language}
-- Preferred session modality: {preferred_modality}
-
-Matched counselor:
-{_counselor_summary(c)}
-
-Write a warm, personal 3-4 sentence paragraph explaining why this counselor is a good match for the client. Speak directly to the client using "you"/"your". Do not mention numbers or scores. If there is a mismatch (modality or gender), acknowledge it briefly in a reassuring way.
-
-Respond with plain text only. No JSON, no markdown."""
-
-    try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        response = model.generate_content(prompt)
-        return response.text.strip()
-    except Exception:
-        return None
 
 
 @st.dialog("Start over?")
@@ -1016,7 +964,7 @@ def show_matching_page():
             st.session_state.pop("_global_sent_to", None)
             st.session_state.pop("_success_name", None)
             for k in list(st.session_state.keys()):
-                if k.startswith("match_") or k.startswith("shap_") or k.startswith("gemini_single_"):
+                if k.startswith("match_") or k.startswith("shap_") or k.startswith("explanation_single_"):
                     del st.session_state[k]
 
         client_age = st.session_state.client_age
@@ -1082,21 +1030,12 @@ def show_matching_page():
                 st.session_state.excluded_counselor_ids + [dismissed_id]
             )
 
-        # ── Match Explanation + SHAP (Gemini AI) ─────────────────────────────
+        # ── Match Explanation + SHAP ──────────────────────────────────────────
         def _get_explanation(c):
-            key = f"gemini_single_{c.get('counselor_id')}"
+            key = f"explanation_single_{c.get('counselor_id')}"
             if key not in st.session_state:
-                text = get_gemini_explanation(
-                    c, client_issue, preferred_language, preferred_modality,
-                    preferred_c_gender, client_age, int(previous_exp),
-                )
-                if not text:
-                    text = _fallback_explanation(c, client_issue, preferred_modality, int(previous_exp))
-                st.session_state[key] = text
+                st.session_state[key] = _generate_explanation(c, client_issue, preferred_modality, int(previous_exp))
             return st.session_state[key]
-
-        with st.spinner("Generating your personalised match insight..."):
-            explanation = _get_explanation(best_c)
 
         counselor_name = best_c.get("name", "Your Top Match").upper()
 
@@ -1156,6 +1095,7 @@ def show_matching_page():
                 _dismiss(0)
                 st.rerun()
         with col2:
+            explanation = _get_explanation(best_c)
             if explanation:
                 st.markdown(
                     f'<div class="ai-explanation-box" style="margin-bottom:16px;">'
