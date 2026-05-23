@@ -4,12 +4,13 @@ from contextlib import asynccontextmanager
 import os
 
 from backend.routers import counselors, auth, requests, matching, model_performance, contact
-from backend.ml import load_resources
+from backend.ml import load_resources, _get_shap_explainer
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_resources()
+    _get_shap_explainer()
     yield
 
 app = FastAPI(title="Client-Counselor Matching System API", version="1.0.0", lifespan=lifespan)
