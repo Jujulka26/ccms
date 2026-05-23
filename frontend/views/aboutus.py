@@ -185,16 +185,12 @@ def show_aboutus_page():
         unsafe_allow_html=True,
     )
 
-    # ── Hero ──────────────────────────────────────────────────────────────────
+    # ── Header ────────────────────────────────────────────────────────────────
     st.markdown(
         """
-        <div class="au-hero">
-            <div style="position: relative; z-index: 2;">
-                <div class="au-eyebrow">About Us</div>
-                <div class="au-hero-title">Built for people,<br>powered by AI.</div>
-                <p class="au-hero-copy">The right support, matched to you.</p>
-            </div>
-            <div class="au-hero-emoji">🧠</div>
+        <div style="padding:24px 0 20px; border-bottom:1px solid rgba(0,0,0,0.07); margin-bottom:24px;">
+            <div style="font-family:'DM Serif Display',serif; font-size:clamp(22px,3vw,34px); color:#1A1A2E; margin:0 0 8px; letter-spacing:-0.3px; line-height:1.15;">About Us</div>
+            <p style="font-size:14px; color:#6B6B80; margin:0; line-height:1.6;">Learn about the mission and values behind CC Match.</p>
         </div>
         """,
         unsafe_allow_html=True,

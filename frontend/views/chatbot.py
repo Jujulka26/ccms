@@ -6,17 +6,7 @@ def show_chatbot_page():
     st.markdown(
         """
         <style>
-        .chat-header {
-            font-family: 'DM Serif Display', serif;
-            font-size: 38px;
-            color: #1A1A2E;
-            margin-bottom: 8px;
-        }
-        .chat-subheader {
-            font-size: 16px;
-            color: #5A5A6E;
-            margin-bottom: 24px;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
         .botbox {
             background:#F8F5FF;border:1px solid #E9E1FF;border-radius:14px;padding:24px;margin-bottom:24px;
         }
@@ -27,23 +17,25 @@ def show_chatbot_page():
 
     st.markdown(
         '''
-        <div class="chat-header" style="display: flex; align-items: center; gap: 12px;">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="ai-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#4285F4"/>
-                        <stop offset="50%" stop-color="#9B72CB"/>
-                        <stop offset="100%" stop-color="#D96570"/>
-                    </linearGradient>
-                </defs>
-                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#ai-gradient)"/>
-            </svg>
-            Chat Support
+        <div style="padding:24px 0 20px; border-bottom:1px solid rgba(0,0,0,0.07); margin-bottom:24px;">
+            <div style="font-family:'DM Serif Display',serif; font-size:clamp(22px,3vw,34px); color:#1A1A2E; margin:0 0 8px; letter-spacing:-0.3px; line-height:1.15; display:flex; align-items:center; gap:16px;">
+                <svg width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                    <defs>
+                        <linearGradient id="mira-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#4285F4"/>
+                            <stop offset="50%" stop-color="#9B72CB"/>
+                            <stop offset="100%" stop-color="#D96570"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#mira-grad)"/>
+                </svg>
+                Chat with Mira
+            </div>
+            <p style="font-size:14px; color:#6B6B80; margin:0; line-height:1.6;">Ask any questions about counseling, mental health, and our platform. Powered by Gemini AI.</p>
         </div>
-        ''', 
+        ''',
         unsafe_allow_html=True
     )
-    st.markdown('<div class="chat-subheader">Ask any general questions or receive guidance about counseling, mental health, and the process. Powered by Gemini AI.</div>', unsafe_allow_html=True)
 
     import os
     api_key = os.environ.get("GEMINI_API_KEY")

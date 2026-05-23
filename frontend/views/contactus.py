@@ -184,16 +184,12 @@ def show_contactus_page():
         unsafe_allow_html=True,
     )
 
-    # ── Hero ──────────────────────────────────────────────────────────────────
+    # ── Header ────────────────────────────────────────────────────────────────
     st.markdown(
         """
-        <div class="cu-hero">
-            <div style="position: relative; z-index: 2;">
-                <div class="cu-eyebrow">Contact Us</div>
-                <div class="cu-hero-title">We're here to help.</div>
-                <p class="cu-hero-copy">Have a question or need support? Reach out to our team and we'll get back to you as soon as possible.</p>
-            </div>
-            <div class="cu-hero-emoji">📬</div>
+        <div style="padding:24px 0 20px; border-bottom:1px solid rgba(0,0,0,0.07); margin-bottom:24px;">
+            <div style="font-family:'DM Serif Display',serif; font-size:clamp(22px,3vw,34px); color:#1A1A2E; margin:0 0 8px; letter-spacing:-0.3px; line-height:1.15;">Contact Us</div>
+            <p style="font-size:14px; color:#6B6B80; margin:0; line-height:1.6;">Have a question or need support? Reach out and we'll get back to you within 24–48 hours.</p>
         </div>
         """,
         unsafe_allow_html=True,

@@ -1,5 +1,3 @@
-import base64
-import os
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -119,26 +117,19 @@ def show_counselors_page():
         del st.session_state["_success_name"]
         show_request_success_dialog(_sname)
 
-    if "hero_img_1_b64" not in st.session_state:
-        try:
-            with open(os.path.join("frontend", "assets", "ourcounselor.png"), "rb") as f:
-                st.session_state["hero_img_1_b64"] = base64.b64encode(f.read()).decode()
-        except FileNotFoundError:
-            st.session_state["hero_img_1_b64"] = None
-    b64 = st.session_state["hero_img_1_b64"]
-    img_tag = f'<img src="data:image/png;base64,{b64}" class="dir-hero-img" alt="" />' if b64 else ""
-
     st.markdown(
-        f"""
-        <div class="dir-hero">
-            <div class="dir-hero-content">
-                <div class="dir-hero-text">
-                    <div class="dir-eyebrow">Our Team</div>
-                    <div class="dir-title">Meet Our Counselors</div>
-                    <p class="dir-subtitle">Get to know our counselors before you match.</p>
-                </div>
-                <div class="dir-hero-image-wrap">{img_tag}</div>
+        """
+        <div style="padding:24px 0 20px; border-bottom:1px solid rgba(0,0,0,0.07); margin-bottom:24px;">
+            <div style="font-family:'DM Serif Display',serif; font-size:clamp(22px,3vw,34px); color:#1A1A2E; margin:0 0 8px; letter-spacing:-0.3px; line-height:1.15; display:flex; align-items:center; gap:16px;">
+                <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Meet Our Counselors
             </div>
+            <p style="font-size:14px; color:#6B6B80; margin:0; line-height:1.6;">Get to know our counselors and find one that's right for you.</p>
         </div>
         """,
         unsafe_allow_html=True,

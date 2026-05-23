@@ -1,7 +1,5 @@
-import base64
 import hashlib
 import json as _json
-import os
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -18,34 +16,19 @@ def inject_styles():
         html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
         .stApp { background: #F7F5F0; }
 
-        .hero-wrap {
-            background-color: #FAFAFF;
-            background-image:
-                radial-gradient(at 0% 0%, #E9DFFF 0px, transparent 60%),
-                radial-gradient(at 100% 100%, #F0E6FF 0px, transparent 60%);
-            border-radius: 20px;
-            padding: 56px 52px 48px;
-            margin-bottom: 32px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(124,58,237,0.15);
-            box-shadow: 0 16px 32px -8px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+        .page-header { padding: 24px 0 20px; border-bottom: 1px solid rgba(0,0,0,0.07); margin-bottom: 24px; }
+        .page-header-eyebrow {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(139,92,246,0.09); border: 1px solid rgba(139,92,246,0.18);
+            border-radius: 20px; padding: 3px 12px 3px 10px; margin-bottom: 12px;
+            font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7C3AED;
         }
-        .hero-eyebrow {
-            display: inline-block;
-            font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
-            color: #8B5CF6; background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.25);
-            border-radius: 20px; padding: 4px 14px; margin-bottom: 20px;
-        }
-        .hero-title { font-family: 'DM Serif Display', serif; font-size: clamp(26px, 5vw, 42px); line-height: 1.15; color: #1A1A2E; margin: 0 0 16px; letter-spacing: -0.5px; }
-        .hero-subtitle { font-size: 16px; color: #4A4A5C; max-width: 480px; line-height: 1.65; margin: 0; }
-        .hero-stats { display: flex; gap: 40px; margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(0,0,0,0.08); }
-        .hero-stat-num { font-family: 'DM Serif Display', serif; font-size: 28px; color: #1A1A2E; line-height: 1; }
-        .hero-stat-label { font-size: 12px; color: #8B8B9A; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
-        .hero-content { display: flex; align-items: center; position: relative; z-index: 2; }
-        .hero-text { flex: 1; min-width: 0; max-width: 60%; }
-        .hero-image-wrap { position: absolute; bottom: -48px; right: -20px; width: 50%; height: 130%; pointer-events: none; z-index: 1; }
-        .hero-img { width: 100%; height: 100%; object-fit: contain; object-position: right center; opacity: 0.9; mix-blend-mode: multiply; -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 30%, black 60%); mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 30%, black 60%); }
+        .page-header-title { font-family: 'DM Serif Display', serif; font-size: clamp(26px, 3.2vw, 38px); color: #1A1A2E; margin: 0 0 8px; letter-spacing: -0.4px; line-height: 1.15; display: block; }
+        .page-header-sub { font-size: 14px; color: #6B6B80; margin: 0; line-height: 1.6; }
+        .page-header-stats { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .page-header-stat { display: inline-flex; align-items: center; gap: 7px; background: #F8F5FF; border: 1px solid rgba(139,92,246,0.15); border-radius: 20px; padding: 6px 13px; }
+        .page-header-stat-num { font-family: 'DM Serif Display', serif; font-size: 17px; color: #6D28D9; line-height: 1; }
+        .page-header-stat-label { font-size: 11px; color: #8B7BA8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
 
         .form-card {
             background: radial-gradient(1200px 300px at -10% -30%, rgba(139,92,246,0.08) 0%, transparent 60%), radial-gradient(900px 260px at 110% 120%, rgba(109,40,217,0.06) 0%, transparent 55%), #FFFFFF;
@@ -59,6 +42,7 @@ def inject_styles():
         .step-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: #1A1A2E; line-height: 1.2; }
         .step-copy { font-size: 14px; color: #5A5A6E; margin: 4px 0 16px 48px; line-height: 1.55; }
         .section-divider { border: none; border-top: 1px solid #E5E5E5; margin: 0px 0 20px 0 !important; position: relative; z-index: 10; }
+        .anchor-link { display: none !important; }
 
         [data-testid="block-container"] [data-testid="stVerticalBlock"] { gap: 0.5rem !important; }
         [data-testid="stRadio"] > div, [role="radiogroup"] { margin-bottom: 0 !important; padding-bottom: 0 !important; }
@@ -71,7 +55,7 @@ def inject_styles():
             border-color: #8B5CF6 !important; box-shadow: 0 0 0 3px rgba(139,92,246,0.1) !important;
         }
         label[data-testid="stWidgetLabel"] p, label[data-testid="stWidgetLabel"] div, label[data-testid="stWidgetLabel"] span {
-            font-size: 18px !important; font-weight: 600 !important; color: #1A1A2E !important; margin-bottom: 10px !important;
+            font-size: 14px !important; font-weight: 600 !important; color: #1A1A2E !important; margin-bottom: 8px !important;
         }
 
         [data-testid="block-container"] [data-baseweb="radio"] > div:first-child,
@@ -265,31 +249,29 @@ def scroll_to_results(anchor_id="match-results-anchor"):
     )
 
 
-def render_hero_new():
-    if "hero_img_2_b64" not in st.session_state:
-        try:
-            with open(os.path.join("frontend", "assets", "ccmatchlogo.png"), "rb") as f:
-                st.session_state["hero_img_2_b64"] = base64.b64encode(f.read()).decode()
-        except FileNotFoundError:
-            st.session_state["hero_img_2_b64"] = None
-    b64 = st.session_state["hero_img_2_b64"]
-    img_tag = f'<img src="data:image/png;base64,{b64}" class="hero-img" alt="" />' if b64 else ""
+def render_page_header():
     st.markdown(
-        f"""
-        <div class="hero-wrap">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <div class="hero-eyebrow">AI-Powered Matching</div>
-                    <h1 class="hero-title">Find Your<br><em>Ideal Counselor</em></h1>
-                    <p class="hero-subtitle" style="font-style:italic;">"Asking for help is a sign of strength, not weakness."</p>
+        """
+        <div class="page-header">
+            <div class="page-header-title">Find Your Ideal Counselor</div>
+            <div class="page-header-stats">
+                <div class="page-header-stat">
+                    <span class="page-header-stat-num">8</span>
+                    <span class="page-header-stat-label">Match Factors</span>
                 </div>
-                <div class="hero-image-wrap">{img_tag}</div>
+                <div class="page-header-stat">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span class="page-header-stat-label">Personalised</span>
+                </div>
+                <div class="page-header-stat">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span class="page-header-stat-label">Explainable AI</span>
+                </div>
             </div>
-            <div class="hero-stats">
-                <div><div class="hero-stat-num">8</div><div class="hero-stat-label">Match factors</div></div>
-                <div><div class="hero-stat-num">Match</div><div class="hero-stat-label">Personalised</div></div>
-                <div><div class="hero-stat-num">SHAP</div><div class="hero-stat-label">Explainability</div></div>
-            </div>
+            <p style="font-size:12px; color:#9090A8; margin:12px 0 0; line-height:1.55; display:flex; align-items:center; gap:6px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B0A8C0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                AI-generated estimates only — not a clinical assessment. Always consult a qualified mental health professional.
+            </p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -299,25 +281,16 @@ def render_hero_new():
 def render_disclaimer():
     st.markdown(
         """
-        <div style="
-            background: rgba(245,158,11,0.05);
-            border: 1px solid rgba(245,158,11,0.25);
-            border-left: 4px solid #F59E0B;
-            border-radius: 0 12px 12px 0;
-            padding: 14px 20px;
-            margin-bottom: 24px;
-            display: flex;
-            gap: 14px;
-            align-items: center;
-        ">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+        <div style="display:flex; gap:8px; align-items:flex-start; padding:10px 14px; margin-top:16px;
+            background:rgba(245,158,11,0.04); border:1px solid rgba(245,158,11,0.2); border-radius:10px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
-            <span style="font-size:13px; color:#5A5A6E; line-height:1.6;">
-                <strong style="color:#B45309;">Disclaimer:</strong>
-                Compatibility scores are AI-generated estimates based on your preferences, not clinical assessments. They should not replace advice from a qualified mental health professional.
+            <span style="font-size:12px; color:#78716C; line-height:1.55;">
+                <strong style="color:#92400E;">Note:</strong>
+                Compatibility scores are AI-generated estimates, not clinical assessments — always consult a qualified mental health professional.
             </span>
         </div>
         """,
@@ -857,9 +830,7 @@ def show_matching_page():
     if "preferred_language" not in st.session_state:  st.session_state.preferred_language = ref["preferred_language"][0] if ref["preferred_language"] else ""
     if "preferred_c_gender" not in st.session_state:  st.session_state.preferred_c_gender = ref["preferred_counselor_gender"][0] if ref["preferred_counselor_gender"] else ""
 
-    render_hero_new()
-    render_disclaimer()
-    st.markdown('<div class="form-card">', unsafe_allow_html=True)
+    render_page_header()
 
     components.html(
         """
@@ -1058,52 +1029,6 @@ def show_matching_page():
             return st.session_state[key]
 
         counselor_name = best_c.get("name", "Your Top Match").upper()
-
-        # ── Your profile summary card ─────────────────────────────────────────
-        _c_gender_label = "Any gender" if preferred_c_gender == "No preference" else preferred_c_gender
-        _exp_label = "Prior experience" if int(previous_exp) == 1 else "New to counseling"
-        def _col(label, value, last=False):
-            br = "" if last else "border-right:1px solid #EDE9F6;"
-            return f"""<div style="padding:20px 26px;{br}min-width:0;">
-                <div style="font-size:10px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;
-                            color:#B0A8CC;margin-bottom:7px;">{label}</div>
-                <div style="font-size:15px;font-weight:700;color:#18122B;
-                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{value}</div>
-            </div>"""
-        _user_icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
-        st.markdown(
-            f"""
-            <div style="background:#FFFFFF;border-radius:16px;margin-bottom:24px;
-                        border:1px solid #E8E4F3;
-                        box-shadow:0 4px 16px rgba(109,40,217,0.07),0 1px 4px rgba(0,0,0,0.04);
-                        overflow:hidden;">
-                <div style="background:#F8F5FF;border-bottom:1px solid #EDE9F6;
-                            padding:13px 26px;display:flex;align-items:center;gap:10px;">
-                    <div style="width:28px;height:28px;border-radius:8px;flex-shrink:0;
-                                background:linear-gradient(135deg,#7C3AED 0%,#A78BFA 100%);
-                                display:flex;align-items:center;justify-content:center;">
-                        {_user_icon}
-                    </div>
-                    <span style="font-size:12px;font-weight:700;letter-spacing:0.1em;
-                                 text-transform:uppercase;color:#4C2A91;">Your Profile</span>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);">
-                    {_col("Age", f"{client_age} yrs")}
-                    {_col("Gender", client_gender)}
-                    {_col("Ethnicity", client_ethnicity)}
-                    {_col("Focus Area", client_issue, last=True)}
-                </div>
-                <div style="height:1px;background:#EDE9F6;"></div>
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);">
-                    {_col("Language", preferred_language)}
-                    {_col("Approach", preferred_modality)}
-                    {_col("Counselor Gender", _c_gender_label)}
-                    {_col("Experience", _exp_label, last=True)}
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
         # Paired header row
         st.markdown('<p style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin:8px 0 24px;">YOUR MATCHES</p>', unsafe_allow_html=True)
