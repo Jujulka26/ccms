@@ -122,7 +122,10 @@ def inject_styles():
 
         .ai-explanation-box { background: linear-gradient(135deg, #F8F5FF 0%, #FDF9FF 100%); border: 1px solid rgba(139,92,246,0.15); border-left: 3px solid #8B5CF6; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
         .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; }
-        .ai-explanation-text { font-size: 15.5px; color: #2D2D3F; line-height: 1.85; font-weight: 400; margin: 0; font-style: italic; }
+        .ai-reason-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+        .ai-reason-row:last-child { margin-bottom: 0; }
+        .ai-reason-icon { flex-shrink: 0; margin-top: 2px; }
+        .ai-reason-text { font-size: 14.5px; color: #2D2D3F; line-height: 1.5; font-weight: 400; }
 
         div[data-testid="stTabs"] button { font-family: 'DM Sans', sans-serif !important; font-size: 14px !important; font-weight: 500 !important; }
 
@@ -673,38 +676,55 @@ def show_request_success_dialog(name: str):
 
 
 # ── Match explanation ─────────────────────────────────────────────────────────
-def _generate_explanation(c, client_issue, preferred_modality, previous_exp) -> str:
-    name       = c.get("name", "Your counselor")
-    first      = name.split()[0]
-    spec       = c.get("specialization", client_issue)
-    exp        = int(c.get("experience_years") or 0)
-    modality   = c.get("counselor_modality", "")
-    mod_match  = c.get("modality_match") == 1
-    gender     = c.get("gender", "").lower()
-    pronoun    = "She" if gender in ["female", "woman"] else ("He" if gender in ["male", "man"] else "They")
-    pron_their = "her" if gender in ["female", "woman"] else ("his" if gender in ["male", "man"] else "their")
+def _generate_explanation(c, client_issue) -> str:
+    import random
+    first     = c.get("name", "Your counselor").split()[0]
+    spec      = c.get("specialization", client_issue)
+    exp       = int(c.get("experience_years") or 0)
+    modality  = c.get("counselor_modality", "")
+    mod_match = c.get("modality_match") == 1
+    eth_match = c.get("ethnicity_match") == 1
+    ethnicity = c.get("ethnicity", "") if eth_match else ""
 
-    if spec == client_issue:
-        s1 = f"{first} specialises in {spec}, which means your concerns will be met with genuine understanding and targeted care."
-    else:
-        s1 = f"Although {first}'s primary specialisation is {spec}, this area closely overlaps with {client_issue} — {pron_their} experience puts you in very capable hands."
+    exp_str    = f"{exp} years" if exp >= 8 else "several years"
+    exact      = spec == client_issue
+    issue_bold = f"<strong>{client_issue}</strong>"
+    spec_bold  = f"<strong>{spec}</strong>"
+    mod_bold   = f"<strong>{modality}</strong>"
+    eth_bold   = f"<strong>{ethnicity}</strong>" if ethnicity else ""
 
-    if mod_match:
-        s2 = f"{pronoun} practises {modality}, which matches your preferred approach, so you can feel at ease with how sessions are structured."
-    else:
-        s2 = f"{pronoun} works with {modality} rather than {preferred_modality}, but many clients find this approach equally effective, and {first} will guide you through it at your own pace."
+    # Spec phrasing when not an exact match
+    spec_phrase_A = f"{exp_str} working with {issue_bold}" if exact else f"{exp_str} in {spec_bold}, closely related to {issue_bold}"
+    spec_phrase_B = f"exactly where {first}'s focus lies" if exact else f"closely related to {first}'s expertise in {spec_bold}"
+    spec_phrase_C = f"specialises in {issue_bold}" if exact else f"specialises in {spec_bold}, which closely relates to {issue_bold}"
 
-    if exp >= 8:
-        s3 = f"With {exp} years of experience, {first} brings a depth of insight that can make a real difference in your journey."
-    else:
-        s3 = f"{first} brings {exp} years of dedicated practice, offering a fresh and attentive approach to supporting your wellbeing."
+    templates = [
+        # A — experience-led
+        (
+            f"For {issue_bold}, it helps to speak with someone who truly knows that area. "
+            f"{first} has {spec_phrase_A}, so your challenges are already familiar to them."
+            + (f" They also practise {mod_bold}, which matches the approach you prefer." if mod_match else "")
+            + (f" Your shared {eth_bold} background may help conversations feel natural from the start." if eth_match and ethnicity else "")
+        ),
+        # B — built around you
+        (
+            f"You need support with {issue_bold}, and {spec_phrase_B}. "
+            f"With {exp_str} of focused experience"
+            + (f" and a {mod_bold} approach that fits your preference" if mod_match else "")
+            + f", you can spend less time explaining and more time making progress."
+            + (f" {first} also shares your {eth_bold} background, which can help build comfort early on." if eth_match and ethnicity else "")
+        ),
+        # C — strong match
+        (
+            f"Finding the right fit is not always easy. "
+            f"{first} {spec_phrase_C}, brings {exp_str} of hands-on experience"
+            + (f", and practises {mod_bold}, the approach you said you prefer" if mod_match else "")
+            + f". Across what matters to you, {first} is a strong match."
+            + (f" Your shared {eth_bold} background may also help you feel more at ease from the beginning." if eth_match and ethnicity else "")
+        ),
+    ]
 
-    if previous_exp:
-        s4 = f"Since you've engaged with counseling before, {first} can build on that foundation and help you continue growing with confidence."
-    else:
-        s4 = f"If this is a new step for you, {first} will create a safe, welcoming space so you can open up at whatever pace feels right."
-
-    return f"{s1} {s2} {s3} {s4}"
+    return random.choice(templates)
 
 
 @st.dialog("Start over?")
@@ -1033,8 +1053,8 @@ def show_matching_page():
         # ── Match Explanation + SHAP ──────────────────────────────────────────
         def _get_explanation(c):
             key = f"explanation_single_{c.get('counselor_id')}"
-            if key not in st.session_state:
-                st.session_state[key] = _generate_explanation(c, client_issue, preferred_modality, int(previous_exp))
+            if not isinstance(st.session_state.get(key), list):
+                st.session_state[key] = _generate_explanation(c, client_issue)
             return st.session_state[key]
 
         counselor_name = best_c.get("name", "Your Top Match").upper()
@@ -1100,81 +1120,79 @@ def show_matching_page():
                 st.markdown(
                     f'<div class="ai-explanation-box" style="margin-bottom:16px;">'
                     f'<div class="ai-badge">✦ Why {counselor_name}?</div>'
-                    f'<p class="ai-explanation-text">{explanation}</p>'
+                    f'<p style="font-size:15.5px;color:#2D2D3F;line-height:1.7;margin:0;">{explanation}</p>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )
 
-        # ── SHAP full-width below both cards ─────────────────────────────────
-        st.markdown('<div style="height:24px;"></div>', unsafe_allow_html=True)
-        with st.expander("Technical details — SHAP feature contributions", expanded=False):
-            _shap_cache_key = "shap_" + hashlib.md5(
-                _json.dumps(sorted(best_features.items())).encode()
-            ).hexdigest()
-            if _shap_cache_key not in st.session_state:
-                st.session_state[_shap_cache_key] = post_shap(best_features)
-            shap_result = st.session_state[_shap_cache_key]
-            if shap_result.get("error"):
-                st.info(shap_result["error"])
-            else:
-                readable_names = {
-                    "issue_match":        "Issue Similarity",
-                    "modality_issue_fit": "Issue-Modality Fit",
-                    "modality_match":     "Preferred Modality Match",
-                    "gender_match":       "Preferred Gender Match",
-                    "exp_issue_fit":      "Counselor Seniority",
-                    "ethnicity_match":    "Ethnicity Match",
-                    "prev_exp":           "Client Previous Experience",
-                    "age_gap":            "Age Gap",
-                }
-                try:
-                    names  = shap_result["feature_names"]
-                    values = shap_result["shap_values"]
-                    fvals  = shap_result["feature_values"]
-                    order  = sorted(range(len(values)), key=lambda i: abs(values[i]), reverse=True)
-                    max_abs = max(abs(v) for v in values) or 1.0
+            with st.expander("Technical details — SHAP feature contributions", expanded=False):
+                _shap_cache_key = "shap_" + hashlib.md5(
+                    _json.dumps(sorted(best_features.items())).encode()
+                ).hexdigest()
+                if _shap_cache_key not in st.session_state:
+                    st.session_state[_shap_cache_key] = post_shap(best_features)
+                shap_result = st.session_state[_shap_cache_key]
+                if shap_result.get("error"):
+                    st.info(shap_result["error"])
+                else:
+                    readable_names = {
+                        "issue_match":        "Issue Similarity",
+                        "modality_issue_fit": "Issue-Modality Fit",
+                        "modality_match":     "Preferred Modality Match",
+                        "gender_match":       "Preferred Gender Match",
+                        "exp_issue_fit":      "Counselor Seniority",
+                        "ethnicity_match":    "Ethnicity Match",
+                        "prev_exp":           "Client Previous Experience",
+                        "age_gap":            "Age Gap",
+                    }
+                    try:
+                        names  = shap_result["feature_names"]
+                        values = shap_result["shap_values"]
+                        fvals  = shap_result["feature_values"]
+                        order  = sorted(range(len(values)), key=lambda i: abs(values[i]), reverse=True)
+                        max_abs = max(abs(v) for v in values) or 1.0
 
-                    rows_html = ""
-                    for i in order:
-                        label = readable_names.get(names[i], names[i])
-                        fval  = fvals[i]
-                        sv    = values[i]
-                        pct   = abs(sv) / max_abs * 100
-                        color = "#10B981" if sv >= 0 else "#EF4444"
-                        sign  = f"+{sv:.3f}" if sv >= 0 else f"{sv:.3f}"
-                        fval_str = f"{fval:.2f}" if isinstance(fval, float) else str(fval)
+                        rows_html = ""
+                        for i in order:
+                            label = readable_names.get(names[i], names[i])
+                            fval  = fvals[i]
+                            sv    = values[i]
+                            pct   = abs(sv) / max_abs * 100
+                            color = "#10B981" if sv >= 0 else "#EF4444"
+                            sign  = f"+{sv:.3f}" if sv >= 0 else f"{sv:.3f}"
+                            fval_str = f"{fval:.2f}" if isinstance(fval, float) else str(fval)
 
-                        rows_html += f"""
-                        <div style="display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #F3F0F8;">
-                            <div style="width:200px; font-size:12.5px; color:#4A4A5A; text-align:right; flex-shrink:0;">{label}</div>
-                            <div style="width:36px; font-size:11px; color:#9090A8; text-align:right; flex-shrink:0;">{fval_str}</div>
-                            <div style="flex:1; position:relative; height:10px; background:#F3F0F8; border-radius:6px; overflow:hidden;">
-                                <div style="position:absolute; top:0; height:10px; width:{pct/2:.1f}%; background:{color}; border-radius:6px;
-                                    {'left:50%' if sv >= 0 else f'right:50%'};"></div>
-                                <div style="position:absolute; top:0; left:50%; width:1px; height:10px; background:rgba(0,0,0,0.15);"></div>
+                            rows_html += f"""
+                            <div style="display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid #F3F0F8;">
+                                <div style="flex:2; min-width:0; font-size:12.5px; color:#4A4A5A; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{label}</div>
+                                <div style="width:32px; font-size:11px; color:#9090A8; text-align:right; flex-shrink:0;">{fval_str}</div>
+                                <div style="flex:1.5; min-width:30px; position:relative; height:10px; background:#F3F0F8; border-radius:6px; overflow:hidden;">
+                                    <div style="position:absolute; top:0; height:10px; width:{pct/2:.1f}%; background:{color}; border-radius:6px;
+                                        {'left:50%' if sv >= 0 else f'right:50%'};"></div>
+                                    <div style="position:absolute; top:0; left:50%; width:1px; height:10px; background:rgba(0,0,0,0.15);"></div>
+                                </div>
+                                <div style="width:48px; font-size:12.5px; font-weight:700; color:{color}; flex-shrink:0; text-align:right;">{sign}</div>
+                            </div>"""
+
+                        st.markdown(
+                            f"""
+                            <div style="font-size:11px; font-weight:600; color:#8B5CF6; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;">Feature contributions</div>
+                            <div style="display:flex; align-items:center; gap:8px; padding:0 0 6px; border-bottom:2px solid #E8E4F0;">
+                                <div style="flex:2; min-width:0; font-size:11px; color:#A0A0B8; text-align:right;">Feature</div>
+                                <div style="width:32px; font-size:11px; color:#A0A0B8; text-align:right; flex-shrink:0;">Value</div>
+                                <div style="flex:1.5; min-width:30px; font-size:11px; color:#A0A0B8; text-align:center;">Impact</div>
+                                <div style="width:48px; font-size:11px; color:#A0A0B8; flex-shrink:0; text-align:right;">SHAP</div>
                             </div>
-                            <div style="width:52px; font-size:12.5px; font-weight:700; color:{color}; flex-shrink:0;">{sign}</div>
-                        </div>"""
-
-                    st.markdown(
-                        f"""
-                        <div style="font-size:11px; font-weight:600; color:#8B5CF6; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;">Feature contributions</div>
-                        <div style="display:flex; align-items:center; gap:10px; padding:0 0 6px; border-bottom:2px solid #E8E4F0;">
-                            <div style="width:200px; font-size:11px; color:#A0A0B8; text-align:right; flex-shrink:0;">Feature</div>
-                            <div style="width:36px; font-size:11px; color:#A0A0B8; text-align:right; flex-shrink:0;">Value</div>
-                            <div style="flex:1; font-size:11px; color:#A0A0B8; text-align:center;">Impact</div>
-                            <div style="width:52px; font-size:11px; color:#A0A0B8; flex-shrink:0;">SHAP</div>
-                        </div>
-                        {rows_html}
-                        <div style="display:flex; gap:16px; margin-top:12px; font-size:11px; color:#8B8B9A;">
-                            <span><span style="display:inline-block;width:10px;height:10px;background:#10B981;border-radius:2px;margin-right:5px;vertical-align:middle;"></span>Increases match</span>
-                            <span><span style="display:inline-block;width:10px;height:10px;background:#EF4444;border-radius:2px;margin-right:5px;vertical-align:middle;"></span>Decreases match</span>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-                except Exception as exc:
-                    st.info(f"Could not render feature contributions: {exc}")
+                            {rows_html}
+                            <div style="display:flex; gap:16px; margin-top:12px; font-size:11px; color:#8B8B9A;">
+                                <span><span style="display:inline-block;width:10px;height:10px;background:#10B981;border-radius:2px;margin-right:5px;vertical-align:middle;"></span>Increases match</span>
+                                <span><span style="display:inline-block;width:10px;height:10px;background:#EF4444;border-radius:2px;margin-right:5px;vertical-align:middle;"></span>Decreases match</span>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    except Exception as exc:
+                        st.info(f"Could not render feature contributions: {exc}")
 
         components.html(
             """
