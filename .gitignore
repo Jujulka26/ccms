@@ -13,6 +13,7 @@ venv/
 
 # ML model (large binary — commit separately if needed)
 *.pkl
+catboost_info/
 
 # Counselor images (user-uploaded content)
 backend/static/counselors/

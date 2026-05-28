@@ -114,7 +114,7 @@ rows = []
 
 # Worst case: 35*0.6(diff issue) + 3.6(no mod match) + 1.5(no prev exp) + 1(gender mismatch) + 1(ethnicity mismatch) + 0(junior) + 13*0.4(worst mod fit) + 0(max age gap) = 33.3
 S_MIN = 33.3
-# Compressed from actual max 88.0 — forces top-tier pairs to label=1, reducing label noise. Empirically optimal via sweep.
+# Compressed from actual max 88.5 — forces top-tier pairs to label=1, reducing label noise. Empirically optimal via sweep.
 S_MAX = 84.0
 
 EXP_BONUS = {"Trauma": 10, "Anxiety": 7, "Depression": 7, "Stress": 5}
@@ -142,7 +142,7 @@ for client in clients:
 
         # Previous counseling experience x modality match interaction
         if client["previous_counseling_experience"] == 1:
-            S += 5 + 2 * int(modality_match)
+            S += 5.5 + 2 * int(modality_match)
         else:
             S += 1.5
 

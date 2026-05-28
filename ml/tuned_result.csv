@@ -1,0 +1,6 @@
+Model,Accuracy,F1,ROC-AUC
+Baseline LightGBM,0.811,0.782,0.892
+Baseline CatBoost,0.806,0.777,0.892
+Tuned LightGBM,0.806,0.783,0.896
+Tuned CatBoost,0.807,0.787,0.896
+Ensemble,0.807,0.785,0.896
