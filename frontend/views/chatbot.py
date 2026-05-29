@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import streamlit.components.v1 as components
 import google.generativeai as genai
@@ -37,7 +38,6 @@ def show_chatbot_page():
         unsafe_allow_html=True
     )
 
-    import os
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         st.error("Developer Setup Required: Please set the GEMINI_API_KEY environment variable to activate the chatbot.")
