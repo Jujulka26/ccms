@@ -7,7 +7,7 @@ _AVATAR_COLORS = [
     "#3B82F6", "#EC4899", "#0EA5E9",
 ]
 
-_IMG_DIR = Path(__file__).parent.parent.parent / "backend" / "static" / "counselors"
+_IMG_DIR = Path(__file__).parent.parent / "assets" / "profile"
 
 _IMG_CACHE: dict[str, str] = {}
 _THUMB_SIZE = 160  # px — more than enough for 84px display

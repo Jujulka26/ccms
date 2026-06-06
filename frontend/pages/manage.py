@@ -1,9 +1,10 @@
+import math
 import streamlit as st
 import pandas as pd
 from pathlib import Path
 from frontend.utils.api import get_counselors, add_counselor, update_counselor, delete_counselor, get_reference_data
 
-_IMG_DIR = Path(__file__).parent.parent.parent / "backend" / "static" / "counselors"
+_IMG_DIR = Path(__file__).parent.parent / "assets" / "profile"
 
 
 def _save_image(file, name: str) -> str:
@@ -147,10 +148,8 @@ def _option_index(options, value, default=0):
 def safe_str(val):
     if val is None:
         return ""
-    if isinstance(val, float):
-        import math
-        if math.isnan(val):
-            return ""
+    if isinstance(val, float) and math.isnan(val):
+        return ""
     return str(val)
 
 
@@ -169,7 +168,7 @@ def render_add_counselor_dialog():
             with col2:
                 counselor_language = st.multiselect("Language", LANGUAGE_OPTIONS, default=["Malay"], max_selections=2)
                 specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=SPECIALIZATION_OPTIONS.index("Stress"))
-                counselor_modality = st.selectbox("Modality", MODALITY_OPTIONS, index=MODALITY_OPTIONS.index("Cognitive"))
+                counselor_modality = st.multiselect("Modality", MODALITY_OPTIONS, default=["Cognitive"], max_selections=2)
                 experience_years = st.number_input("Years of Experience", 0, 30, 3)
 
         with tab2:
@@ -189,6 +188,7 @@ def render_add_counselor_dialog():
         missing = []
         if not name.strip():                  missing.append("Name")
         if not counselor_language:            missing.append("Language")
+        if not counselor_modality:            missing.append("Modality")
         if not about_me.strip():              missing.append("About Me")
         if not modality_desc.strip():         missing.append("Modality Description")
         if not expertise_tags.strip():        missing.append("Expertise Tags")
@@ -202,7 +202,7 @@ def render_add_counselor_dialog():
                 "name": name, "age": age, "gender": gender, "ethnicity": ethnicity,
                 "specialization": specialization,
                 "counselor_language": ", ".join(counselor_language),
-                "counselor_modality": counselor_modality,
+                "counselor_modality": ", ".join(counselor_modality),
                 "experience_years": experience_years,
                 "about_me": about_me, "expertise_tags": expertise_tags,
                 "helpful_thought_1": helpful_thought_1, "helpful_thought_2": helpful_thought_2,
@@ -232,7 +232,9 @@ def render_edit_counselor_dialog():
     gender_index = _option_index(GENDER_OPTIONS, row.get("gender"))
     ethnicity_index = _option_index(ETHNICITY_OPTIONS, row.get("ethnicity"))
     specialization_index = _option_index(SPECIALIZATION_OPTIONS, row.get("specialization"))
-    modality_index = _option_index(MODALITY_OPTIONS, row.get("counselor_modality"))
+    current_mods = [m.strip() for m in str(row.get("counselor_modality", "")).split(",") if m.strip() in MODALITY_OPTIONS]
+    if not current_mods:
+        current_mods = [MODALITY_OPTIONS[0]]
 
     with st.form("edit_counselor_dialog_form"):
         tab1, tab2 = st.tabs(["Basic Info", "Profile Details"])
@@ -250,7 +252,7 @@ def render_edit_counselor_dialog():
                     current_langs = [LANGUAGE_OPTIONS[0]]
                 edit_language = st.multiselect("Language", LANGUAGE_OPTIONS, default=current_langs, max_selections=2)
                 edit_specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=specialization_index)
-                edit_modality = st.selectbox("Modality", MODALITY_OPTIONS, index=modality_index)
+                edit_modality = st.multiselect("Modality", MODALITY_OPTIONS, default=current_mods, max_selections=2)
                 edit_year_exp = st.number_input("Years of Experience", 0, 30, int(row["experience_years"]))
 
         with tab2:
@@ -273,6 +275,7 @@ def render_edit_counselor_dialog():
         missing = []
         if not edit_name.strip():             missing.append("Name")
         if not edit_language:                 missing.append("Language")
+        if not edit_modality:                 missing.append("Modality")
         if not edit_about_me.strip():         missing.append("About Me")
         if not edit_modality_desc.strip():    missing.append("Modality Description")
         if not edit_expertise_tags.strip():   missing.append("Expertise Tags")
@@ -289,7 +292,7 @@ def render_edit_counselor_dialog():
                 "name": edit_name, "age": edit_age, "gender": edit_gender, "ethnicity": edit_ethnicity,
                 "specialization": edit_specialization,
                 "counselor_language": ", ".join(edit_language),
-                "counselor_modality": edit_modality,
+                "counselor_modality": ", ".join(edit_modality),
                 "experience_years": edit_year_exp,
                 "about_me": edit_about_me, "expertise_tags": edit_expertise_tags,
                 "helpful_thought_1": edit_thought_1, "helpful_thought_2": edit_thought_2,
@@ -393,5 +396,5 @@ def show_manage_page():
     if counselors_df.empty:
         st.warning("No counselors found in the database.")
     else:
-        display_df = counselors_df.drop(columns=["about_me", "helpful_thought_1", "helpful_thought_2"], errors="ignore")
+        display_df = counselors_df.drop(columns=["about_me", "modality_desc", "helpful_thought_1", "helpful_thought_2"], errors="ignore")
         st.dataframe(display_df, use_container_width=True, hide_index=True)

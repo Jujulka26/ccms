@@ -169,6 +169,20 @@ def inject_app_styles():
             width: 100%;
         }
 
+        /* ── Primary buttons — keep purple without config.toml ──────── */
+        button[kind="primary"] {
+            background-color: #7C3AED !important;
+            border: 1px solid #6D28D9 !important;
+            color: #FFFFFF !important;
+        }
+        button[kind="primary"]:hover {
+            background-color: #6D28D9 !important;
+            border-color: #5B21B6 !important;
+        }
+        button[kind="primary"]:active {
+            background-color: #5B21B6 !important;
+        }
+
         /* ── Logout — destructive ghost button ────────────────────────── */
         section[data-testid="stSidebar"] button[kind="secondary"] {
             background: transparent !important;

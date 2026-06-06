@@ -3,21 +3,35 @@ __pycache__/
 *.py[cod]
 *.pyo
 
-# Streamlit
-.streamlit/secrets.toml
-
-# Environment
-.env
+# Virtual environment
 .venv/
 venv/
 
-# ML model (large binary — commit separately if needed)
+# Streamlit
+.streamlit/
+
+# Environment / secrets
+.env
+.env.*
+
+# ML — large binary models (run tunemodels.py to regenerate)
 *.pkl
 catboost_info/
 
-# Counselor images (user-uploaded content)
-backend/static/counselors/
+# ML — generated dataset and artifacts (run datascript.py / trainmodels.py / tunemodels.py)
+ml/client_counselor_dataset.csv
+ml/*.png
+ml/*.txt
+
+# Model version history (large PKL files inside)
+model_store/
+
+# Counselor profile images (binary assets, manage outside git)
+frontend/assets/profile/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
