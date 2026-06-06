@@ -1,6 +1,5 @@
 import hashlib
 import math
-import pandas as pd
 import mysql.connector
 
 
@@ -29,15 +28,24 @@ def load_counselors() -> list[dict]:
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        query = """
-        SELECT c.*, p.about_me, p.expertise_tags, p.helpful_thought_1, p.helpful_thought_2,
-               p.modality_desc, p.image
-        FROM tbl_counselor c
-        LEFT JOIN tbl_counselor_profile p ON c.counselor_id = p.counselor_id
-        """
-        cursor.execute(query)
-        rows = cursor.fetchall()
-        return [_clean_row(r) for r in rows]
+        cursor.execute("""
+            SELECT c.*, p.about_me, p.expertise_tags, p.helpful_thought_1, p.helpful_thought_2,
+                   p.modality_desc, p.image
+            FROM tbl_counselor c
+            LEFT JOIN tbl_counselor_profile p ON c.counselor_id = p.counselor_id
+        """)
+        return [_clean_row(r) for r in cursor.fetchall()]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def counselor_exists(counselor_id: int) -> bool:
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT 1 FROM tbl_counselor WHERE counselor_id=%s LIMIT 1", (counselor_id,))
+        return cursor.fetchone() is not None
     finally:
         cursor.close()
         conn.close()
@@ -46,24 +54,22 @@ def load_counselors() -> list[dict]:
 def verify_admin_credentials(email: str, password: str) -> bool:
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    query = "SELECT password_hash, role FROM tbl_user WHERE email=%s LIMIT 1"
     try:
-        cursor.execute(query, (email,))
+        cursor.execute("SELECT password_hash, role FROM tbl_user WHERE email=%s LIMIT 1", (email,))
         row = cursor.fetchone()
         if not row or row["role"] != "admin":
             return False
-        hashed = hashlib.sha256(password.encode()).hexdigest()
-        return row["password_hash"] == hashed
+        return row["password_hash"] == hashlib.sha256(password.encode()).hexdigest()
     finally:
         cursor.close()
         conn.close()
 
 
 def add_counselor(
-    name, age, gender, ethnicity, specialization,
+    *, name, age, gender, ethnicity, specialization,
     counselor_language, counselor_modality, experience_years,
-    about_me, expertise_tags, helpful_thought_1, helpful_thought_2,
-    modality_desc=None, image=None,
+    about_me=None, expertise_tags=None, helpful_thought_1=None,
+    helpful_thought_2=None, modality_desc=None, image=None,
 ):
     conn = get_connection()
     cursor = conn.cursor()
@@ -102,10 +108,10 @@ def get_counselor_by_name(name: str) -> dict | None:
 
 
 def update_counselor(
-    counselor_id, name, age, gender, ethnicity, specialization,
+    counselor_id: int, *, name, age, gender, ethnicity, specialization,
     counselor_language, counselor_modality, experience_years,
-    about_me, expertise_tags, helpful_thought_1, helpful_thought_2,
-    modality_desc=None, image=None,
+    about_me=None, expertise_tags=None, helpful_thought_1=None,
+    helpful_thought_2=None, modality_desc=None, image=None,
 ):
     conn = get_connection()
     cursor = conn.cursor()
@@ -204,8 +210,7 @@ def get_all_requests() -> list[dict]:
                JOIN tbl_counselor c ON r.counselor_id = c.counselor_id
                ORDER BY r.request_id DESC"""
         )
-        rows = cursor.fetchall()
-        return [_clean_row(r) for r in rows]
+        return [_clean_row(r) for r in cursor.fetchall()]
     finally:
         cursor.close()
         conn.close()
@@ -271,8 +276,7 @@ def get_consented_outcomes() -> list[dict]:
             WHERE r.outcome_consent = 1 AND r.match_outcome IN ('Successful', 'Unsuccessful')
             ORDER BY r.request_id DESC
         """)
-        rows = cursor.fetchall()
-        return [_clean_row(r) for r in rows]
+        return [_clean_row(r) for r in cursor.fetchall()]
     finally:
         cursor.close()
         conn.close()

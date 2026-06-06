@@ -2,7 +2,7 @@
 cd /d "C:\Users\My PC\OneDrive\Desktop\ccms"
 
 echo Starting FastAPI Backend...
-start "FastAPI Backend" cmd /k "c:\python_env\py311_env\Scripts\activate && uvicorn backend.main:app --reload"
+start "FastAPI Backend" cmd /k "cd /d C:\Users\My PC\OneDrive\Desktop\ccms\backend && uv run fastapi dev app/main.py"
 
 timeout /t 3 /nobreak
 

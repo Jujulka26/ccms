@@ -4,7 +4,7 @@ import os
 # Ensure the project root (parent of archive/) is on the path so `backend` imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from backend.db import add_counselor, update_counselor, get_counselor_by_name
+from backend_old.db import add_counselor, update_counselor, get_counselor_by_name
 
 counselors = [
   {

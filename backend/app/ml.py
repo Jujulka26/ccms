@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 import joblib
 
-BASE_DIR = Path(__file__).parent.parent / "ml"
+# app/ml.py is at backend/app/ml.py, so parent.parent.parent = ccms/
+BASE_DIR = Path(__file__).parent.parent.parent / "ml"
 
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
@@ -81,10 +82,10 @@ def _exp_years_value(val) -> float:
 
 
 def run_match(match_req, counselors: list[dict]) -> dict:
-    client_age        = match_req.client_age
-    client_issue      = match_req.client_issue
-    client_ethnicity  = match_req.client_ethnicity
-    prev_exp          = match_req.prev_exp
+    client_age          = match_req.client_age
+    client_issue        = match_req.client_issue
+    client_ethnicity    = match_req.client_ethnicity
+    prev_exp            = match_req.prev_exp
     preferred_language  = match_req.preferred_language
     preferred_modality  = match_req.preferred_modality
     preferred_c_gender  = match_req.preferred_c_gender
@@ -96,7 +97,7 @@ def run_match(match_req, counselors: list[dict]) -> dict:
     for c in counselors:
         if c.get("counselor_id") in exclude_ids:
             continue
-        counselor_languages = [v.strip() for v in str(c.get("counselor_language", "")).split(",") if v.strip()]
+        counselor_languages  = [v.strip() for v in str(c.get("counselor_language", "")).split(",") if v.strip()]
         if preferred_language not in counselor_languages:
             continue
         counselor_modalities = [v.strip() for v in str(c.get("counselor_modality", "")).split(",") if v.strip()]
@@ -117,19 +118,18 @@ def run_match(match_req, counselors: list[dict]) -> dict:
         return {"error": f"No counselors found who support {preferred_language}."}
 
     df = pd.DataFrame(rows)
-    X = df[FEATURE_ORDER]
+    X  = df[FEATURE_ORDER]
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="X does not have valid feature names")
         prob = model.predict_proba(X)[:, 1]
 
-    # Temperature scaling T=1.5: spreads scores without hard ceiling
     T = 1.5
-    prob = np.clip(prob, 1e-7, 1 - 1e-7)
+    prob   = np.clip(prob, 1e-7, 1 - 1e-7)
     logits = np.log(prob / (1 - prob))
     df["compatibility"] = (1 / (1 + np.exp(-logits / T))) * 100
 
-    ranked = df.sort_values("compatibility", ascending=False)
+    ranked        = df.sort_values("compatibility", ascending=False)
     counselor_map = {c["counselor_id"]: c for c in counselors}
 
     def build_match(row) -> dict:
@@ -227,16 +227,15 @@ def compute_shap(features: dict) -> dict:
     try:
         import shap
     except ImportError:
-        return {"error": "SHAP not installed. Run: pip install shap", "shap_values": [], "base_value": 0.0, "feature_names": [], "feature_values": []}
+        return {"error": "SHAP not installed.", "shap_values": [], "base_value": 0.0, "feature_names": [], "feature_values": []}
 
     try:
-        model, _ = load_resources()
+        model, _  = load_resources()
         explainer = _get_shap_explainer()
 
         feature_values = [features.get(f, 0.0) for f in FEATURE_ORDER]
-        x_row = pd.DataFrame([{f: features.get(f, 0.0) for f in FEATURE_ORDER}])
-
-        x_scaled = model.named_steps["prep"].transform(x_row[FEATURE_ORDER])
+        x_row     = pd.DataFrame([{f: features.get(f, 0.0) for f in FEATURE_ORDER}])
+        x_scaled  = model.named_steps["prep"].transform(x_row[FEATURE_ORDER])
         shap_vals = explainer.shap_values(x_scaled)
 
         if isinstance(shap_vals, list):

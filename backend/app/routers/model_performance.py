@@ -6,16 +6,18 @@ import threading
 import uuid
 from datetime import datetime
 from pathlib import Path
+
+import pandas as pd
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from backend.schemas import ModelPerformanceResponse
-import pandas as pd
+from schemas import ModelPerformanceResponse
 
 _jobs: dict[str, dict] = {}
 
 router = APIRouter(prefix="/model-performance", tags=["model-performance"])
 
-BASE_DIR     = Path(__file__).parent.parent.parent
+# app/routers/model_performance.py → parent.parent.parent.parent = ccms/
+BASE_DIR     = Path(__file__).parent.parent.parent.parent
 ML_DIR       = BASE_DIR / "ml"
 STORE_DIR    = BASE_DIR / "model_store"
 VERSIONS_DIR = STORE_DIR / "versions"
@@ -44,7 +46,7 @@ class RetrainRequest(BaseModel):
 def _ensemble_metrics(tuned_csv: Path) -> dict:
     if not tuned_csv.exists():
         return {}
-    df = pd.read_csv(str(tuned_csv))
+    df  = pd.read_csv(str(tuned_csv))
     row = df[df["Model"] == "Ensemble"]
     row = row.iloc[0] if not row.empty else df.iloc[-1]
     return {
@@ -52,12 +54,6 @@ def _ensemble_metrics(tuned_csv: Path) -> dict:
         "f1":       round(float(row.get("F1", 0)), 3),
         "roc_auc":  round(float(row.get("ROC-AUC", 0)), 3),
     }
-
-
-def _read_tuned_table(tuned_csv: Path) -> list[dict]:
-    if not tuned_csv.exists():
-        return []
-    return pd.read_csv(str(tuned_csv)).to_dict(orient="records")
 
 
 def _get_active_version() -> str:
@@ -79,7 +75,6 @@ def _load_meta(version_dir: Path) -> dict:
 
 
 def _append_real_data(rows: list) -> int:
-    """Append uploaded real outcome rows to the generated dataset. Returns rows added."""
     valid_issues = set(ISSUE_SIMILARITY.keys())
     mapped = []
     for r in rows:
@@ -90,24 +85,24 @@ def _append_real_data(rows: list) -> int:
         if r.get("specialization") not in valid_issues:
             continue
         mapped.append({
-            "client_id":                     -1,
-            "client_age":                    r.get("client_age") or 30,
-            "client_gender":                 r.get("client_gender") or "Male",
-            "client_ethnicity":              r.get("client_ethnicity") or "Malay",
-            "client_issue":                  r["client_issue"],
+            "client_id":                      -1,
+            "client_age":                     r.get("client_age") or 30,
+            "client_gender":                  r.get("client_gender") or "Male",
+            "client_ethnicity":               r.get("client_ethnicity") or "Malay",
+            "client_issue":                   r["client_issue"],
             "previous_counseling_experience": r.get("prev_exp") or 0,
-            "preferred_language":            r.get("preferred_language") or "English",
-            "preferred_modality":            r.get("preferred_modality") or "Cognitive",
-            "preferred_counselor_gender":    r.get("preferred_c_gender") or "No preference",
-            "counselor_id":                  -1,
-            "counselor_age":                 r.get("counselor_age") or 35,
-            "counselor_gender":              r.get("counselor_gender") or "Female",
-            "counselor_ethnicity":           r.get("counselor_ethnicity") or "Malay",
-            "counselor_language":            r.get("counselor_language") or "English",
-            "specialization":                r["specialization"],
-            "counselor_modality":            r.get("counselor_modality") or "Cognitive",
-            "experience_years":              r.get("experience_years") or 5,
-            "match_success":                 1 if r["match_outcome"] == "Successful" else 0,
+            "preferred_language":             r.get("preferred_language") or "English",
+            "preferred_modality":             r.get("preferred_modality") or "Cognitive",
+            "preferred_counselor_gender":     r.get("preferred_c_gender") or "No preference",
+            "counselor_id":                   -1,
+            "counselor_age":                  r.get("counselor_age") or 35,
+            "counselor_gender":               r.get("counselor_gender") or "Female",
+            "counselor_ethnicity":            r.get("counselor_ethnicity") or "Malay",
+            "counselor_language":             r.get("counselor_language") or "English",
+            "specialization":                 r["specialization"],
+            "counselor_modality":             r.get("counselor_modality") or "Cognitive",
+            "experience_years":               r.get("experience_years") or 5,
+            "match_success":                  1 if r["match_outcome"] == "Successful" else 0,
         })
 
     if not mapped or not _DATASET_CSV.exists():
@@ -119,7 +114,7 @@ def _append_real_data(rows: list) -> int:
     return len(mapped)
 
 
-# ── GET / ────────────────────────────────────────────────────────────────────
+# ── GET / ─────────────────────────────────────────────────────────────────────
 
 @router.get("/", response_model=ModelPerformanceResponse)
 def get_model_performance():
@@ -140,21 +135,20 @@ def get_model_performance():
             best_roc = float(df_t["ROC-AUC"].max())
 
         return {
-            "models":        df.drop(columns=["Overall"]).to_dict(orient="records"),
-            "best_model":    str(top["Model"]),
-            "best_roc_auc":  best_roc,
-            "model_count":   len(df),
+            "models":         df.drop(columns=["Overall"]).to_dict(orient="records"),
+            "best_model":     str(top["Model"]),
+            "best_roc_auc":   best_roc,
+            "model_count":    len(df),
             "deployed_model": DEPLOYED_MODEL,
-            "tuning_models": tuning_models,
+            "tuning_models":  tuning_models,
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to load model performance data.")
 
 
-# ── GET /history ─────────────────────────────────────────────────────────────
+# ── GET /history ──────────────────────────────────────────────────────────────
 
 def _ensure_initial_version():
-    """Snapshot the pre-versioning model as v_initial if no versions exist yet."""
     STORE_DIR.mkdir(exist_ok=True)
     VERSIONS_DIR.mkdir(exist_ok=True)
     initial_dir = VERSIONS_DIR / "v_initial"
@@ -184,7 +178,7 @@ def _ensure_initial_version():
 @router.get("/history")
 def get_history():
     _ensure_initial_version()
-    active = _get_active_version()
+    active   = _get_active_version()
     versions = []
     for vdir in sorted(VERSIONS_DIR.iterdir(), reverse=True):
         if not vdir.is_dir():
@@ -193,8 +187,10 @@ def get_history():
         if meta:
             meta["is_active"] = (meta.get("version_id") == active)
             versions.append(meta)
-    # Put v_initial at the bottom regardless of sort order
-    versions.sort(key=lambda v: ("0" if v["version_id"] == "v_initial" else v["version_id"]), reverse=True)
+    versions.sort(
+        key=lambda v: ("0" if v["version_id"] == "v_initial" else v["version_id"]),
+        reverse=True,
+    )
     return versions
 
 
@@ -204,11 +200,10 @@ def _run_training(job_id: str, payload: RetrainRequest):
     job = _jobs[job_id]
     version_dir = None
     try:
-        # Ensure store dirs exist before any file operations
         STORE_DIR.mkdir(exist_ok=True)
         VERSIONS_DIR.mkdir(exist_ok=True)
 
-        job["step"] = "Backing up current model..."
+        job["step"]     = "Backing up current model..."
         job["progress"] = 0.05
         if _ENSEMBLE.exists():
             shutil.copy2(str(_ENSEMBLE), str(_ENSEMBLE_BAK))
@@ -220,8 +215,8 @@ def _run_training(job_id: str, payload: RetrainRequest):
         version_dir = VERSIONS_DIR / version_id
         version_dir.mkdir(exist_ok=True)
 
-        scripts = [ML_DIR / "datascript.py", ML_DIR / "trainmodels.py", ML_DIR / "tunemodels.py"]
-        labels  = [
+        scripts        = [ML_DIR / "datascript.py", ML_DIR / "trainmodels.py", ML_DIR / "tunemodels.py"]
+        labels         = [
             "Step 1 / 3 — Generating dataset (datascript.py)",
             "Step 2 / 3 — Training models (trainmodels.py)",
             "Step 3 / 3 — Tuning hyperparameters (tunemodels.py)",
@@ -316,26 +311,23 @@ def retrain_status(job_id: str):
     return _jobs[job_id]
 
 
-# ── POST /deploy/{version_id} ────────────────────────────────────────────────
+# ── POST /deploy/{version_id} ─────────────────────────────────────────────────
 
 @router.post("/deploy/{version_id}")
 def deploy_version(version_id: str):
     version_dir = VERSIONS_DIR / version_id
     if not version_dir.exists():
         raise HTTPException(status_code=404, detail=f"Version {version_id} not found.")
-
     pkl = version_dir / "ensemble.pkl"
     csv = version_dir / "tuned_result.csv"
     if not pkl.exists():
         raise HTTPException(status_code=404, detail="ensemble.pkl not found in this version.")
-
     STORE_DIR.mkdir(exist_ok=True)
     if _ENSEMBLE.exists():
         shutil.copy2(str(_ENSEMBLE), str(_ENSEMBLE_BAK))
     shutil.copy2(str(pkl), str(_ENSEMBLE))
     if csv.exists():
         shutil.copy2(str(csv), str(_TUNED_CSV))
-
     _set_active_version(version_id)
     return {"message": f"Version {version_id} is now the active model."}
 

@@ -19,7 +19,7 @@ from sklearn.metrics import (
 )
 from sklearn.dummy import DummyClassifier
 
-from backend.ml import engineer_features_from_df, FEATURE_ORDER
+from backend_old.ml import engineer_features_from_df, FEATURE_ORDER
 
 BASE_DIR = Path(__file__).parent
 

@@ -23,7 +23,7 @@ from catboost import CatBoostClassifier
 
 BASE_DIR = Path(__file__).parent
 
-from backend.ml import SoftVotingEnsemble
+from backend_old.ml import SoftVotingEnsemble
 
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
