@@ -180,10 +180,10 @@ def inject_styles():
 
 def modality_help_text(modality_options):
     descriptions = {
-        "CBT": "Helps you change negative thoughts and behaviors.",
+        "Cognitive": "Helps you identify and reframe unhelpful thought patterns (e.g. CBT).",
+        "Behavioral": "Focuses on changing behaviours through techniques like exposure and activation.",
         "Humanistic": "Focuses on understanding your feelings in a supportive, non-judgmental way.",
-        "Mindfulness": "Teaches you to stay calm and aware in the present moment.",
-        "REBT": "Helps you challenge unhealthy beliefs and think more positively."
+        "Psychodynamic": "Explores how past experiences and unconscious patterns shape you today.",
     }
     if not modality_options:
         return "Modality is the counseling approach used in sessions."
@@ -495,7 +495,7 @@ def show_profile_dialog(c: dict, score=None):
         f'<div style="padding-left:4px;">'
         f'<div style="display:flex;align-items:baseline;gap:10px;">'
         f'<div class="prof-name">{name}</div>{score_item}</div>'
-        f'<div class="prof-role">Licensed Counselor</div>'
+        f'<div class="prof-role">Registered Counsellor (LKM)</div>'
         f'<div class="prof-meta">{meta_html}</div></div></div></div>'
         f'<div style="height:12px;"></div>',
         unsafe_allow_html=True,

@@ -97,7 +97,7 @@ def _append_real_data(rows: list) -> int:
             "client_issue":                  r["client_issue"],
             "previous_counseling_experience": r.get("prev_exp") or 0,
             "preferred_language":            r.get("preferred_language") or "English",
-            "preferred_modality":            r.get("preferred_modality") or "CBT",
+            "preferred_modality":            r.get("preferred_modality") or "Cognitive",
             "preferred_counselor_gender":    r.get("preferred_c_gender") or "No preference",
             "counselor_id":                  -1,
             "counselor_age":                 r.get("counselor_age") or 35,
@@ -105,7 +105,7 @@ def _append_real_data(rows: list) -> int:
             "counselor_ethnicity":           r.get("counselor_ethnicity") or "Malay",
             "counselor_language":            r.get("counselor_language") or "English",
             "specialization":                r["specialization"],
-            "counselor_modality":            r.get("counselor_modality") or "CBT",
+            "counselor_modality":            r.get("counselor_modality") or "Cognitive",
             "experience_years":              r.get("experience_years") or 5,
             "match_success":                 1 if r["match_outcome"] == "Successful" else 0,
         })

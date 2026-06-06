@@ -14,7 +14,7 @@ _SPEC_COLORS = {
 }
 
 _MODALITY_ICONS = {
-    "CBT": "🧠", "Mindfulness": "🌿", "Humanistic": "🤝", "REBT": "💡",
+    "Cognitive": "🧠", "Behavioral": "🌿", "Humanistic": "🤝", "Psychodynamic": "💡",
 }
 
 
@@ -218,7 +218,7 @@ def show_counselors_page():
                         {av}
                         <div>
                             <div class="c-name">{name}</div>
-                            <div class="c-title">Licensed Counselor</div>
+                            <div class="c-title">Registered Counsellor (LKM)</div>
                         </div>
                     </div>
                     <span class="c-spec-badge"

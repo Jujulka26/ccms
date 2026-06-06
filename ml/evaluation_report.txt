@@ -1,48 +1,48 @@
 ML MODEL EVALUATION REPORT
 ============================================================
 Dataset       : client_counselor_dataset.csv
-Total samples : 19,854
+Total samples : 19,991
 Features      : 8
 Target        : match_success (binary)
-Class balance : match=1 (46.4%), match=0 (53.6%)
+Class balance : match=1 (39.0%), match=0 (61.0%)
 Model         : Ensemble (LightGBM + CatBoost)
 Pipeline      : Soft-voting ensemble of two tuned pipelines
 
 TEST SET RESULTS (20% held-out, stratified split, seed=42)
 ------------------------------------------------------------
-Accuracy      : 0.8068
-Precision     : 0.8115
-Recall        : 0.7608
-F1 Score      : 0.7853
-ROC-AUC       : 0.8964
+Accuracy      : 0.8140
+Precision     : 0.7282
+Recall        : 0.8346
+F1 Score      : 0.7778
+ROC-AUC       : 0.9175
 
 BASELINE COMPARISON
 ------------------------------------------------------------
-Majority-class : Accuracy=0.5356  F1=0.0000
-Ensemble       : Accuracy=0.8068  F1=0.7853
-Lift over baseline: +27.12% accuracy
+Majority-class : Accuracy=0.6099  F1=0.0000
+Ensemble       : Accuracy=0.8140  F1=0.7778
+Lift over baseline: +20.41% accuracy
 
 5-FOLD CROSS-VALIDATION
 ------------------------------------------------------------
   LightGBM
-    ACCURACY  : mean=0.8002 ± 0.0026  [0.7955–0.8033]
-    F1        : mean=0.7721 ± 0.0023  [0.7688–0.7754]
-    ROC_AUC   : mean=0.8887 ± 0.0028  [0.8841–0.8919]
+    ACCURACY  : mean=0.8151 ± 0.0028  [0.8127–0.8204]
+    F1        : mean=0.7578 ± 0.0028  [0.7543–0.7623]
+    ROC_AUC   : mean=0.9155 ± 0.0025  [0.9124–0.9194]
   CatBoost
-    ACCURACY  : mean=0.8005 ± 0.0031  [0.7958–0.8033]
-    F1        : mean=0.7728 ± 0.0028  [0.7694–0.7754]
-    ROC_AUC   : mean=0.8898 ± 0.0027  [0.8853–0.8933]
+    ACCURACY  : mean=0.8166 ± 0.0020  [0.8142–0.8199]
+    F1        : mean=0.7569 ± 0.0023  [0.7532–0.7592]
+    ROC_AUC   : mean=0.9159 ± 0.0024  [0.9127–0.9197]
 
 FEATURE IMPORTANCE (highest to lowest, LightGBM + CatBoost averaged)
 ------------------------------------------------------------
-  Issue Similarity              : 0.4422  (44.2%)
-  Preferred Modality Match      : 0.2222  (22.2%)
-  Issue-Modality Fit            : 0.1016  (10.2%)
-  Counselor Seniority           : 0.0857  (8.6%)
-  Client Previous Experience    : 0.0726  (7.3%)
-  Preferred Gender Match        : 0.0452  (4.5%)
-  Ethnicity Match               : 0.0213  (2.1%)
-  Age Gap                       : 0.0093  (0.9%)
+  Issue Similarity              : 0.4327  (43.3%)
+  Preferred Modality Match      : 0.2306  (23.1%)
+  Counselor Seniority           : 0.1183  (11.8%)
+  Issue-Modality Fit            : 0.0730  (7.3%)
+  Client Previous Experience    : 0.0644  (6.4%)
+  Preferred Gender Match        : 0.0366  (3.7%)
+  Ethnicity Match               : 0.0248  (2.5%)
+  Age Gap                       : 0.0196  (2.0%)
 
 VERDICT
 ------------------------------------------------------------

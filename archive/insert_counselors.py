@@ -1,8 +1,8 @@
 import sys
 import os
 
-# Ensure the backend module can be imported
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Ensure the project root (parent of archive/) is on the path so `backend` imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.db import add_counselor, update_counselor, get_counselor_by_name
 
@@ -14,13 +14,13 @@ counselors = [
     "ethnicity": "Chinese",
     "specialization": "Anxiety",
     "counselor_language": "Mandarin, English",
-    "counselor_modality": "CBT",
+    "counselor_modality": "Cognitive",
     "experience_years": 10,
-    "about_me": "I specialise in anxiety management and help clients build practical coping skills through structured, evidence-based techniques.",
-    "expertise_tags": "Anxiety, Panic Attacks, Work Stress, CBT, Goal Setting",
+    "about_me": "I specialise in anxiety management and help clients build practical coping skills through structured, evidence-based cognitive techniques.",
+    "expertise_tags": "Anxiety, Panic Attacks, Work Stress, Cognitive Therapy, Goal Setting",
     "helpful_thought_1": "I feel overwhelmed and don't know where to start.",
     "helpful_thought_2": "I want to feel more in control of my thoughts.",
-    "modality_desc": "CBT helps us identify unhelpful thought patterns and replace them with healthier ones through structured exercises and weekly goals.",
+    "modality_desc": "Cognitive therapy helps us identify unhelpful thought patterns and replace them with healthier ones through structured exercises and weekly goals.",
     "image": "Mei Ling Tan.png"
   },
   {
@@ -46,13 +46,13 @@ counselors = [
     "ethnicity": "Indian",
     "specialization": "Stress",
     "counselor_language": "Tamil, English",
-    "counselor_modality": "Mindfulness",
+    "counselor_modality": "Behavioral",
     "experience_years": 5,
-    "about_me": "I guide clients in using mindfulness and breathing techniques to manage everyday stress and build emotional resilience.",
-    "expertise_tags": "Stress, Burnout, Mindfulness, Breathing, Work-Life Balance",
+    "about_me": "I help clients manage everyday stress by building practical routines and relaxation skills, and gradually changing the habits that fuel burnout.",
+    "expertise_tags": "Stress, Burnout, Behavioral Activation, Routines, Work-Life Balance",
     "helpful_thought_1": "I am constantly exhausted and can't switch off.",
     "helpful_thought_2": "I feel anxious all the time but I don't know why.",
-    "modality_desc": "Mindfulness-based sessions teach you to observe thoughts without reacting — small daily practices that create lasting calm.",
+    "modality_desc": "Behavioral sessions focus on action — building healthier routines, practising relaxation, and taking small steps that steadily reduce stress.",
     "image": "Priya Nair.png"
   },
   {
@@ -62,13 +62,13 @@ counselors = [
     "ethnicity": "Chinese",
     "specialization": "Trauma",
     "counselor_language": "Mandarin, English",
-    "counselor_modality": "CBT",
+    "counselor_modality": "Behavioral",
     "experience_years": 12,
-    "about_me": "I have extensive experience working with trauma survivors, helping clients safely process difficult memories and rebuild a sense of safety.",
-    "expertise_tags": "Trauma, PTSD, Abuse, Resilience, CBT",
+    "about_me": "I have extensive experience with trauma survivors, using gradual, structured exposure to help clients safely face difficult memories and rebuild a sense of safety.",
+    "expertise_tags": "Trauma, PTSD, Exposure Therapy, Resilience, Behavioral",
     "helpful_thought_1": "I keep reliving something that happened to me.",
     "helpful_thought_2": "I don't feel safe opening up to people.",
-    "modality_desc": "CBT for trauma involves carefully revisiting difficult experiences in a structured, safe way to reduce their emotional intensity over time.",
+    "modality_desc": "Behavioral (exposure-based) trauma work involves carefully and safely approaching avoided memories and situations to reduce their emotional intensity over time.",
     "image": "David Lim.png"
   },
   {
@@ -78,13 +78,13 @@ counselors = [
     "ethnicity": "Malay",
     "specialization": "Anxiety",
     "counselor_language": "Malay, English",
-    "counselor_modality": "REBT",
+    "counselor_modality": "Cognitive",
     "experience_years": 18,
-    "about_me": "As a senior counsellor I help clients challenge irrational beliefs that fuel anxiety, replacing them with balanced, realistic thinking.",
-    "expertise_tags": "Anxiety, Social Anxiety, Perfectionism, REBT, Irrational Beliefs",
+    "about_me": "As a senior counsellor I help clients identify and challenge the unhelpful beliefs that fuel anxiety, replacing them with balanced, realistic thinking.",
+    "expertise_tags": "Anxiety, Social Anxiety, Perfectionism, Cognitive Therapy, Beliefs",
     "helpful_thought_1": "I always worry about what others think of me.",
     "helpful_thought_2": "I put too much pressure on myself to be perfect.",
-    "modality_desc": "REBT helps us identify the beliefs driving your distress and actively challenge them — leading to lasting changes in how you feel.",
+    "modality_desc": "Cognitive therapy helps us identify the beliefs driving your distress and actively reframe them — leading to lasting changes in how you feel.",
     "image": "Siti Rahimah.png"
   },
   {
@@ -94,13 +94,13 @@ counselors = [
     "ethnicity": "Indian",
     "specialization": "Depression",
     "counselor_language": "Tamil, English",
-    "counselor_modality": "Mindfulness",
+    "counselor_modality": "Psychodynamic",
     "experience_years": 6,
-    "about_me": "I blend mindfulness with compassion-focused techniques to help clients with depression reconnect with themselves and find meaning.",
-    "expertise_tags": "Depression, Self-compassion, Motivation, Mindfulness, Young Adults",
+    "about_me": "I help clients with depression explore the deeper roots of their low mood — past experiences and recurring patterns — to build lasting self-understanding.",
+    "expertise_tags": "Depression, Self-understanding, Relationships, Psychodynamic, Young Adults",
     "helpful_thought_1": "I have no motivation to do anything anymore.",
     "helpful_thought_2": "I feel empty even when things seem fine on the outside.",
-    "modality_desc": "Mindfulness for depression focuses on breaking the cycle of rumination — learning to be present rather than stuck in the past.",
+    "modality_desc": "Psychodynamic work looks beneath the symptoms — we explore how your history and inner patterns shape the way you feel today.",
     "image": "Kevin Raj.png"
   },
   {
@@ -110,13 +110,13 @@ counselors = [
     "ethnicity": "Malay",
     "specialization": "Stress",
     "counselor_language": "Malay, English",
-    "counselor_modality": "CBT",
+    "counselor_modality": "Cognitive",
     "experience_years": 22,
-    "about_me": "With over two decades of experience I help professionals and families manage chronic stress through practical CBT strategies.",
-    "expertise_tags": "Stress, Career Burnout, Family Issues, CBT, Coping Skills",
+    "about_me": "With over two decades of experience I help professionals and families manage chronic stress through practical cognitive strategies.",
+    "expertise_tags": "Stress, Career Burnout, Family Issues, Cognitive Therapy, Coping Skills",
     "helpful_thought_1": "My work is taking over my life and I can't keep up.",
     "helpful_thought_2": "I feel responsible for everything and it's crushing me.",
-    "modality_desc": "CBT gives us concrete tools — we identify your biggest stressors, challenge unhelpful patterns, and build a sustainable coping plan.",
+    "modality_desc": "Cognitive therapy gives us concrete tools — we identify your biggest stressors, reframe unhelpful patterns, and build a sustainable coping plan.",
     "image": "Ahmad Fadzil.png"
   },
   {
@@ -142,13 +142,13 @@ counselors = [
     "ethnicity": "Other",
     "specialization": "Stress",
     "counselor_language": "English",
-    "counselor_modality": "REBT",
+    "counselor_modality": "Cognitive",
     "experience_years": 15,
-    "about_me": "Originally from the UK, I help expats and locals navigate cross-cultural workplace burnout and life transitions by challenging their demanding self-expectations.",
-    "expertise_tags": "Stress, Expat Adjustments, Career Burnout, REBT",
+    "about_me": "Originally from the UK, I help expats and locals navigate cross-cultural burnout by identifying and reframing the demanding self-expectations that drive their stress.",
+    "expertise_tags": "Stress, Expat Adjustments, Career Burnout, Cognitive Therapy",
     "helpful_thought_1": "I feel completely alienated in my current environment.",
     "helpful_thought_2": "I'm pushing myself to the breaking point for my career.",
-    "modality_desc": "REBT addresses the rigid demands we place on ourselves and our environment, teaching unconditional self-acceptance.",
+    "modality_desc": "Cognitive therapy addresses the rigid demands we place on ourselves, helping you build more flexible, self-accepting thinking.",
     "image": "Dr. Sarah Jenkins.png"
   },
   {
@@ -158,13 +158,13 @@ counselors = [
     "ethnicity": "Other",
     "specialization": "Depression",
     "counselor_language": "English",
-    "counselor_modality": "Mindfulness",
+    "counselor_modality": "Psychodynamic",
     "experience_years": 9,
-    "about_me": "An Australian expat focusing on treating depression through a somatic and mindfulness lens, bringing gentle awareness back to the body and the present moment.",
-    "expertise_tags": "Depression, Emotional Numbness, Mindfulness, Somatic Awareness",
+    "about_me": "An Australian expat treating depression through insight-oriented work, helping clients understand the emotional patterns and history beneath their numbness.",
+    "expertise_tags": "Depression, Emotional Numbness, Insight, Psychodynamic",
     "helpful_thought_1": "Nothing gives me joy anymore.",
     "helpful_thought_2": "I just feel hollow inside most days.",
-    "modality_desc": "Mindfulness helps us observe our depressive thoughts without judgment, breaking the harsh inner critical cycle.",
+    "modality_desc": "Psychodynamic therapy helps us understand the deeper sources of depression — making sense of long-standing patterns rather than just the surface symptoms.",
     "image": "Marcus Thompson.png"
   },
   {
@@ -174,13 +174,13 @@ counselors = [
     "ethnicity": "Other",
     "specialization": "Trauma",
     "counselor_language": "English",
-    "counselor_modality": "CBT",
+    "counselor_modality": "Cognitive",
     "experience_years": 25,
-    "about_me": "With decades of clinical experience in Europe and Asia, I provide structured CBT interventions to safely process deep-rooted traumatic experiences.",
-    "expertise_tags": "Trauma, PTSD, Complex Trauma, CBT",
+    "about_me": "With decades of clinical experience in Europe and Asia, I provide structured cognitive interventions (CPT) to safely reprocess deep-rooted traumatic experiences.",
+    "expertise_tags": "Trauma, PTSD, Complex Trauma, Cognitive Processing",
     "helpful_thought_1": "I can't escape the bad memories. They control my life.",
     "helpful_thought_2": "I isolate myself so I don't feel vulnerable.",
-    "modality_desc": "CBT for trauma systematically addresses avoidance behaviors and helps reprocess fearful memories in a secure environment.",
+    "modality_desc": "Cognitive processing therapy helps you re-examine and reframe trauma-related beliefs, reducing their grip in a secure, structured way.",
     "image": "Dr. Hannah Schmidt.png"
   },
   {
@@ -190,13 +190,13 @@ counselors = [
     "ethnicity": "Malay",
     "specialization": "Trauma",
     "counselor_language": "Malay, English",
-    "counselor_modality": "Mindfulness",
+    "counselor_modality": "Behavioral",
     "experience_years": 7,
-    "about_me": "I integrate trauma-informed mindfulness to help clients gently reconnect with their bodies after traumatic events without feeling overwhelmed.",
-    "expertise_tags": "Trauma, Somatic Healing, Mindfulness, Emotional Regulation",
+    "about_me": "I use trauma-informed behavioral techniques to help clients gradually and safely re-engage with life after traumatic events without feeling overwhelmed.",
+    "expertise_tags": "Trauma, Exposure, Emotional Regulation, Behavioral",
     "helpful_thought_1": "I want to be able to relax without feeling panicked.",
     "helpful_thought_2": "I feel detached from myself and my emotions.",
-    "modality_desc": "Trauma-sensitive mindfulness focuses on gentle, safe body-awareness techniques ensuring you stay within your window of tolerance.",
+    "modality_desc": "Behavioral trauma work uses gentle, paced exposure and grounding so you can face avoided situations while staying within your window of tolerance.",
     "image": "Nur Atiqah.png"
   },
   {
@@ -206,13 +206,13 @@ counselors = [
     "ethnicity": "Indian",
     "specialization": "Stress",
     "counselor_language": "Tamil, English, Malay",
-    "counselor_modality": "REBT",
+    "counselor_modality": "Psychodynamic",
     "experience_years": 16,
-    "about_me": "I use Rational Emotive Behavior Therapy to combat severe executive stress, perfectionism, and anger issues driven by workplace demands.",
-    "expertise_tags": "Stress, Executive Burnout, Anger Management, REBT, Male Mental Health",
+    "about_me": "I help high-pressure professionals understand the deeper drivers behind their stress, perfectionism, and anger — the patterns and demands they learned long ago.",
+    "expertise_tags": "Stress, Executive Burnout, Anger Management, Psychodynamic, Male Mental Health",
     "helpful_thought_1": "I snap at my family because I'm so stressed from work.",
     "helpful_thought_2": "Things HAVE to go my way or everything is a disaster.",
-    "modality_desc": "Through REBT, we dissect the absolute 'musts' driving your stress and replace them with flexible, resilient preferences.",
+    "modality_desc": "Psychodynamic work explores where your pressures and 'musts' truly come from, building insight that loosens their hold over time.",
     "image": "Karthik Raj.png"
   },
   {
@@ -222,13 +222,13 @@ counselors = [
     "ethnicity": "Chinese",
     "specialization": "Depression",
     "counselor_language": "Mandarin, English",
-    "counselor_modality": "CBT",
+    "counselor_modality": "Behavioral",
     "experience_years": 4,
-    "about_me": "I work with young adults and university students facing depression, using engaging CBT strategies and behavioral activation to rebuild lost motivation.",
-    "expertise_tags": "Depression, Quarter-Life Crisis, Youth, CBT",
+    "about_me": "I work with young adults and university students facing depression, using behavioral activation to rebuild momentum — acting from a plan rather than waiting for motivation.",
+    "expertise_tags": "Depression, Quarter-Life Crisis, Youth, Behavioral Activation",
     "helpful_thought_1": "I feel lost and disconnected from my peers.",
     "helpful_thought_2": "Every small task feels like climbing a mountain.",
-    "modality_desc": "Cognitive Behavioral Therapy here focuses heavily on behavioral activation—learning to act from plan rather than acting from a low mood.",
+    "modality_desc": "Behavioral activation focuses on action — scheduling meaningful, rewarding activities to lift mood rather than waiting to feel motivated first.",
     "image": "Sarah Chen.png"
   },
   {
@@ -254,13 +254,13 @@ counselors = [
     "ethnicity": "Indian",
     "specialization": "Depression",
     "counselor_language": "English, Tamil",
-    "counselor_modality": "REBT",
+    "counselor_modality": "Psychodynamic",
     "experience_years": 14,
-    "about_me": "I help clients challenge the deep-seated negative core beliefs that drive depression, working together to create behavioral experiments that test out new ways of living.",
-    "expertise_tags": "Depression, Postpartum Depression, REBT, Core Beliefs",
+    "about_me": "I help clients explore the deep-seated patterns and early experiences that drive depression, building insight into the roots of how they relate to themselves.",
+    "expertise_tags": "Depression, Postpartum Depression, Psychodynamic, Core Patterns",
     "helpful_thought_1": "I feel like a burden to my family.",
     "helpful_thought_2": "No matter what I achieve, it never feels like enough.",
-    "modality_desc": "Through REBT, we will identify the negative philosophies keeping you stuck and design practical interventions to rebuild your energy.",
+    "modality_desc": "Psychodynamic therapy helps us understand the long-standing patterns and experiences keeping you stuck, so change comes from genuine insight.",
     "image": "Kavitha Menon.png"
   },
   {
@@ -278,38 +278,6 @@ counselors = [
     "helpful_thought_2": "My life changes are happening too fast to process.",
     "modality_desc": "The Humanistic approach supports you in finding meaning and self-actualization during times of major uncontrollable changes.",
     "image": "Benny Ng.png"
-  },
-  {
-    "name": "Farhana binti Yusof",
-    "age": 30,
-    "gender": "Female",
-    "ethnicity": "Malay",
-    "specialization": "Anxiety",
-    "counselor_language": "Malay, English",
-    "counselor_modality": "Mindfulness",
-    "experience_years": 6,
-    "about_me": "I work dynamically with young professionals heavily burdened by anxiety, integrating secular mindfulness to ground frantic, overactive and racing minds.",
-    "expertise_tags": "Anxiety, Generalized Anxiety, Millennials, Mindfulness",
-    "helpful_thought_1": "I am procrastinating so much because of my anxiety.",
-    "helpful_thought_2": "My brain won't shut off at night.",
-    "modality_desc": "Mindfulness utilizes breath and grounding techniques to anchor you into the present minute, disarming future-oriented panic.",
-    "image": "Farhana binti Yusof.png"
-  },
-  {
-    "name": "Arun Prakash",
-    "age": 33,
-    "gender": "Male",
-    "ethnicity": "Indian",
-    "specialization": "Trauma",
-    "counselor_language": "Tamil, English",
-    "counselor_modality": "Humanistic",
-    "experience_years": 7,
-    "about_me": "I practice deeply affirming, person-centered therapy for men recovering from silent trauma, focusing heavily on destigmatizing the healing process.",
-    "expertise_tags": "Trauma, Men's Mental Health, Stigma, Humanistic",
-    "helpful_thought_1": "I feel weak asking for help about this trauma.",
-    "helpful_thought_2": "I've held onto this secret for far too long.",
-    "modality_desc": "In my humanistic sessions, your safety and autonomy are priorities. We remove the stigma and move forward with profound validation.",
-    "image": "Arun Prakash.png"
   },
   {
     "name": "Claire Dupont",

@@ -132,7 +132,7 @@ GENDER_OPTIONS = ["Male", "Female"]
 ETHNICITY_OPTIONS = ["Malay", "Chinese", "Indian", "Other"]
 LANGUAGE_OPTIONS = ["English", "Malay", "Mandarin", "Tamil"]
 SPECIALIZATION_OPTIONS = ["Anxiety", "Depression", "Stress", "Trauma"]
-MODALITY_OPTIONS = ["CBT", "Humanistic", "Mindfulness", "REBT"]
+MODALITY_OPTIONS = ["Cognitive", "Behavioral", "Humanistic", "Psychodynamic"]
 
 
 def _option_index(options, value, default=0):
@@ -169,7 +169,7 @@ def render_add_counselor_dialog():
             with col2:
                 counselor_language = st.multiselect("Language", LANGUAGE_OPTIONS, default=["Malay"], max_selections=2)
                 specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=SPECIALIZATION_OPTIONS.index("Stress"))
-                counselor_modality = st.selectbox("Modality", MODALITY_OPTIONS, index=MODALITY_OPTIONS.index("CBT"))
+                counselor_modality = st.selectbox("Modality", MODALITY_OPTIONS, index=MODALITY_OPTIONS.index("Cognitive"))
                 experience_years = st.number_input("Years of Experience", 0, 30, 3)
 
         with tab2:

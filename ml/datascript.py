@@ -16,7 +16,7 @@ GENDERS = ["Male", "Female"]
 ETHNICITIES = ["Malay", "Chinese", "Indian", "Other"]
 LANGUAGES = ["English", "Malay", "Mandarin", "Tamil"]
 ISSUES = ["Anxiety", "Depression", "Stress", "Trauma"]
-MODALITIES = ["CBT", "Humanistic", "Mindfulness", "REBT"]
+MODALITIES = ["Cognitive", "Behavioral", "Humanistic", "Psychodynamic"]
 
 
 def generate_experience_years(age):
@@ -31,6 +31,9 @@ def generate_experience_years(age):
         return random.randint(8, min(20, max_exp))
 
 
+# Issue similarity — grounded in DASS-21 subscale inter-correlations (r ~ 0.5-0.6;
+# Henry & Crawford 2005) and PTSD comorbidity with depression/anxiety (shared-vulnerability
+# model). Anxiety-Stress is the most correlated DASS pair, hence highest.
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety":1.0,"Stress":0.7,"Trauma":0.6,"Depression":0.6},
     "Stress":     {"Stress":1.0,"Anxiety":0.7,"Trauma":0.6,"Depression":0.6},
@@ -38,12 +41,15 @@ ISSUE_SIMILARITY = {
     "Depression": {"Depression":1.0,"Anxiety":0.6,"Stress":0.6,"Trauma":0.6}
 }
 
-# Clinical evidence: how well each modality treats each issue
+# Modality-issue clinical efficacy — CBT (Cognitive) first-line for anxiety & depression;
+# Prolonged Exposure (Behavioral) & CPT/TF-CBT (Cognitive) first-line for PTSD (APA/VA
+# guidelines); psychodynamic ~ CBT for depression (Smith 2024 meta-analysis), weaker for
+# anxiety/trauma.
 MODALITY_ISSUE_FIT = {
-    "Anxiety":    {"CBT": 1.0, "Mindfulness": 0.8, "REBT": 0.7, "Humanistic": 0.4},
-    "Depression": {"CBT": 1.0, "Mindfulness": 0.8, "Humanistic": 0.7, "REBT": 0.6},
-    "Stress":     {"Mindfulness": 1.0, "CBT": 0.7, "Humanistic": 0.7, "REBT": 0.5},
-    "Trauma":     {"CBT": 1.0, "Humanistic": 0.5, "Mindfulness": 0.5, "REBT": 0.5},
+    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.5, "Psychodynamic": 0.6},
+    "Depression": {"Cognitive": 1.0, "Behavioral": 0.8, "Humanistic": 0.7, "Psychodynamic": 0.9},
+    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.5},
+    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.5, "Psychodynamic": 0.6},
 }
 
 clients = []
@@ -112,13 +118,10 @@ for i in range(NUM_COUNSELORS):
 
 rows = []
 
-# Worst case: 35*0.6(diff issue) + 3.6(no mod match) + 1.5(no prev exp) + 1(gender mismatch) + 1(ethnicity mismatch) + 0(junior) + 13*0.4(worst mod fit) + 0(max age gap) = 33.3
-S_MIN = 33.3
-# Compressed from actual max 88.5 — forces top-tier pairs to label=1, reducing label noise. Empirically optimal via sweep.
-S_MAX = 84.0
-
 EXP_BONUS = {"Trauma": 10, "Anxiety": 7, "Depression": 7, "Stress": 5}
 
+# ---- Pass 1: compute the match score S for every valid pair ----
+pairs = []
 for client in clients:
     for counselor in random.sample(counselors, COUNSELORS_PER_CLIENT):
 
@@ -174,22 +177,33 @@ for client in clients:
         age_gap = abs(client["client_age"] - counselor["counselor_age"])
         S += max(0, 20 - age_gap) * 0.10
 
-        base_prob = (S - S_MIN) / (S_MAX - S_MIN)
-        base_prob += random.uniform(-0.05, 0.05)
-        final_prob = max(0.0, min(1.0, base_prob))
+        pairs.append(({**client, **counselor}, S))
 
-        if final_prob > 0.50:
-            match_success = 1
-        elif final_prob < 0.22:
-            match_success = 0
-        else:
-            match_success = np.random.binomial(1, final_prob)
+# ---- Robust-range normalization: scale to the 2nd-98th percentile of realized S
+# (no compression, no hand-tuned bounds). Tails beyond p2/p98 clip to 0/1. ----
+all_S = np.array([s for _, s in pairs])
+S_MIN = float(np.percentile(all_S, 2))
+S_MAX = float(np.percentile(all_S, 98))
+print(f"Robust S range (p2-p98): [{S_MIN:.2f}, {S_MAX:.2f}]")
 
-        rows.append({
-            **client,
-            **counselor,
-            "match_success": match_success
-        })
+# ---- Pass 2: convert to probability and draw the label ----
+for merged, S in pairs:
+    base_prob = (S - S_MIN) / (S_MAX - S_MIN)
+    base_prob += random.uniform(-0.05, 0.05)   # small measurement noise on the score
+    final_prob = max(0.0, min(1.0, base_prob))
+
+    # Fair partial-binomial label: only clear-cut extremes (>0.70 / <0.30) are
+    # deterministic; the wide middle band is drawn stochastically to encode the
+    # unobserved human factors (rapport, circumstances) the model cannot see.
+    if final_prob > 0.70:
+        match_success = 1
+    elif final_prob < 0.30:
+        match_success = 0
+    else:
+        match_success = np.random.binomial(1, final_prob)
+
+    merged["match_success"] = match_success
+    rows.append(merged)
 
 df = pd.DataFrame(rows)
 df.to_csv(BASE_DIR / "client_counselor_dataset.csv", index=False)

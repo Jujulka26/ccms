@@ -13,7 +13,7 @@ def send_approval_email(client_name: str, client_email: str, counselor_name: str
 
     body = f"""Hello {client_name},
 
-Great news! Your request to match with our Licensed Counselor, {counselor_name}, has been reviewed and approved by the clinic coordinator.
+Great news! Your request to match with our Registered Counsellor (LKM), {counselor_name}, has been reviewed and approved by the clinic coordinator.
 
 Please wait for {counselor_name} to contact you directly via this email address to schedule your first introductory session.
 
