@@ -23,7 +23,7 @@ from catboost import CatBoostClassifier
 
 BASE_DIR = Path(__file__).parent
 
-from backend_old.ml import SoftVotingEnsemble
+
 
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
@@ -33,10 +33,10 @@ ISSUE_SIMILARITY = {
 }
 
 MODALITY_ISSUE_FIT = {
-    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.5, "Psychodynamic": 0.6},
+    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.3},
     "Depression": {"Cognitive": 1.0, "Behavioral": 0.8, "Humanistic": 0.7, "Psychodynamic": 0.9},
-    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.5},
-    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.5, "Psychodynamic": 0.6},
+    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.3},
+    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.4},
 }
 
 FEATURES = [
@@ -47,7 +47,10 @@ FEATURES = [
 
 def engineer_features(df):
     df = df.copy()
-    df['modality_match']     = (df['preferred_modality'] == df['counselor_modality']).astype(int)
+    df['modality_match']     = df.apply(
+        lambda row: int(row['preferred_modality'] in [m.strip() for m in str(row['counselor_modality']).split(',')]),
+        axis=1
+    )
     df['gender_match']       = ((df['preferred_counselor_gender'] == "No preference") |
                                 (df['preferred_counselor_gender'] == df['counselor_gender'])).astype(int)
     df['ethnicity_match']    = (df['client_ethnicity'] == df['counselor_ethnicity']).astype(int)
@@ -56,8 +59,10 @@ def engineer_features(df):
     df['prev_exp']           = df['previous_counseling_experience']
     df['age_gap']            = (df['client_age'] - df['counselor_age']).abs()
     df['modality_issue_fit'] = df.apply(
-        lambda r: MODALITY_ISSUE_FIT.get(r['client_issue'], {}).get(
-            str(r['counselor_modality']).split(',')[0].strip(), 0.5), axis=1)
+        lambda r: max(
+            MODALITY_ISSUE_FIT.get(r['client_issue'], {}).get(m.strip(), 0.5)
+            for m in str(r['counselor_modality']).split(',')
+        ), axis=1)
     return df[FEATURES]
 
 
@@ -83,7 +88,7 @@ print(f"Split: {len(X_train):,} train / {len(X_test):,} test")
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-print("\nEvaluating baselines...")
+print("\nEvaluating baselines (LightGBM / CatBoost)...")
 base_lgbm = joblib.load(BASE_DIR / "baseline_lgbm.pkl")
 base_cat  = joblib.load(BASE_DIR / "baseline_cat.pkl")
 scores_base_lgbm, _ = evaluate(base_lgbm, X_test, y_test)
@@ -91,6 +96,7 @@ scores_base_cat,  _ = evaluate(base_cat,  X_test, y_test)
 print(f"  Baseline LightGBM : {scores_base_lgbm}")
 print(f"  Baseline CatBoost : {scores_base_cat}")
 
+# ── Tune LightGBM ──────────────────────────────────────────────────────────────
 print("\nTuning LightGBM (n_iter=50)...")
 lgbm_pipe = ImbPipeline([
     ("prep",  StandardScaler()),
@@ -120,6 +126,7 @@ print(f"  Tuned LightGBM : {scores_tuned_lgbm}")
 joblib.dump(tuned_lgbm, BASE_DIR / "tuned_lgbm.pkl")
 print("  Saved: tuned_lgbm.pkl")
 
+# ── Tune CatBoost ──────────────────────────────────────────────────────────────
 print("\nTuning CatBoost (n_iter=50)...")
 cat_pipe = ImbPipeline([
     ("prep",  StandardScaler()),
@@ -147,58 +154,56 @@ print(f"  Tuned CatBoost : {scores_tuned_cat}")
 joblib.dump(tuned_cat, BASE_DIR / "tuned_cat.pkl")
 print("  Saved: tuned_cat.pkl")
 
-print("\nBuilding soft-voting ensemble (LightGBM + CatBoost)...")
-ensemble = SoftVotingEnsemble(tuned_lgbm, tuned_cat)
-scores_ensemble, _ = evaluate(ensemble, X_test, y_test)
-print(f"  Ensemble : {scores_ensemble}")
-joblib.dump(ensemble, BASE_DIR / "ensemble.pkl")
-print("  Saved: ensemble.pkl")
-
+# ── Save results CSV ───────────────────────────────────────────────────────────
 rows = [
     {"Model": "Baseline LightGBM", **scores_base_lgbm},
     {"Model": "Baseline CatBoost", **scores_base_cat},
     {"Model": "Tuned LightGBM",    **scores_tuned_lgbm},
     {"Model": "Tuned CatBoost",    **scores_tuned_cat},
-    {"Model": "Ensemble",          **scores_ensemble},
 ]
 pd.DataFrame(rows).to_csv(BASE_DIR / "tuned_result.csv", index=False)
 print("Saved: tuned_result.csv")
 
+# ── Chart ──────────────────────────────────────────────────────────────────────
 print("Generating chart...")
 metrics = ["Accuracy", "F1", "ROC-AUC"]
 plot_data = {
-    "Baseline LightGBM": (scores_base_lgbm,  "#C4B5FD"),
-    "Baseline CatBoost": (scores_base_cat,   "#FCA5A5"),
+    "Baseline LightGBM": (scores_base_lgbm, "#C4B5FD"),
+    "Baseline CatBoost": (scores_base_cat,  "#FCA5A5"),
     "Tuned LightGBM":    (scores_tuned_lgbm, "#7C3AED"),
     "Tuned CatBoost":    (scores_tuned_cat,  "#DC2626"),
-    "Ensemble":          (scores_ensemble,   "#059669"),
 }
 
 x       = np.arange(len(metrics))
-width   = 0.15
-offsets = [-2, -1, 0, 1, 2]
+width   = 0.14
+offsets = [-1.5, -0.5, 0.5, 1.5]
 
-fig, ax = plt.subplots(figsize=(12, 6))
+fig, ax = plt.subplots(figsize=(14, 6))
 fig.patch.set_facecolor("#FAFAF8")
 ax.set_facecolor("#FAFAF8")
 
 for (label, (scores, color)), offset in zip(plot_data.items(), offsets):
-    vals = [scores[m] for m in metrics]
-    bars = ax.bar(x + offset * width, vals, width, label=label,
-                  color=color, zorder=3, edgecolor="white", linewidth=0.5)
+    vals  = [scores[m] for m in metrics]
+    hatch = "//" if label == "Tuned LightGBM" else None
+    bars  = ax.bar(x + offset * width, vals, width, label=label,
+                   color=color, zorder=3, edgecolor="white", linewidth=0.5,
+                   hatch=hatch)
     for bar, val in zip(bars, vals):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.003,
                 f"{val:.3f}", ha="center", va="bottom",
-                fontsize=8, fontweight="bold", color="#374151")
+                fontsize=7.5, fontweight="bold", color="#374151")
 
 ax.set_xticks(x)
 ax.set_xticklabels(metrics, fontsize=13, fontweight="bold")
 all_vals = [s[m] for _, (s, _) in plot_data.items() for m in metrics]
-ax.set_ylim(max(0.0, min(all_vals) - 0.08), min(1.0, max(all_vals) + 0.07))
+ax.set_ylim(max(0.0, min(all_vals) - 0.08), min(1.0, max(all_vals) + 0.09))
 ax.set_ylabel("Score", fontsize=12)
-ax.set_title("Baseline vs Tuned — LightGBM & CatBoost\nClient-Counselor Matching System",
-             fontsize=14, fontweight="bold", pad=14)
-ax.legend(fontsize=9, framealpha=0.9, loc="lower right")
+ax.set_title(
+    f"Baseline vs Tuned — LightGBM & CatBoost\n"
+    f"Deployed: Tuned LightGBM  (ROC-AUC: {scores_tuned_lgbm['ROC-AUC']:.3f})  // = selected",
+    fontsize=13, fontweight="bold", pad=14,
+)
+ax.legend(fontsize=8.5, framealpha=0.9, loc="lower right")
 ax.yaxis.grid(True, linestyle="--", alpha=0.4, zorder=0)
 ax.set_axisbelow(True)
 for spine in ["top", "right"]:
@@ -215,4 +220,4 @@ print("-" * 65)
 for row in rows:
     print(f"{row['Model']:<30} {row['Accuracy']:>9.3f} {row['F1']:>9.3f} {row['ROC-AUC']:>9.3f}")
 print("=" * 65)
-print(f"\nDeployment model: ensemble.pkl  (Soft-Voting: Tuned LightGBM + Tuned CatBoost)")
+print("\nDONE")

@@ -3,7 +3,7 @@ import streamlit.components.v1 as components
 
 from frontend.utils.api import get_counselors
 from frontend.utils.avatar import avatar_html
-from frontend.views.matching import show_profile_dialog, show_request_success_dialog
+from frontend.pages.matching import show_profile_dialog, show_request_success_dialog
 
 
 _SPEC_COLORS = {
@@ -23,26 +23,6 @@ def inject_styles():
         """
         <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-        .dir-hero {
-            position: relative; overflow: hidden;
-            background-color: #FAFAFF;
-            background-image: radial-gradient(at 0% 0%, #E9DFFF 0px, transparent 60%), radial-gradient(at 100% 100%, #F0E6FF 0px, transparent 60%);
-            border-radius: 20px; padding: 48px 52px; margin-bottom: 32px;
-            border: 1px solid rgba(124,58,237,0.15);
-            box-shadow: 0 16px 32px -8px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
-        }
-        .dir-hero-content { display: flex; align-items: center; position: relative; z-index: 2; }
-        .dir-hero-text { flex: 1; min-width: 0; max-width: 60%; }
-        .dir-hero-image-wrap { position: absolute; top: -48px; bottom: -48px; right: 0; width: 38%; pointer-events: none; z-index: 1; }
-        .dir-hero-img { width: 100%; height: 100%; object-fit: contain; object-position: right center; opacity: 0.9; mix-blend-mode: multiply; -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 30%, black 60%); mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 30%, black 60%); }
-        .dir-eyebrow {
-            display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
-            text-transform: uppercase; color: #8B5CF6; background: rgba(167,139,250,0.12);
-            border: 1px solid rgba(167,139,250,0.25); border-radius: 20px; padding: 4px 14px; margin-bottom: 16px;
-        }
-        .dir-title { font-family: 'DM Serif Display', serif; font-size: 42px; color: #1A1A2E; margin: 0 0 12px; line-height: 1.15; letter-spacing: -0.5px; }
-        .dir-subtitle { font-size: 16px; color: #4A4A5C; margin: 0; line-height: 1.65; max-width: 520px; }
 
         .filter-bar {
             background: #FFFFFF; border-radius: 16px;

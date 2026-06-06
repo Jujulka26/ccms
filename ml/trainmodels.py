@@ -33,34 +33,31 @@ ISSUE_SIMILARITY = {
 }
 
 MODALITY_ISSUE_FIT = {
-    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.5, "Psychodynamic": 0.6},
+    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.3},
     "Depression": {"Cognitive": 1.0, "Behavioral": 0.8, "Humanistic": 0.7, "Psychodynamic": 0.9},
-    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.5},
-    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.5, "Psychodynamic": 0.6},
+    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.3},
+    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.4},
 }
 
-df['modality_match'] = (df['preferred_modality'] == df['counselor_modality']).astype(int)
-
+df['modality_match'] = df.apply(
+    lambda row: int(row['preferred_modality'] in [m.strip() for m in str(row['counselor_modality']).split(',')]),
+    axis=1
+)
 df['gender_match'] = (
     (df['preferred_counselor_gender'] == "No preference") |
     (df['preferred_counselor_gender'] == df['counselor_gender'])
 ).astype(int)
-
 df['ethnicity_match'] = (df['client_ethnicity'] == df['counselor_ethnicity']).astype(int)
-
 df['issue_match'] = df.apply(
     lambda row: ISSUE_SIMILARITY[row['client_issue']][row['specialization']], axis=1
 )
-
 df['exp_issue_fit'] = (df['experience_years'] >= 8).astype(int)
-
 df['prev_exp'] = df['previous_counseling_experience']
-
 df['age_gap'] = (df['client_age'] - df['counselor_age']).abs()
-
 df['modality_issue_fit'] = df.apply(
-    lambda row: MODALITY_ISSUE_FIT.get(row['client_issue'], {}).get(
-        str(row['counselor_modality']).split(',')[0].strip(), 0.5
+    lambda row: max(
+        MODALITY_ISSUE_FIT.get(row['client_issue'], {}).get(m.strip(), 0.5)
+        for m in str(row['counselor_modality']).split(',')
     ),
     axis=1
 )
@@ -133,15 +130,15 @@ print("\nGenerating chart...")
 
 model_names = results_df["Model"].tolist()
 metrics     = ["Accuracy", "F1", "ROC-AUC"]
-colors      = ["#6D28D9", "#7C3AED", "#A78BFA", "#C4B5FD", "#DDD6FE"]
+colors      = ["#6D28D9", "#7C3AED", "#A78BFA", "#F97316", "#10B981"]
 
 x      = np.arange(len(metrics))
-width  = 0.15
-gap    = 0.02
+width  = 0.10
+gap    = 0.01
 n      = len(model_names)
 starts = -(n - 1) / 2 * (width + gap)
 
-fig, axes = plt.subplots(1, 2, figsize=(18, 6))
+fig, axes = plt.subplots(1, 2, figsize=(20, 7))
 fig.patch.set_facecolor("#FAFAF8")
 
 # Left: grouped bar chart
@@ -156,7 +153,7 @@ for i, (model, color) in enumerate(zip(model_names, colors)):
     for bar, val in zip(bars, vals):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.005,
                 f"{val:.3f}", ha="center", va="bottom",
-                fontsize=7.5, fontweight="bold", color="#374151")
+                fontsize=6.5, fontweight="bold", color="#374151")
 
 ax.set_xticks(x)
 ax.set_xticklabels(metrics, fontsize=12, fontweight="bold")
@@ -165,7 +162,7 @@ ax.set_ylim(max(0.0, all_vals.min() - 0.08), min(1.0, all_vals.max() + 0.07))
 ax.set_ylabel("Score", fontsize=11)
 ax.set_title("Baseline Model Comparison\n(Accuracy · F1 · ROC-AUC)",
              fontsize=13, fontweight="bold", pad=12)
-ax.legend(loc="lower right", framealpha=0.9, fontsize=9)
+ax.legend(loc="lower right", framealpha=0.9, fontsize=8)
 ax.yaxis.grid(True, linestyle="--", alpha=0.5, zorder=0)
 ax.set_axisbelow(True)
 for spine in ["top", "right"]:
@@ -199,20 +196,20 @@ table_data = [
 ]
 
 tbl = ax2.table(cellText=table_data, colLabels=col_labels,
-                cellLoc="center", loc="center", bbox=[0, 0.15, 1, 0.7])
+                cellLoc="center", loc="center", bbox=[0, 0.05, 1, 0.85])
 tbl.auto_set_font_size(False)
-tbl.set_fontsize(11)
+tbl.set_fontsize(10)
 
 for j in range(len(col_labels)):
     tbl[0, j].set_facecolor("#6D28D9")
     tbl[0, j].set_text_props(color="white", fontweight="bold")
-    tbl[0, j].set_height(0.12)
+    tbl[0, j].set_height(0.10)
 
-row_colors = ["#EDE9FE", "#F5F3FF", "#FAF8FF", "#FFFFFF", "#FFFFFF"]
-for i, row_color in enumerate(row_colors):
+row_colors = ["#EDE9FE", "#F5F3FF", "#FAF8FF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF"]
+for i, row_color in enumerate(row_colors[:len(table_data)]):
     for j in range(len(col_labels)):
         tbl[i + 1, j].set_facecolor(row_color)
-        tbl[i + 1, j].set_height(0.10)
+        tbl[i + 1, j].set_height(0.09)
         if i == 0:
             tbl[i + 1, j].set_text_props(fontweight="bold")
 
@@ -223,7 +220,7 @@ for metric, col_idx in metric_col_map.items():
 
 ax2.set_title("Model Performance Summary\n(sorted by Overall score)",
               fontsize=13, fontweight="bold", pad=12)
-ax2.text(0.5, 0.08, "Overall = mean(Accuracy, F1, ROC-AUC)  |  Purple = best in column",
+ax2.text(0.5, 0.02, "Overall = mean(Accuracy, F1, ROC-AUC)  |  Purple = best in column",
          ha="center", va="center", transform=ax2.transAxes, fontsize=8.5, color="#6B7280")
 
 plt.suptitle("Baseline Model Benchmark — Client-Counselor Matching System",

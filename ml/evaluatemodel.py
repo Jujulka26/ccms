@@ -19,9 +19,75 @@ from sklearn.metrics import (
 )
 from sklearn.dummy import DummyClassifier
 
-from backend_old.ml import engineer_features_from_df, FEATURE_ORDER
-
 BASE_DIR = Path(__file__).parent
+
+
+
+ISSUE_SIMILARITY = {
+    "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
+    "Stress":     {"Stress":  1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.6},
+    "Trauma":     {"Trauma":  1.0, "Stress":  0.6, "Anxiety": 0.6, "Depression": 0.6},
+    "Depression": {"Depression": 1.0, "Anxiety": 0.6, "Stress": 0.6, "Trauma": 0.6},
+}
+
+MODALITY_ISSUE_FIT = {
+    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.3},
+    "Depression": {"Cognitive": 1.0, "Behavioral": 0.8, "Humanistic": 0.7, "Psychodynamic": 0.9},
+    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.3},
+    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.4},
+}
+
+FEATURE_ORDER = [
+    "issue_match", "modality_issue_fit", "modality_match", "gender_match",
+    "exp_issue_fit", "ethnicity_match", "prev_exp", "age_gap",
+]
+
+
+def _issue_match(client_issue, specialization):
+    return ISSUE_SIMILARITY.get(client_issue, {}).get(specialization, 0.0)
+
+
+def _modality_fit(client_issue, counselor_modality):
+    mods = [m.strip() for m in str(counselor_modality).split(",") if m.strip()]
+    return max(MODALITY_ISSUE_FIT.get(client_issue, {}).get(m, 0.5) for m in mods)
+
+
+def _exp_issue_fit(exp_year):
+    try:
+        return 1 if float(exp_year) >= 8 else 0
+    except (TypeError, ValueError):
+        return 0
+
+
+def _prev_exp_value(val):
+    try:
+        return int(val)
+    except (TypeError, ValueError):
+        return 0
+
+
+def engineer_features_from_df(df):
+    rows = []
+    for _, row in df.iterrows():
+        try:
+            client_issue         = row.get("client_issue", "")
+            preferred_modality   = row.get("preferred_modality", "")
+            preferred_c_gender   = row.get("preferred_counselor_gender", "No preference")
+            counselor_modalities = [v.strip() for v in str(row.get("counselor_modality", "")).split(",") if v.strip()]
+            exp_yrs = float(row.get("experience_years", 0) or 0)
+            rows.append({
+                "issue_match":        _issue_match(client_issue, row.get("specialization", "")),
+                "modality_issue_fit": _modality_fit(client_issue, row.get("counselor_modality", "")),
+                "modality_match":     int(preferred_modality in counselor_modalities),
+                "gender_match":       1 if preferred_c_gender == "No preference" else int(preferred_c_gender == row.get("counselor_gender", "")),
+                "exp_issue_fit":      _exp_issue_fit(exp_yrs),
+                "ethnicity_match":    int(row.get("client_ethnicity", "") == row.get("counselor_ethnicity", "")),
+                "prev_exp":           _prev_exp_value(row.get("previous_counseling_experience", 0)),
+                "age_gap":            abs(float(row.get("client_age", 0) or 0) - float(row.get("counselor_age", 0) or 0)),
+            })
+        except Exception:
+            continue
+    return pd.DataFrame(rows)
 
 # ── 1. Load data and engineer features ────────────────────────────────────────
 print("Loading dataset...")
@@ -42,10 +108,10 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 print(f"\nSplit: {len(X_train):,} train / {len(X_test):,} test (80/20 stratified)")
 
-# ── 3. Load ensemble (deployed model) ────────────────────────────────────────
-print("\nLoading model (ensemble.pkl)...")
-model = joblib.load(str(BASE_DIR / "ensemble.pkl"))
-print("  Loaded: SoftVotingEnsemble (LightGBM + CatBoost)")
+# ── 3. Load deployed model ────────────────────────────────────────────────────
+print("\nLoading model (tuned_lgbm.pkl)...")
+model = joblib.load(str(BASE_DIR / "tuned_lgbm.pkl"))
+print("  Loaded: tuned_lgbm.pkl")
 
 # ── 4. Evaluate on held-out test set ─────────────────────────────────────────
 print("\n" + "="*60)
@@ -80,62 +146,40 @@ y_base_pred = baseline.predict(X_test)
 base_acc    = accuracy_score(y_test, y_base_pred)
 base_f1     = f1_score(y_test, y_base_pred, zero_division=0)
 print(f"  Majority-class baseline — Accuracy: {base_acc:.4f}  F1: {base_f1:.4f}")
-print(f"  Ensemble               — Accuracy: {acc:.4f}  F1: {f1:.4f}")
+print(f"  Tuned LightGBM         — Accuracy: {acc:.4f}  F1: {f1:.4f}")
 print(f"  Improvement: +{(acc - base_acc)*100:.2f}% accuracy, +{(f1 - base_f1)*100:.2f}% F1")
 
-# ── 6. Component comparison on test set ──────────────────────────────────────
+# ── 6. Cross-validation ───────────────────────────────────────────────────────
 print("\n" + "="*60)
-print("COMPONENT COMPARISON  (same held-out test set)")
+print("5-FOLD STRATIFIED CROSS-VALIDATION  (Tuned LightGBM)")
 print("="*60)
 
-lgbm_pipe = model._lgbm
-cat_pipe  = model._cat
-
-for label, pipe in [("Tuned LightGBM", lgbm_pipe), ("Tuned CatBoost", cat_pipe), ("Ensemble", model)]:
-    yp   = pipe.predict(X_test)
-    ypr  = pipe.predict_proba(X_test)[:, 1]
-    print(f"  {label:<22}  "
-          f"Acc={accuracy_score(y_test, yp):.4f}  "
-          f"F1={f1_score(y_test, yp):.4f}  "
-          f"ROC-AUC={roc_auc_score(y_test, ypr):.4f}")
-
-lgbm_only = lgbm_pipe.named_steps["model"]
-
-# ── 7. Cross-validation on both components ────────────────────────────────────
-print("\n" + "="*60)
-print("5-FOLD STRATIFIED CROSS-VALIDATION  (LightGBM & CatBoost)")
-print("="*60)
-
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-cv_results = {}
-
-for label, pipe in [("LightGBM", lgbm_pipe), ("CatBoost", cat_pipe)]:
-    inner_model = pipe.named_steps["model"]
-    X_scaled    = pipe.named_steps["prep"].transform(X)
-    res = cross_validate(
-        inner_model, X_scaled, y,
-        cv=cv,
-        scoring=["accuracy", "f1", "roc_auc"],
-        return_train_score=True,
-    )
-    cv_results[label] = res
-    print(f"\n  {label}")
-    for metric in ["accuracy", "f1", "roc_auc"]:
-        ts = res[f"test_{metric}"]
-        tr = res[f"train_{metric}"]
-        print(f"    {metric.upper():<10}  CV={ts.mean():.4f} ± {ts.std():.4f}  "
-              f"train={tr.mean():.4f}  [{ts.min():.4f}–{ts.max():.4f}]")
-    gap = res["train_accuracy"].mean() - res["test_accuracy"].mean()
-    if gap > 0.05:
-        print(f"    WARNING: train/test gap={gap:.4f} — possible overfitting")
-    else:
-        print(f"    Train/test gap={gap:.4f} — no significant overfitting")
+cv          = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+inner_model = model.named_steps["model"]
+X_scaled    = model.named_steps["prep"].transform(X)
+res = cross_validate(
+    inner_model, X_scaled, y,
+    cv=cv,
+    scoring=["accuracy", "f1", "roc_auc"],
+    return_train_score=True,
+)
+cv_results = {"LightGBM": res}
+for metric in ["accuracy", "f1", "roc_auc"]:
+    ts = res[f"test_{metric}"]
+    tr = res[f"train_{metric}"]
+    print(f"  {metric.upper():<10}  CV={ts.mean():.4f} ± {ts.std():.4f}  "
+          f"train={tr.mean():.4f}  [{ts.min():.4f}–{ts.max():.4f}]")
+gap = res["train_accuracy"].mean() - res["test_accuracy"].mean()
+if gap > 0.05:
+    print(f"  WARNING: train/test gap={gap:.4f} — possible overfitting")
+else:
+    print(f"  Train/test gap={gap:.4f} — no significant overfitting")
 
 # ── 8. Plots ──────────────────────────────────────────────────────────────────
 print("\nGenerating evaluation plots...")
 
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-fig.suptitle("ML Model Evaluation — Ensemble (LightGBM + CatBoost)",
+fig.suptitle("ML Model Evaluation — Tuned LightGBM",
              fontsize=14, fontweight="bold")
 
 # Plot A: Confusion Matrix
@@ -146,7 +190,7 @@ axes[0].set_title("Confusion Matrix\n(Held-out Test Set)", fontweight="bold")
 
 # Plot B: ROC Curve
 fpr, tpr, _ = roc_curve(y_test, y_prob)
-axes[1].plot(fpr, tpr, color="#6D28D9", lw=2, label=f"Ensemble (AUC = {roc_auc:.3f})")
+axes[1].plot(fpr, tpr, color="#6D28D9", lw=2, label=f"Tuned LightGBM (AUC = {roc_auc:.3f})")
 axes[1].plot([0, 1], [0, 1], color="gray", linestyle="--", label="Random baseline")
 axes[1].set_xlabel("False Positive Rate")
 axes[1].set_ylabel("True Positive Rate")
@@ -155,14 +199,11 @@ axes[1].legend()
 axes[1].set_xlim([0, 1])
 axes[1].set_ylim([0, 1.02])
 
-# Plot C: Feature Importance (averaged across LightGBM + CatBoost)
-cat_only   = cat_pipe.named_steps["model"]
-lgbm_imp   = lgbm_only.booster_.feature_importance(importance_type="gain").astype(float)
-cat_imp    = cat_only.get_feature_importance().astype(float)
-lgbm_imp  /= lgbm_imp.sum()
-cat_imp   /= cat_imp.sum()
-feature_importances = (lgbm_imp + cat_imp) / 2
-sorted_idx = np.argsort(feature_importances)
+# Plot C: Feature Importance (LightGBM)
+lgbm_imp            = inner_model.booster_.feature_importance(importance_type="gain").astype(float)
+lgbm_imp           /= lgbm_imp.sum()
+feature_importances = lgbm_imp
+sorted_idx          = np.argsort(feature_importances)
 readable = {
     "issue_match":        "Issue Similarity",
     "modality_issue_fit": "Issue-Modality Fit",
@@ -178,7 +219,7 @@ colors = ["#6D28D9" if feature_importances[i] >= np.median(feature_importances) 
           for i in sorted_idx]
 axes[2].barh(labels, feature_importances[sorted_idx], color=colors)
 axes[2].set_xlabel("Relative Importance (normalized)")
-axes[2].set_title("Feature Importance\n(LightGBM + CatBoost averaged)", fontweight="bold")
+axes[2].set_title("Feature Importance\n(Tuned LightGBM)", fontweight="bold")
 axes[2].set_xlim([0, feature_importances.max() * 1.15])
 for i, v in enumerate(feature_importances[sorted_idx]):
     axes[2].text(v + 0.002, i, f"{v:.3f}", va="center", fontsize=8)
@@ -196,8 +237,8 @@ report_lines = [
     f"Features      : {len(FEATURE_ORDER)}",
     f"Target        : match_success (binary)",
     f"Class balance : match=1 ({y.mean()*100:.1f}%), match=0 ({(1-y).mean()*100:.1f}%)",
-    f"Model         : Ensemble (LightGBM + CatBoost)",
-    f"Pipeline      : Soft-voting ensemble of two tuned pipelines",
+    f"Model         : tuned_lgbm.pkl",
+    f"Pipeline      : StandardScaler → SMOTE → tree classifier",
     "",
     "TEST SET RESULTS (20% held-out, stratified split, seed=42)",
     "-" * 60,
@@ -210,13 +251,13 @@ report_lines = [
     "BASELINE COMPARISON",
     "-" * 60,
     f"Majority-class : Accuracy={base_acc:.4f}  F1={base_f1:.4f}",
-    f"Ensemble       : Accuracy={acc:.4f}  F1={f1:.4f}",
+    f"Tuned LightGBM : Accuracy={acc:.4f}  F1={f1:.4f}",
     f"Lift over baseline: +{(acc-base_acc)*100:.2f}% accuracy",
     "",
     "5-FOLD CROSS-VALIDATION",
     "-" * 60,
 ]
-for cv_label in ["LightGBM", "CatBoost"]:
+for cv_label in ["LightGBM"]:
     res = cv_results[cv_label]
     report_lines.append(f"  {cv_label}")
     for metric in ["accuracy", "f1", "roc_auc"]:
@@ -225,7 +266,7 @@ for cv_label in ["LightGBM", "CatBoost"]:
                             f"[{s.min():.4f}–{s.max():.4f}]")
 report_lines += [
     "",
-    "FEATURE IMPORTANCE (highest to lowest, LightGBM + CatBoost averaged)",
+    "FEATURE IMPORTANCE (highest to lowest, Tuned LightGBM)",
     "-" * 60,
 ]
 for i in np.argsort(feature_importances)[::-1]:

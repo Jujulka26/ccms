@@ -40,10 +40,6 @@ class AdminLoginRequest(BaseModel):
     password: str
 
 
-class AdminLoginResponse(BaseModel):
-    success: bool
-
-
 class IntroRequestCreate(BaseModel):
     client_name: str
     client_email: str

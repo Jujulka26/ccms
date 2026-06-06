@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from schemas import CounselorCreate, CounselorUpdate, CounselorResponse
+from security import verify_token
 import db
 
 router = APIRouter(prefix="/counselors", tags=["counselors"])
@@ -14,7 +15,7 @@ def get_counselors():
 
 
 @router.post("/", status_code=201)
-def create_counselor(payload: CounselorCreate):
+def create_counselor(payload: CounselorCreate, _: None = Depends(verify_token)):
     try:
         db.add_counselor(**payload.model_dump())
         return {"message": "Counselor added successfully."}
@@ -23,7 +24,7 @@ def create_counselor(payload: CounselorCreate):
 
 
 @router.put("/{counselor_id}")
-def update_counselor(counselor_id: int, payload: CounselorUpdate):
+def update_counselor(counselor_id: int, payload: CounselorUpdate, _: None = Depends(verify_token)):
     if not db.counselor_exists(counselor_id):
         raise HTTPException(status_code=404, detail=f"Counselor {counselor_id} not found.")
     try:
@@ -34,7 +35,7 @@ def update_counselor(counselor_id: int, payload: CounselorUpdate):
 
 
 @router.delete("/{counselor_id}")
-def delete_counselor(counselor_id: int):
+def delete_counselor(counselor_id: int, _: None = Depends(verify_token)):
     if not db.counselor_exists(counselor_id):
         raise HTTPException(status_code=404, detail=f"Counselor {counselor_id} not found.")
     try:

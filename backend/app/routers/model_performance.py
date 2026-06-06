@@ -23,13 +23,13 @@ STORE_DIR    = BASE_DIR / "model_store"
 VERSIONS_DIR = STORE_DIR / "versions"
 ACTIVE_FILE  = STORE_DIR / "active_version.txt"
 
-DEPLOYED_MODEL = "Ensemble (LightGBM + CatBoost)"
+_BEST_MODEL     = ML_DIR / "tuned_lgbm.pkl"
+_TUNED_CSV      = ML_DIR / "tuned_result.csv"
+_BEST_MODEL_BAK = STORE_DIR / "tuned_lgbm_backup.pkl"
+_TUNED_CSV_BAK  = STORE_DIR / "tuned_result_backup.csv"
+_DATASET_CSV    = ML_DIR / "client_counselor_dataset.csv"
 
-_ENSEMBLE      = ML_DIR / "ensemble.pkl"
-_TUNED_CSV     = ML_DIR / "tuned_result.csv"
-_ENSEMBLE_BAK  = STORE_DIR / "ensemble_backup.pkl"
-_TUNED_CSV_BAK = STORE_DIR / "tuned_result_backup.csv"
-_DATASET_CSV   = ML_DIR / "client_counselor_dataset.csv"
+
 
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
@@ -43,12 +43,13 @@ class RetrainRequest(BaseModel):
     real_data: list = []
 
 
-def _ensemble_metrics(tuned_csv: Path) -> dict:
+def _deployed_metrics(tuned_csv: Path) -> dict:
     if not tuned_csv.exists():
         return {}
-    df  = pd.read_csv(str(tuned_csv))
-    row = df[df["Model"] == "Ensemble"]
-    row = row.iloc[0] if not row.empty else df.iloc[-1]
+    df      = pd.read_csv(str(tuned_csv))
+    name    = "Tuned LightGBM"
+    matched = df[df["Model"] == name]
+    row     = matched.iloc[0] if not matched.empty else df.loc[df["ROC-AUC"].idxmax()]
     return {
         "accuracy": round(float(row.get("Accuracy", 0)), 3),
         "f1":       round(float(row.get("F1", 0)), 3),
@@ -139,7 +140,7 @@ def get_model_performance():
             "best_model":     str(top["Model"]),
             "best_roc_auc":   best_roc,
             "model_count":    len(df),
-            "deployed_model": DEPLOYED_MODEL,
+            "deployed_model": "Tuned LightGBM",
             "tuning_models":  tuning_models,
         }
     except Exception:
@@ -154,13 +155,13 @@ def _ensure_initial_version():
     initial_dir = VERSIONS_DIR / "v_initial"
     if initial_dir.exists():
         return
-    if not _ENSEMBLE.exists():
+    if not _BEST_MODEL.exists():
         return
     initial_dir.mkdir()
-    shutil.copy2(str(_ENSEMBLE), str(initial_dir / "ensemble.pkl"))
+    shutil.copy2(str(_BEST_MODEL), str(initial_dir / "tuned_lgbm.pkl"))
     if _TUNED_CSV.exists():
         shutil.copy2(str(_TUNED_CSV), str(initial_dir / "tuned_result.csv"))
-    metrics = _ensemble_metrics(_TUNED_CSV)
+    metrics = _deployed_metrics(_TUNED_CSV)
     meta = {
         "version_id":   "v_initial",
         "timestamp":    "2026-01-01T00:00:00",
@@ -205,12 +206,12 @@ def _run_training(job_id: str, payload: RetrainRequest):
 
         job["step"]     = "Backing up current model..."
         job["progress"] = 0.05
-        if _ENSEMBLE.exists():
-            shutil.copy2(str(_ENSEMBLE), str(_ENSEMBLE_BAK))
+        if _BEST_MODEL.exists():
+            shutil.copy2(str(_BEST_MODEL), str(_BEST_MODEL_BAK))
         if _TUNED_CSV.exists():
             shutil.copy2(str(_TUNED_CSV), str(_TUNED_CSV_BAK))
 
-        old_metrics = _ensemble_metrics(_TUNED_CSV_BAK)
+        old_metrics = _deployed_metrics(_TUNED_CSV_BAK)
         version_id  = "v_" + datetime.now().strftime("%Y%m%d_%H%M%S")
         version_dir = VERSIONS_DIR / version_id
         version_dir.mkdir(exist_ok=True)
@@ -254,14 +255,14 @@ def _run_training(job_id: str, payload: RetrainRequest):
 
         job["step"]     = "Saving version artifacts..."
         job["progress"] = 0.93
-        new_metrics = _ensemble_metrics(_TUNED_CSV)
-        if _ENSEMBLE.exists():
-            shutil.copy2(str(_ENSEMBLE), str(version_dir / "ensemble.pkl"))
+        new_metrics = _deployed_metrics(_TUNED_CSV)
+        if _BEST_MODEL.exists():
+            shutil.copy2(str(_BEST_MODEL), str(version_dir / "tuned_lgbm.pkl"))
         if _TUNED_CSV.exists():
             shutil.copy2(str(_TUNED_CSV), str(version_dir / "tuned_result.csv"))
 
-        if _ENSEMBLE_BAK.exists():
-            shutil.copy2(str(_ENSEMBLE_BAK), str(_ENSEMBLE))
+        if _BEST_MODEL_BAK.exists():
+            shutil.copy2(str(_BEST_MODEL_BAK), str(_BEST_MODEL))
         if _TUNED_CSV_BAK.exists():
             shutil.copy2(str(_TUNED_CSV_BAK), str(_TUNED_CSV))
 
@@ -318,14 +319,14 @@ def deploy_version(version_id: str):
     version_dir = VERSIONS_DIR / version_id
     if not version_dir.exists():
         raise HTTPException(status_code=404, detail=f"Version {version_id} not found.")
-    pkl = version_dir / "ensemble.pkl"
+    pkl = version_dir / "tuned_lgbm.pkl"
     csv = version_dir / "tuned_result.csv"
     if not pkl.exists():
-        raise HTTPException(status_code=404, detail="ensemble.pkl not found in this version.")
+        raise HTTPException(status_code=404, detail="tuned_lgbm.pkl not found in this version.")
     STORE_DIR.mkdir(exist_ok=True)
-    if _ENSEMBLE.exists():
-        shutil.copy2(str(_ENSEMBLE), str(_ENSEMBLE_BAK))
-    shutil.copy2(str(pkl), str(_ENSEMBLE))
+    if _BEST_MODEL.exists():
+        shutil.copy2(str(_BEST_MODEL), str(_BEST_MODEL_BAK))
+    shutil.copy2(str(pkl), str(_BEST_MODEL))
     if csv.exists():
         shutil.copy2(str(csv), str(_TUNED_CSV))
     _set_active_version(version_id)
@@ -351,9 +352,9 @@ def delete_version(version_id: str):
 
 @router.post("/rollback")
 def rollback_model():
-    if not _ENSEMBLE_BAK.exists():
+    if not _BEST_MODEL_BAK.exists():
         raise HTTPException(status_code=404, detail="No backup found. Cannot rollback.")
-    shutil.copy2(str(_ENSEMBLE_BAK), str(_ENSEMBLE))
+    shutil.copy2(str(_BEST_MODEL_BAK), str(_BEST_MODEL))
     if _TUNED_CSV_BAK.exists():
         shutil.copy2(str(_TUNED_CSV_BAK), str(_TUNED_CSV))
     return {"message": "Rollback successful. Previous model restored."}

@@ -96,17 +96,6 @@ def add_counselor(
         conn.close()
 
 
-def get_counselor_by_name(name: str) -> dict | None:
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute("SELECT counselor_id FROM tbl_counselor WHERE name=%s LIMIT 1", (name,))
-        return cursor.fetchone()
-    finally:
-        cursor.close()
-        conn.close()
-
-
 def update_counselor(
     counselor_id: int, *, name, age, gender, ethnicity, specialization,
     counselor_language, counselor_modality, experience_years,

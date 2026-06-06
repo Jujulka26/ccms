@@ -183,9 +183,9 @@ def _render_performance_metrics(data):
     )
 
     st.markdown(
-        '<div class="pm-note">Differences between top baseline models are within noise. '
-        'LightGBM and CatBoost were selected for tuning. A soft-voting ensemble of both achieved the best '
-        'ROC-AUC and was chosen as the final deployed model.</div>',
+        '<div class="pm-note">Five baseline models were evaluated. '
+        'LightGBM and CatBoost were selected for hyperparameter tuning. '
+        'Tuned LightGBM was deployed based on best F1 and accuracy.</div>',
         unsafe_allow_html=True,
     )
 
@@ -202,8 +202,8 @@ def _render_performance_metrics(data):
         st.markdown(
             """
             <div class="pm-card">
-                <div class="pm-card-title">Tuning comparison — LightGBM vs CatBoost vs Ensemble</div>
-                <p class="pm-card-copy">LightGBM and CatBoost were the top two baseline models and were both tuned with RandomizedSearchCV (50 iterations). A soft-voting ensemble of both achieved the best overall ROC-AUC and was selected as the deployed model.</p>
+                <div class="pm-card-title">Tuning comparison — LightGBM vs CatBoost</div>
+                <p class="pm-card-copy">LightGBM and CatBoost were tuned with RandomizedSearchCV (50 iterations each). Tuned LightGBM is deployed as the active model.</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -224,9 +224,8 @@ def _render_performance_metrics(data):
             <div class="pm-recommend-badge">&#10003; &nbsp;Deployed Model</div>
             <div class="pm-recommend-title">{deployed_model} is the active model</div>
             <p class="pm-recommend-copy">
-                LightGBM and CatBoost were the top two performers at baseline and were both tuned with
-                RandomizedSearchCV. A soft-voting ensemble of both achieved the highest ROC-AUC after tuning
-                and was selected as the final deployed model for client-counselor matching.
+                LightGBM and CatBoost were tuned with RandomizedSearchCV (50 iterations each).
+                Tuned LightGBM is the active deployed model for client-counselor matching.
             </p>
         </div>
         """,
@@ -263,7 +262,7 @@ def _render_outcome_data():
 
 
 def _render_model_management(data):
-    deployed_model = data.get("deployed_model", "Ensemble (LightGBM + CatBoost)")
+    deployed_model = data.get("deployed_model", "Tuned LightGBM")
 
     st.markdown(
         """

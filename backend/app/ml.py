@@ -8,6 +8,7 @@ import joblib
 # app/ml.py is at backend/app/ml.py, so parent.parent.parent = ccms/
 BASE_DIR = Path(__file__).parent.parent.parent / "ml"
 
+
 ISSUE_SIMILARITY = {
     "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
     "Stress":     {"Stress": 1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.6},
@@ -16,10 +17,10 @@ ISSUE_SIMILARITY = {
 }
 
 MODALITY_ISSUE_FIT = {
-    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.5, "Psychodynamic": 0.6},
+    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.3},
     "Depression": {"Cognitive": 1.0, "Behavioral": 0.8, "Humanistic": 0.7, "Psychodynamic": 0.9},
-    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.5},
-    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.5, "Psychodynamic": 0.6},
+    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.3},
+    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.4},
 }
 
 FEATURE_ORDER = [
@@ -28,25 +29,9 @@ FEATURE_ORDER = [
 ]
 
 
-class SoftVotingEnsemble:
-    def __init__(self, lgbm_pipe, cat_pipe):
-        self._lgbm = lgbm_pipe
-        self._cat  = cat_pipe
-
-    def predict_proba(self, X):
-        return (self._lgbm.predict_proba(X) + self._cat.predict_proba(X)) / 2
-
-    def predict(self, X):
-        return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
-
-    @property
-    def named_steps(self):
-        return self._lgbm.named_steps
-
-
 @lru_cache(maxsize=1)
 def load_resources():
-    model = joblib.load(str(BASE_DIR / "ensemble.pkl"))
+    model = joblib.load(str(BASE_DIR / "tuned_lgbm.pkl"))
     df_ref = pd.read_csv(str(BASE_DIR / "client_counselor_dataset.csv"))
     return model, df_ref
 
@@ -56,8 +41,8 @@ def _issue_match(client_issue: str, specialization: str) -> float:
 
 
 def _modality_fit(client_issue: str, counselor_modality: str) -> float:
-    primary = str(counselor_modality).split(",")[0].strip()
-    return MODALITY_ISSUE_FIT.get(client_issue, {}).get(primary, 0.5)
+    mods = [m.strip() for m in str(counselor_modality).split(",") if m.strip()]
+    return max(MODALITY_ISSUE_FIT.get(client_issue, {}).get(m, 0.5) for m in mods)
 
 
 def _exp_issue_fit(exp_year) -> int:

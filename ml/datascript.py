@@ -46,10 +46,10 @@ ISSUE_SIMILARITY = {
 # guidelines); psychodynamic ~ CBT for depression (Smith 2024 meta-analysis), weaker for
 # anxiety/trauma.
 MODALITY_ISSUE_FIT = {
-    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.5, "Psychodynamic": 0.6},
+    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.3},
     "Depression": {"Cognitive": 1.0, "Behavioral": 0.8, "Humanistic": 0.7, "Psychodynamic": 0.9},
-    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.5},
-    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.5, "Psychodynamic": 0.6},
+    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.3},
+    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.4},
 }
 
 clients = []
@@ -109,9 +109,11 @@ for i in range(NUM_COUNSELORS):
             ISSUES, weights=[0.35, 0.3, 0.25, 0.1]
         )[0],
 
-        "counselor_modality": random.choices(
-            MODALITIES, weights=[0.4, 0.25, 0.2, 0.15]
-        )[0],
+        "counselor_modality": (
+            random.choices(MODALITIES, weights=[0.4, 0.25, 0.2, 0.15])[0]
+            if random.random() < 0.6
+            else ", ".join(random.sample(MODALITIES, 2))
+        ),
 
         "experience_years": exp
     })
@@ -134,20 +136,21 @@ for client in clients:
 
         # Issue similarity (d=0.75)
         sim = ISSUE_SIMILARITY[client["client_issue"]][counselor["specialization"]]
-        S += 35 * sim
+        S += 40 * sim
 
         # Modality preference match (d=0.27, Swift et al. 2018)
-        modality_match = client["preferred_modality"] == counselor["counselor_modality"]
+        counselor_mods = [m.strip() for m in counselor["counselor_modality"].split(",")]
+        modality_match = client["preferred_modality"] in counselor_mods
         if modality_match:
-            S += 11 + sim
+            S += 9 + sim
         else:
             S += 3 + sim
 
         # Previous counseling experience x modality match interaction
         if client["previous_counseling_experience"] == 1:
-            S += 5.5 + 2 * int(modality_match)
+            S += 6 + 2 * int(modality_match)
         else:
-            S += 1.5
+            S += 2
 
         # Gender (d=0.21, PMC11750298 RCT — larger effect than ethnicity)
         preferred = client["preferred_counselor_gender"]
@@ -161,7 +164,7 @@ for client in clients:
 
         # Ethnicity (d=0.09, Cabral & Smith 2011 — smaller effect than gender)
         if client["client_ethnicity"] == counselor["counselor_ethnicity"]:
-            S += 4
+            S += 3
         else:
             S += 1
 
@@ -169,8 +172,8 @@ for client in clients:
         if counselor["experience_years"] >= 8:
             S += EXP_BONUS[client["client_issue"]]
 
-        # Clinical modality-issue fit (d=0.175)
-        fit = MODALITY_ISSUE_FIT[client["client_issue"]][counselor["counselor_modality"]]
+        # Clinical modality-issue fit (d=0.175) — best fit across counselor's modalities
+        fit = max(MODALITY_ISSUE_FIT[client["client_issue"]].get(m, 0.5) for m in counselor_mods)
         S += 13 * fit
 
         # Age gap (Lehane 2025, small directional effect)

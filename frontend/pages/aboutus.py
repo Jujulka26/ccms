@@ -7,59 +7,6 @@ def show_aboutus_page():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-        /* ── Hero ─────────────────────────────────────────────────────── */
-        .au-hero {
-            position: relative;
-            overflow: hidden;
-            background-color: #FAFAFF;
-            background-image:
-                radial-gradient(at 0% 0%, #E9DFFF 0px, transparent 60%),
-                radial-gradient(at 100% 100%, #F0E6FF 0px, transparent 60%);
-            border-radius: 20px;
-            padding: 48px 52px;
-            margin-bottom: 32px;
-            border: 1px solid rgba(124,58,237,0.15);
-            box-shadow: 0 16px 32px -8px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
-        }
-        .au-eyebrow {
-            color: #8B5CF6;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            background: rgba(167,139,250,0.12);
-            border: 1px solid rgba(167,139,250,0.25);
-            border-radius: 20px;
-            padding: 4px 14px;
-            margin-bottom: 20px;
-            display: inline-block;
-        }
-        .au-hero-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 42px;
-            color: #1A1A2E;
-            margin-bottom: 16px;
-            line-height: 1.15;
-            letter-spacing: -0.5px;
-        }
-        .au-hero-copy {
-            font-size: 16px;
-            color: #4A4A5C;
-            margin: 0;
-            line-height: 1.65;
-            max-width: 520px;
-        }
-        .au-hero-emoji {
-            font-size: 90px;
-            line-height: 1;
-            position: absolute;
-            right: 48px;
-            bottom: -10px;
-            opacity: 0.18;
-            transform: rotate(-8deg);
-            pointer-events: none;
-        }
-
         /* ── Section title ────────────────────────────────────────────── */
         .au-section-title {
             font-family: 'DM Serif Display', serif;

@@ -1,13 +1,13 @@
 import streamlit as st
-from frontend.views.manage import show_manage_page
-from frontend.views.matching import show_matching_page
-from frontend.views.model_performance import show_model_performance_page
-from frontend.views.login import show_login_page
-from frontend.views.chatbot import show_chatbot_page
-from frontend.views.manage_request import render as show_manage_request_page
-from frontend.views.aboutus import show_aboutus_page
-from frontend.views.contactus import show_contactus_page
-from frontend.views.counselors import show_counselors_page
+from frontend.pages.manage import show_manage_page
+from frontend.pages.matching import show_matching_page
+from frontend.pages.model_performance import show_model_performance_page
+from frontend.pages.login import show_login_page
+from frontend.pages.chatbot import show_chatbot_page
+from frontend.pages.manage_request import render as show_manage_request_page
+from frontend.pages.aboutus import show_aboutus_page
+from frontend.pages.contactus import show_contactus_page
+from frontend.pages.counselors import show_counselors_page
 
 
 if "login" in st.query_params:
@@ -40,139 +40,6 @@ def inject_app_styles():
 
         .block-container {
             max-width: 1200px;
-        }
-
-        /* ── Strip default link formatting so it looks like a card ── */
-        a.clickable-card-link {
-            text-decoration: none !important;
-            color: inherit !important;
-            display: block; /* Makes the whole area clickable */
-            height: 100%;
-        }
-
-        /* ── Hero section ─────────────────────────────────────────────── */
-        .app-hero {
-            background: #1A1A2E;
-            border-radius: 20px;
-            padding: 56px 52px 48px;
-            margin-bottom: 32px;
-            position: relative;
-            overflow: hidden;
-        }
-        .app-hero::before {
-            content: '';
-            position: absolute;
-            top: -80px; right: -80px;
-            width: 320px; height: 320px;
-            background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .app-hero::after {
-            content: '';
-            position: absolute;
-            bottom: -60px; left: 40px;
-            width: 220px; height: 220px;
-            background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .eyebrow {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #A78BFA;
-            background: rgba(167,139,250,0.12);
-            border: 1px solid rgba(167,139,250,0.25);
-            border-radius: 20px;
-            padding: 4px 14px;
-            margin-bottom: 20px;
-        }
-        .hero-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 42px;
-            line-height: 1.15;
-            color: #FFFFFF;
-            margin: 0 0 16px;
-            letter-spacing: -0.5px;
-        }
-        .hero-copy {
-            font-size: 16px;
-            color: rgba(255,255,255,0.55);
-            max-width: 480px;
-            line-height: 1.65;
-            margin: 0;
-        }
-
-        /* ── Card sections ────────────────────────────────────────────── */
-        .landing-card {
-            background: #FFFFFF;
-            border-radius: 20px;
-            padding: 36px 40px;
-            border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-            height: 100%;
-            min-height: 240px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-        }
-        .landing-card.admin {
-            background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(255,255,255,0.95) 100%);
-        }
-        
-        .landing-badge {
-            display: inline-block;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            border-radius: 20px;
-            padding: 4px 12px;
-            margin-bottom: 20px;
-            background: rgba(139,92,246,0.15);
-            color: #8B5CF6;
-        }
-        .landing-badge.admin {
-            background: rgba(16,185,129,0.15);
-            color: #10B981;
-        }
-        .landing-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 26px;
-            font-weight: 700;
-            color: #1A1A2E;
-            margin-bottom: 12px;
-            line-height: 1.2;
-        }
-        .landing-meta {
-            color: #5A5A6E;
-            font-size: 15px;
-            margin-bottom: 0;
-            line-height: 1.6;
-        }
-        
-        .landing-action {
-            font-size: 15px;
-            font-weight: 600;
-            color: #8B5CF6;
-            margin-top: 24px;
-            display: flex;
-            align-items: center;
-        }
-        .landing-card.admin .landing-action {
-            color: #10B981;
-        }
-
-        /* ── Hover effects mapped directly to the link wrapper ── */
-        a.clickable-card-link:hover .landing-card {
-            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-            transform: translateY(-2px);
-            border-color: #8B5CF6;
-        }
-        a.clickable-card-link:hover .landing-card.admin {
-            border-color: #10B981;
         }
 
         /* ── Form styling ─────────────────────────────────────────────── */
