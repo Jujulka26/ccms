@@ -7,7 +7,7 @@ from frontend.pages.matching import show_profile_dialog, show_request_success_di
 
 
 _SPEC_COLORS = {
-    "Anxiety":    ("#F3F0FF", "#6D28D9"),
+    "Anxiety":    ("#FFF5F2", "#A84E55"),
     "Depression": ("#FFF7ED", "#C2410C"),
     "Stress":     ("#F0FDF4", "#15803D"),
     "Trauma":     ("#FFF1F2", "#BE123C"),
@@ -22,7 +22,7 @@ def inject_styles():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
         .filter-bar {
             background: #FFFFFF; border-radius: 16px;
@@ -31,7 +31,8 @@ def inject_styles():
         }
         .filter-label {
             font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
-            text-transform: uppercase; color: #8B5CF6; margin-bottom: 10px;
+            text-transform: uppercase; color: #C9636A; margin-bottom: 10px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         .c-card {
@@ -42,45 +43,46 @@ def inject_styles():
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .c-card:hover {
-            border-color: rgba(139,92,246,0.3);
-            box-shadow: 0 4px 20px rgba(139,92,246,0.1);
+            border-color: rgba(201,99,106,0.3);
+            box-shadow: 0 4px 20px rgba(201,99,106,0.1);
         }
         .card-view-btn-dir {
             display: block; width: calc(100% + 48px); margin: 18px -24px 0;
             padding: 14px 24px; background: transparent; border: none;
             border-top: 1px solid rgba(0,0,0,0.07);
-            color: #7C3AED; font-size: 12px; font-weight: 700;
+            color: #C9636A; font-size: 12px; font-weight: 700;
             letter-spacing: 0.08em; text-transform: uppercase;
             cursor: pointer; text-align: center;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             transition: background 0.15s, color 0.15s;
         }
-        .card-view-btn-dir:hover { background: rgba(124,58,237,0.07); color: #5B21B6; }
+        .card-view-btn-dir:hover { background: rgba(201,99,106,0.06); color: #A84E55; }
         [data-testid="stElementContainer"]:has(.c-card) { margin-bottom: 24px !important; }
         .c-avatar-wrap {
             display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
         }
         .c-name {
-            font-family: 'DM Serif Display', serif;
-            font-size: 17px; color: #1A1A2E; margin: 0 0 2px;
+            font-family: 'Fraunces', serif;
+            font-size: 17px; color: #1C1917; margin: 0 0 2px; font-weight: 600;
         }
-        .c-title { font-size: 12px; color: #8B5CF6; font-weight: 600; margin: 0; }
+        .c-title { font-size: 12px; color: #C9636A; font-weight: 600; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         .c-spec-badge {
             display: inline-block; font-size: 11px; font-weight: 700;
             letter-spacing: 0.05em; text-transform: uppercase;
             border-radius: 20px; padding: 3px 12px; margin-bottom: 14px;
-            align-self: flex-start;
+            align-self: flex-start; font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .c-info { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; flex: 1; }
         .c-info-row {
             display: flex; align-items: center; gap: 8px;
-            font-size: 13px; color: #5A5A6E;
+            font-size: 13px; color: #6B6560; font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .c-info-icon { font-size: 14px; flex-shrink: 0; }
 
         .result-count {
-            font-size: 13px; color: #8B5CF6; font-weight: 600;
+            font-size: 13px; color: #C9636A; font-weight: 600;
             margin-bottom: 20px; letter-spacing: 0.02em;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         [class*="st-key-dir_vp_"] { display: none !important; }
         </style>
@@ -100,8 +102,8 @@ def show_counselors_page():
     st.markdown(
         """
         <div style="padding:24px 0 20px; border-bottom:1px solid rgba(0,0,0,0.07); margin-bottom:24px;">
-            <div style="font-family:'DM Serif Display',serif; font-size:clamp(22px,3vw,34px); color:#1A1A2E; margin:0 0 8px; letter-spacing:-0.3px; line-height:1.15; display:flex; align-items:center; gap:16px;">
-                <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+            <div style="font-family:'Fraunces',serif; font-size:clamp(22px,3vw,36px); color:#1C1917; margin:0 0 8px; letter-spacing:-0.4px; line-height:1.12; font-weight:600; display:flex; align-items:center; gap:16px;">
+                <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#C9636A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -109,7 +111,7 @@ def show_counselors_page():
                 </svg>
                 Meet Our Counselors
             </div>
-            <p style="font-size:14px; color:#6B6B80; margin:0; line-height:1.6;">Get to know our counselors and find one that's right for you.</p>
+            <p style="font-size:14px; color:#6B6560; margin:0; line-height:1.6; font-family:'Plus Jakarta Sans',sans-serif;">Get to know our counselors and find one that's right for you.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -232,21 +234,21 @@ def show_counselors_page():
             <style>
             .st-key-dir_prev button, .st-key-dir_next button {
                 background: #FFFFFF !important;
-                border: 1.5px solid rgba(109,40,217,0.25) !important;
-                color: #6D28D9 !important;
+                border: 1.5px solid rgba(201,99,106,0.25) !important;
+                color: #C9636A !important;
                 border-radius: 50px !important;
-                font-family: 'DM Sans', sans-serif !important;
+                font-family: 'Plus Jakarta Sans', sans-serif !important;
                 font-size: 13px !important;
                 font-weight: 600 !important;
                 letter-spacing: 0.04em !important;
                 padding: 10px 24px !important;
                 transition: all 0.2s ease !important;
-                box-shadow: 0 1px 4px rgba(109,40,217,0.08) !important;
+                box-shadow: 0 1px 4px rgba(201,99,106,0.08) !important;
             }
             .st-key-dir_prev button:hover:not(:disabled), .st-key-dir_next button:hover:not(:disabled) {
-                background: rgba(109,40,217,0.06) !important;
-                border-color: #6D28D9 !important;
-                box-shadow: 0 2px 10px rgba(109,40,217,0.15) !important;
+                background: rgba(201,99,106,0.06) !important;
+                border-color: #C9636A !important;
+                box-shadow: 0 2px 10px rgba(201,99,106,0.15) !important;
             }
             .st-key-dir_prev button:disabled, .st-key-dir_next button:disabled {
                 opacity: 0.35 !important;
@@ -263,13 +265,14 @@ def show_counselors_page():
                 st.rerun()
         with pcol2:
             dots = "".join(
-                f'<span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin:0 4px;background:{"#8B5CF6" if i == page else "#D8D0F5"};"></span>'
+                f'<span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin:0 4px;background:{"#C9636A" if i == page else "#F0D0D2"};"></span>'
                 for i in range(total_pages)
             )
+
             st.markdown(
-                f'<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-top:8px;">'
+                f'<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-top:8px;font-family:\'Plus Jakarta Sans\',sans-serif;">'
                 f'<div style="display:flex;align-items:center;gap:4px;">{dots}</div>'
-                f'<span style="font-size:12px;color:#8B8B9A;">{page+1} / {total_pages}</span>'
+                f'<span style="font-size:12px;color:#9C9790;">{page+1} / {total_pages}</span>'
                 f'</div>',
                 unsafe_allow_html=True,
             )

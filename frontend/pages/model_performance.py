@@ -11,7 +11,7 @@ def inject_styles():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
         .pm-stat-grid {
             display: grid;
@@ -34,16 +34,18 @@ def inject_styles():
             margin-bottom: 12px;
         }
         .pm-stat-value {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 36px;
             line-height: 1;
-            color: #1A1A2E;
+            color: #1C1917;
             margin-bottom: 6px;
+            font-weight: 600;
         }
         .pm-stat-label {
             font-size: 13px;
-            color: #8B8B9A;
+            color: #9C9790;
             font-weight: 400;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .pm-card {
             background: #FFFFFF;
@@ -54,46 +56,48 @@ def inject_styles():
             margin-bottom: 20px;
         }
         .pm-card-title {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 20px;
-            color: #1A1A2E;
+            color: #1C1917;
             margin: 0 0 4px;
+            font-weight: 600;
         }
         .pm-card-copy {
             font-size: 14px;
-            color: #5A5A6E;
+            color: #6B6560;
             margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         [data-testid="block-container"] div[data-testid="stTabs"] {
             background: #FFFFFF;
             border-radius: 16px;
             padding: 4px 20px 24px;
             border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
             margin-bottom: 20px;
         }
         div[data-testid="stTabs"] button[role="tab"] {
-            font-family: 'DM Sans', sans-serif !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-size: 14px !important;
             font-weight: 500 !important;
             padding: 12px 18px !important;
-            color: #8B8B9A !important;
+            color: #9C9790 !important;
         }
         div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
             font-weight: 700 !important;
-            color: #1A1A2E !important;
+            color: #1C1917 !important;
         }
         div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
-            background-color: #8B5CF6 !important;
+            background-color: #C9636A !important;
             height: 3px !important;
             border-radius: 3px 3px 0 0 !important;
         }
         div[data-testid="stTabs"] [data-baseweb="tab-border"] {
-            background-color: #F0EDE8 !important;
+            background-color: #F0ECE8 !important;
         }
         .pm-recommend {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, #FFFFFF 100%);
-            border: 1px solid rgba(139, 92, 246, 0.25);
+            background: linear-gradient(135deg, rgba(201,99,106,0.06) 0%, #FFFFFF 100%);
+            border: 1px solid rgba(201,99,106,0.22);
             border-radius: 16px;
             padding: 28px 32px;
             margin-top: 4px;
@@ -106,24 +110,27 @@ def inject_styles():
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #8B5CF6;
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.2);
+            color: #C9636A;
+            background: rgba(201,99,106,0.1);
+            border: 1px solid rgba(201,99,106,0.2);
             border-radius: 20px;
             padding: 4px 12px;
             margin-bottom: 14px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .pm-recommend-title {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 22px;
-            color: #1A1A2E;
+            color: #1C1917;
             margin: 0 0 8px;
+            font-weight: 600;
         }
         .pm-recommend-copy {
             font-size: 14px;
-            color: #5A5A6E;
+            color: #6B6560;
             line-height: 1.65;
             margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .pm-note {
             background: rgba(245, 158, 11, 0.06);
@@ -131,7 +138,7 @@ def inject_styles():
             border-radius: 0 8px 8px 0;
             padding: 10px 16px;
             font-size: 13px;
-            color: #5A5A6E;
+            color: #6B6560;
             margin-bottom: 20px;
         }
         </style>
@@ -151,7 +158,7 @@ def _render_performance_metrics(data):
         f"""
         <div class="pm-stat-grid">
             <div class="pm-stat-card">
-                <div class="pm-stat-eyebrow" style="color:#8B5CF6;">Models compared</div>
+                <div class="pm-stat-eyebrow" style="color:#C9636A;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">Models compared</div>
                 <div class="pm-stat-value">{model_count}</div>
                 <div class="pm-stat-label">evaluated at baseline</div>
             </div>
@@ -317,7 +324,7 @@ def _render_model_management(data):
             f'<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);'
             f'border-radius:12px;padding:16px 20px;margin-bottom:20px;">'
             f'<div style="font-size:12px;font-weight:600;color:#10B981;margin-bottom:6px;">TRAINING COMPLETE</div>'
-            f'<div style="font-size:13px;color:#1A1A2E;">Version <code>{version_id}</code> is ready.{rows_note} '
+            f'<div style="font-size:13px;color:#1C1917;">Version <code>{version_id}</code> is ready.{rows_note} '
             f'Save it to version history, or discard if the metrics are not good enough.</div>'
             f'</div>',
             unsafe_allow_html=True,
@@ -402,7 +409,7 @@ def _render_model_management(data):
                 c1, c2, c3 = st.columns([3, 3, 1], vertical_alignment="center")
                 with c1:
                     st.markdown(
-                        f'<div style="font-size:13px;font-weight:600;color:#1A1A2E;">'
+                        f'<div style="font-size:13px;font-weight:600;color:#1C1917;">'
                         f'{v.get("display_date", vid)}{active_badge}</div>'
                         f'<div style="font-size:12px;color:#8B8B9A;margin-top:2px;">{vid} · {mode_display}</div>',
                         unsafe_allow_html=True,
@@ -410,7 +417,7 @@ def _render_model_management(data):
                 with c2:
                     if m:
                         st.markdown(
-                            f'<div style="font-size:13px;color:#4A4A5C;">'
+                            f'<div style="font-size:13px;color:#6B6560;font-family:\'Plus Jakarta Sans\',sans-serif;">'
                             f'Acc <strong>{m.get("accuracy","—")}</strong> &nbsp;·&nbsp; '
                             f'F1 <strong>{m.get("f1","—")}</strong> &nbsp;·&nbsp; '
                             f'ROC-AUC <strong>{m.get("roc_auc","—")}</strong>'
@@ -437,11 +444,11 @@ def show_model_performance_page():
 
     st.markdown(
         """
-        <div style="position: relative; overflow: hidden; background-color: #FAFDFC; background-image: radial-gradient(at 0% 0%, #D1FAE5 0px, transparent 60%), radial-gradient(at 100% 100%, #ECFDF5 0px, transparent 60%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(16,185,129,0.2); box-shadow: 0 16px 32px -8px rgba(16,185,129,0.12), inset 0 1px 0 rgba(255,255,255,0.9); min-height: 236px;">
+        <div style="position: relative; overflow: hidden; background-color: #FFF9F7; background-image: radial-gradient(at 0% 0%, #FFEEE8 0px, transparent 60%), radial-gradient(at 100% 100%, #FFE4DC 0px, transparent 60%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(196,149,74,0.18); box-shadow: 0 16px 32px -8px rgba(196,149,74,0.1), inset 0 1px 0 rgba(255,255,255,0.9); min-height: 236px;">
             <div style="position: relative; z-index: 2; max-width: 65%;">
-                <div style="color: #10B981; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block;">Analytics</div>
-                <div style="font-family: 'DM Serif Display', serif; font-size: 42px; color: #1A1A2E; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Model Management</div>
-                <p style="font-size: 16px; color: #4A4A5C; margin: 0; line-height: 1.65; max-width: 480px;">Accuracy, F1 and ROC-AUC across all models — plus model version management and retraining.</p>
+                <div style="color: #C4954A; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(196,149,74,0.1); border: 1px solid rgba(196,149,74,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Analytics</div>
+                <div style="font-family: 'Fraunces', serif; font-size: 42px; font-weight: 600; color: #1C1917; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Model Management</div>
+                <p style="font-size: 16px; color: #6B6560; margin: 0; line-height: 1.65; max-width: 480px; font-family: 'Plus Jakarta Sans', sans-serif;">Accuracy, F1 and ROC-AUC across all models, plus model version management and retraining.</p>
             </div>
             <div style="font-size: 110px; line-height: 1; position: absolute; right: 28px; bottom: -20px; z-index: 1; opacity: 0.15; transform: rotate(-5deg); pointer-events: none;">
                 📊
@@ -474,10 +481,10 @@ def show_model_performance_page():
 
             with status_box.container():
                 st.markdown(
-                    f'<div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.2);'
+                    f'<div style="background:rgba(201,99,106,0.06);border:1px solid rgba(201,99,106,0.2);'
                     f'border-radius:12px;padding:16px 20px;margin-bottom:4px;">'
-                    f'<div style="font-size:12px;font-weight:600;color:#8B5CF6;margin-bottom:6px;">TRAINING IN PROGRESS</div>'
-                    f'<div style="font-size:13px;color:#1A1A2E;">{step}</div>'
+                    f'<div style="font-size:12px;font-weight:600;color:#C9636A;margin-bottom:6px;font-family:\'Plus Jakarta Sans\',sans-serif;letter-spacing:0.08em;">TRAINING IN PROGRESS</div>'
+                    f'<div style="font-size:13px;color:#1C1917;font-family:\'Plus Jakarta Sans\',sans-serif;">{step}</div>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )

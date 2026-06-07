@@ -7,49 +7,52 @@ def show_contactus_page():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
         /* ── Hero ─────────────────────────────────────────────────────── */
         .cu-hero {
             position: relative;
             overflow: hidden;
-            background-color: #FAFAFF;
+            background-color: #FFF5F2;
             background-image:
-                radial-gradient(at 0% 0%, #E9DFFF 0px, transparent 60%),
-                radial-gradient(at 100% 100%, #F0E6FF 0px, transparent 60%);
+                radial-gradient(at 0% 0%, #FFE0DC 0px, transparent 60%),
+                radial-gradient(at 100% 100%, #FFDDD8 0px, transparent 60%);
             border-radius: 20px;
             padding: 48px 52px;
             margin-bottom: 32px;
-            border: 1px solid rgba(124,58,237,0.15);
-            box-shadow: 0 16px 32px -8px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+            border: 1px solid rgba(201,99,106,0.15);
+            box-shadow: 0 16px 32px -8px rgba(201,99,106,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
         }
         .cu-eyebrow {
-            color: #8B5CF6;
+            color: #C9636A;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            background: rgba(167,139,250,0.12);
-            border: 1px solid rgba(167,139,250,0.25);
+            background: rgba(201,99,106,0.1);
+            border: 1px solid rgba(201,99,106,0.22);
             border-radius: 20px;
             padding: 4px 14px;
             margin-bottom: 20px;
             display: inline-block;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .cu-hero-title {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 42px;
-            color: #1A1A2E;
+            color: #1C1917;
             margin-bottom: 16px;
-            line-height: 1.15;
+            line-height: 1.12;
             letter-spacing: -0.5px;
+            font-weight: 600;
         }
         .cu-hero-copy {
             font-size: 16px;
-            color: #4A4A5C;
+            color: #6B6560;
             margin: 0;
             line-height: 1.65;
             max-width: 520px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .cu-hero-emoji {
             font-size: 90px;
@@ -57,7 +60,7 @@ def show_contactus_page():
             position: absolute;
             right: 48px;
             bottom: -10px;
-            opacity: 0.18;
+            opacity: 0.15;
             transform: rotate(-8deg);
             pointer-events: none;
         }
@@ -68,13 +71,13 @@ def show_contactus_page():
             border-radius: 16px;
             padding: 28px;
             border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
             height: 100%;
             transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
         }
         .cu-info-card:hover {
-            box-shadow: 0 8px 24px rgba(124,58,237,0.1);
-            border-color: rgba(139,92,246,0.3);
+            box-shadow: 0 8px 24px rgba(201,99,106,0.1);
+            border-color: rgba(201,99,106,0.25);
             transform: translateY(-2px);
         }
         .cu-info-icon {
@@ -84,23 +87,26 @@ def show_contactus_page():
         }
         .cu-info-label {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #8B5CF6;
+            color: #C9636A;
             margin-bottom: 6px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .cu-info-value {
             font-size: 15px;
             font-weight: 600;
-            color: #1A1A2E;
+            color: #1C1917;
             margin-bottom: 4px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .cu-info-sub {
             font-size: 13px;
-            color: #8B8B9A;
+            color: #9C9790;
             margin: 0;
             line-height: 1.5;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* ── Form card ────────────────────────────────────────────────── */
@@ -109,25 +115,27 @@ def show_contactus_page():
             border-radius: 20px;
             padding: 36px 40px;
             border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
             margin-top: 8px;
         }
         .cu-form-title {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 24px;
-            color: #1A1A2E;
+            color: #1C1917;
             margin-bottom: 6px;
+            font-weight: 600;
         }
         .cu-form-sub {
             font-size: 14px;
-            color: #8B8B9A;
+            color: #9C9790;
             margin-bottom: 24px;
             line-height: 1.6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* ── Hours card ───────────────────────────────────────────────── */
         .cu-hours-card {
-            background: linear-gradient(135deg, #1A1A2E 0%, #2D1B6E 100%);
+            background: linear-gradient(135deg, #0E1823 0%, #1A2B3C 100%);
             border-radius: 20px;
             padding: 32px 36px;
             margin-top: 8px;
@@ -138,45 +146,49 @@ def show_contactus_page():
             content: '';
             position: absolute;
             top: -40px; right: -40px;
-            width: 180px; height: 180px;
-            background: radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%);
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(201,99,106,0.2) 0%, transparent 70%);
             pointer-events: none;
         }
         .cu-hours-title {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 20px;
             color: #FFFFFF;
             margin-bottom: 20px;
+            font-weight: 600;
         }
         .cu-hours-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
         }
         .cu-hours-row:last-child {
             border-bottom: none;
         }
         .cu-hours-day {
             font-size: 14px;
-            color: rgba(255,255,255,0.7);
+            color: rgba(255,255,255,0.6);
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .cu-hours-time {
             font-size: 14px;
             font-weight: 600;
             color: #FFFFFF;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .cu-hours-closed {
             font-size: 14px;
             font-weight: 600;
-            color: rgba(239,68,68,0.8);
+            color: rgba(239,68,68,0.75);
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* ── Divider ──────────────────────────────────────────────────── */
         .cu-divider {
             border: none;
-            border-top: 1px solid rgba(0,0,0,0.08);
+            border-top: 1px solid rgba(0,0,0,0.07);
             margin: 32px 0;
         }
         </style>
@@ -188,8 +200,8 @@ def show_contactus_page():
     st.markdown(
         """
         <div style="padding:24px 0 20px; border-bottom:1px solid rgba(0,0,0,0.07); margin-bottom:24px;">
-            <div style="font-family:'DM Serif Display',serif; font-size:clamp(22px,3vw,34px); color:#1A1A2E; margin:0 0 8px; letter-spacing:-0.3px; line-height:1.15;">Contact Us</div>
-            <p style="font-size:14px; color:#6B6B80; margin:0; line-height:1.6;">Have a question or need support? Reach out and we'll get back to you within 24–48 hours.</p>
+            <div style="font-family:'Fraunces',serif; font-size:clamp(22px,3vw,36px); color:#1C1917; margin:0 0 8px; letter-spacing:-0.4px; line-height:1.12; font-weight:600;">Contact Us</div>
+            <p style="font-size:14px; color:#6B6560; margin:0; line-height:1.6; font-family:'Plus Jakarta Sans',sans-serif;">Have a question or need support? Reach out and we'll get back to you within 24-48 hours.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -205,7 +217,7 @@ def show_contactus_page():
                 <div class="cu-info-icon">📧</div>
                 <div class="cu-info-label">Email</div>
                 <div class="cu-info-value">support@cc-match.com</div>
-                <p class="cu-info-sub">We reply within 24–48 hours on business days.</p>
+                <p class="cu-info-sub">We reply within 24-48 hours on business days.</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -218,7 +230,7 @@ def show_contactus_page():
                 <div class="cu-info-icon">📞</div>
                 <div class="cu-info-label">Phone</div>
                 <div class="cu-info-value">+60 12-345 6789</div>
-                <p class="cu-info-sub">Available Mon – Fri, 9 AM to 5 PM.</p>
+                <p class="cu-info-sub">Available Mon - Fri, 9 AM to 5 PM.</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -272,7 +284,7 @@ def show_contactus_page():
             else:
                 try:
                     send_enquiry_email(name.strip(), email.strip(), subject, message.strip())
-                    st.success(f"Thank you, {name.strip()}! Your message has been sent. We'll get back to you within 24–48 hours.")
+                    st.success(f"Thank you, {name.strip()}! Your message has been sent. We'll get back to you within 24-48 hours.")
                 except Exception:
                     st.error("Failed to send your message. Please try again or email us directly.")
 
@@ -280,32 +292,32 @@ def show_contactus_page():
         st.markdown(
             """
             <div class="cu-hours-card">
-                <div class="cu-hours-title">Office Hours</div>
-                <div class="cu-hours-row">
+                <div class="cu-hours-title" style="position:relative;z-index:2;">Office Hours</div>
+                <div class="cu-hours-row" style="position:relative;z-index:2;">
                     <span class="cu-hours-day">Monday</span>
-                    <span class="cu-hours-time">9:00 AM – 5:00 PM</span>
+                    <span class="cu-hours-time">9:00 AM - 5:00 PM</span>
                 </div>
-                <div class="cu-hours-row">
+                <div class="cu-hours-row" style="position:relative;z-index:2;">
                     <span class="cu-hours-day">Tuesday</span>
-                    <span class="cu-hours-time">9:00 AM – 5:00 PM</span>
+                    <span class="cu-hours-time">9:00 AM - 5:00 PM</span>
                 </div>
-                <div class="cu-hours-row">
+                <div class="cu-hours-row" style="position:relative;z-index:2;">
                     <span class="cu-hours-day">Wednesday</span>
-                    <span class="cu-hours-time">9:00 AM – 5:00 PM</span>
+                    <span class="cu-hours-time">9:00 AM - 5:00 PM</span>
                 </div>
-                <div class="cu-hours-row">
+                <div class="cu-hours-row" style="position:relative;z-index:2;">
                     <span class="cu-hours-day">Thursday</span>
-                    <span class="cu-hours-time">9:00 AM – 5:00 PM</span>
+                    <span class="cu-hours-time">9:00 AM - 5:00 PM</span>
                 </div>
-                <div class="cu-hours-row">
+                <div class="cu-hours-row" style="position:relative;z-index:2;">
                     <span class="cu-hours-day">Friday</span>
-                    <span class="cu-hours-time">9:00 AM – 5:00 PM</span>
+                    <span class="cu-hours-time">9:00 AM - 5:00 PM</span>
                 </div>
-                <div class="cu-hours-row">
+                <div class="cu-hours-row" style="position:relative;z-index:2;">
                     <span class="cu-hours-day">Saturday</span>
                     <span class="cu-hours-closed">Closed</span>
                 </div>
-                <div class="cu-hours-row">
+                <div class="cu-hours-row" style="position:relative;z-index:2;">
                     <span class="cu-hours-day">Sunday</span>
                     <span class="cu-hours-closed">Closed</span>
                 </div>

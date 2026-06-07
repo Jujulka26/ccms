@@ -15,36 +15,37 @@ def inject_styles():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-        html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
-        .stApp { background: #F7F5F0; }
+        html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .stApp { background: #FFF9F7; }
 
         .page-header { padding: 24px 0 20px; border-bottom: 1px solid rgba(0,0,0,0.07); margin-bottom: 24px; }
         .page-header-eyebrow {
             display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(139,92,246,0.09); border: 1px solid rgba(139,92,246,0.18);
+            background: rgba(201,99,106,0.08); border: 1px solid rgba(201,99,106,0.18);
             border-radius: 20px; padding: 3px 12px 3px 10px; margin-bottom: 12px;
-            font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7C3AED;
+            font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #C9636A;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .page-header-title { font-family: 'DM Serif Display', serif; font-size: clamp(26px, 3.2vw, 38px); color: #1A1A2E; margin: 0 0 8px; letter-spacing: -0.4px; line-height: 1.15; display: block; }
-        .page-header-sub { font-size: 14px; color: #6B6B80; margin: 0; line-height: 1.6; }
+        .page-header-title { font-family: 'Fraunces', serif; font-size: clamp(26px, 3.2vw, 38px); color: #1C1917; margin: 0 0 8px; letter-spacing: -0.4px; line-height: 1.12; display: block; font-weight: 600; }
+        .page-header-sub { font-size: 14px; color: #6B6560; margin: 0; line-height: 1.6; font-family: 'Plus Jakarta Sans', sans-serif; }
         .page-header-stats { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .page-header-stat { display: inline-flex; align-items: center; gap: 7px; background: #F8F5FF; border: 1px solid rgba(139,92,246,0.15); border-radius: 20px; padding: 6px 13px; }
-        .page-header-stat-num { font-family: 'DM Serif Display', serif; font-size: 17px; color: #6D28D9; line-height: 1; }
-        .page-header-stat-label { font-size: 11px; color: #8B7BA8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+        .page-header-stat { display: inline-flex; align-items: center; gap: 7px; background: #FFF5F2; border: 1px solid rgba(201,99,106,0.15); border-radius: 20px; padding: 6px 13px; }
+        .page-header-stat-num { font-family: 'Fraunces', serif; font-size: 17px; color: #C9636A; line-height: 1; font-weight: 600; }
+        .page-header-stat-label { font-size: 11px; color: #A09088; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         .form-card {
-            background: radial-gradient(1200px 300px at -10% -30%, rgba(139,92,246,0.08) 0%, transparent 60%), radial-gradient(900px 260px at 110% 120%, rgba(109,40,217,0.06) 0%, transparent 55%), #FFFFFF;
+            background: radial-gradient(1200px 300px at -10% -30%, rgba(201,99,106,0.06) 0%, transparent 60%), radial-gradient(900px 260px at 110% 120%, rgba(196,149,74,0.05) 0%, transparent 55%), #FFFFFF;
             border-radius: 24px; padding: 28px 36px 24px;
             border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 12px 32px -16px rgba(31,31,60,0.10), 0 1px 3px rgba(0,0,0,0.03);
+            box-shadow: 0 12px 32px -16px rgba(28,25,23,0.08), 0 1px 3px rgba(0,0,0,0.03);
             margin-bottom: 24px;
         }
         .step-header { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
-        .step-chip { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124,58,237,0.35); flex-shrink: 0; }
-        .step-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: #1A1A2E; line-height: 1.2; }
-        .step-copy { font-size: 14px; color: #5A5A6E; margin: 4px 0 16px 48px; line-height: 1.55; }
+        .step-chip { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #1A2332 0%, #0E1823 100%); color: #FFFFFF; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(14,24,35,0.3); flex-shrink: 0; }
+        .step-title { font-family: 'Fraunces', serif; font-size: 24px; color: #1C1917; line-height: 1.2; font-weight: 600; }
+        .step-copy { font-size: 14px; color: #6B6560; margin: 4px 0 16px 48px; line-height: 1.55; font-family: 'Plus Jakarta Sans', sans-serif; }
         .section-divider { border: none; border-top: 1px solid #E5E5E5; margin: 0px 0 20px 0 !important; position: relative; z-index: 10; }
         .anchor-link { display: none !important; }
 
@@ -53,13 +54,13 @@ def inject_styles():
 
         div[data-testid="stNumberInput"] input, div[data-testid="stSelectbox"] > div > div {
             border-radius: 10px !important; border: 1.5px solid #E5E2DC !important; background: #FAFAF8 !important;
-            font-family: 'DM Sans', sans-serif !important; font-size: 14px !important; transition: border-color 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 14px !important; transition: border-color 0.2s;
         }
         div[data-testid="stNumberInput"] input:focus, div[data-testid="stSelectbox"] > div > div:focus-within {
-            border-color: #8B5CF6 !important; box-shadow: 0 0 0 3px rgba(139,92,246,0.1) !important;
+            border-color: #C9636A !important; box-shadow: 0 0 0 3px rgba(201,99,106,0.1) !important;
         }
         label[data-testid="stWidgetLabel"] p, label[data-testid="stWidgetLabel"] div, label[data-testid="stWidgetLabel"] span {
-            font-size: 14px !important; font-weight: 600 !important; color: #1A1A2E !important; margin-bottom: 8px !important;
+            font-size: 14px !important; font-weight: 600 !important; color: #1C1917 !important; margin-bottom: 8px !important;
         }
 
         [data-testid="block-container"] [data-baseweb="radio"] > div:first-child,
@@ -67,62 +68,62 @@ def inject_styles():
         [data-testid="block-container"] [role="radiogroup"] > label > div:first-child {
             position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; overflow: hidden !important;
         }
-        [data-testid="block-container"] [data-baseweb="radio"] { padding: 9px 22px !important; background: #F7F5F0 !important; border: 1.5px solid #E5E2DC !important; border-radius: 30px !important; cursor: pointer !important; transition: background 0.18s ease, border-color 0.18s ease !important; margin-right: 2px !important; }
-        [data-testid="block-container"] [data-baseweb="radio"]:hover { border-color: #8B5CF6 !important; background: rgba(139,92,246,0.06) !important; }
-        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) { background: rgba(249,115,22,0.08) !important; border-color: #F97316 !important; }
+        [data-testid="block-container"] [data-baseweb="radio"] { padding: 9px 22px !important; background: #FFF9F7 !important; border: 1.5px solid #E8E2DC !important; border-radius: 30px !important; cursor: pointer !important; transition: background 0.18s ease, border-color 0.18s ease !important; margin-right: 2px !important; }
+        [data-testid="block-container"] [data-baseweb="radio"]:hover { border-color: #C9636A !important; background: rgba(201,99,106,0.05) !important; }
+        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) { background: rgba(201,99,106,0.08) !important; border-color: #C9636A !important; }
         [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) p { font-weight: 700 !important; }
-        [data-testid="block-container"] [data-baseweb="radio"] p { font-size: 14px !important; margin: 0 !important; color: #4A4A5A !important; font-weight: 500 !important; }
+        [data-testid="block-container"] [data-baseweb="radio"] p { font-size: 14px !important; margin: 0 !important; color: #4A4540 !important; font-weight: 500 !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
 
-        [data-testid="block-container"] div[data-testid="stButton"] button { border-radius: 12px !important; font-family: 'DM Sans', sans-serif !important; font-size: 15px !important; font-weight: 600 !important; padding: 10px 24px !important; transition: all 0.2s; width: 100% !important; }
-        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] { background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; color: #FFFFFF !important; border: none !important; box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
-        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover { box-shadow: 0 6px 20px rgba(124,58,237,0.45) !important; transform: translateY(-1px); }
+        [data-testid="block-container"] div[data-testid="stButton"] button { border-radius: 12px !important; font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 15px !important; font-weight: 600 !important; padding: 10px 24px !important; transition: all 0.2s; width: 100% !important; }
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] { background: #1A2332 !important; color: #FFFFFF !important; border: none !important; box-shadow: 0 4px 14px rgba(14,24,35,0.28); }
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover { background: #C9636A !important; box-shadow: 0 6px 20px rgba(201,99,106,0.4) !important; transform: translateY(-1px); }
 
         .result-card { position: relative; background: #FFFFFF; border-radius: 20px; padding: 28px 28px 0; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; overflow: hidden; }
         .dismiss-x { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s ease; line-height: 1; z-index: 10; }
         .dismiss-x:hover { background: rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.5); color: #EF4444; }
-        .dismiss-x-light { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1); color: #B0B0C0; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s ease; line-height: 1; z-index: 10; }
+        .dismiss-x-light { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1); color: #B0A8A0; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s ease; line-height: 1; z-index: 10; }
         .dismiss-x-light:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.35); color: #EF4444; }
         .st-key-dismiss_0, .st-key-dismiss_1 { display: none !important; }
         [class*="st-key-vp_"] { display: none !important; }
-        .result-card.primary { background: #1A1A2E; border-color: transparent; }
-        .card-view-btn { display: block; width: calc(100% + 56px); margin: 24px -28px 0; padding: 14px 28px; background: transparent; border: none; border-top: 1px solid rgba(0,0,0,0.07); color: #7C3AED; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: center; font-family: 'DM Sans', sans-serif; transition: background 0.15s, color 0.15s; }
-        .result-card.primary .card-view-btn { border-top-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.55); }
-        .card-view-btn:hover { background: rgba(124,58,237,0.07); color: #5B21B6; }
+        .result-card.primary { background: #0E1823; border-color: transparent; }
+        .card-view-btn { display: block; width: calc(100% + 56px); margin: 24px -28px 0; padding: 14px 28px; background: transparent; border: none; border-top: 1px solid rgba(0,0,0,0.07); color: #C9636A; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.15s, color 0.15s; }
+        .result-card.primary .card-view-btn { border-top-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+        .card-view-btn:hover { background: rgba(201,99,106,0.06); color: #A84E55; }
         .result-card.primary .card-view-btn:hover { background: rgba(255,255,255,0.06); color: #FFFFFF; }
-        .result-card-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 20px; padding: 4px 12px; display: inline-block; margin-bottom: 0; align-self: flex-start; }
-        .badge-primary { background: rgba(139,92,246,0.2); color: #A78BFA; }
-        .badge-secondary { background: #F0EDE8; color: #8B8B9A; }
+        .result-card-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 20px; padding: 4px 12px; display: inline-block; margin-bottom: 0; align-self: flex-start; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .badge-primary { background: rgba(201,99,106,0.18); color: #E8B4B8; }
+        .badge-secondary { background: #F0EDE8; color: #9C9790; }
         .card-header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
         .card-header-photo { flex-shrink: 0; }
         .card-header-info { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
-        .compat-score { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1; color: #FFFFFF; margin: 0; padding-left: 10px; }
-        .compat-score-secondary { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1; color: #1A1A2E; margin: 0; padding-left: 10px; }
-        .compat-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin: 0; padding-left: 10px; }
-        .compat-label-secondary { font-size: 10px; color: #A0A0B0; text-transform: uppercase; letter-spacing: 0.08em; margin: 0; padding-left: 10px; }
-        .counselor-name { font-size: 18px; font-weight: 700; color: #FFFFFF; margin: 0; padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-        .counselor-name-secondary { font-size: 18px; font-weight: 700; color: #1A1A2E; margin: 0; padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .compat-score { font-family: 'Fraunces', serif; font-size: 32px; line-height: 1; color: #FFFFFF; margin: 0; padding-left: 10px; font-weight: 600; }
+        .compat-score-secondary { font-family: 'Fraunces', serif; font-size: 32px; line-height: 1; color: #1C1917; margin: 0; padding-left: 10px; font-weight: 600; }
+        .compat-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin: 0; padding-left: 10px; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .compat-label-secondary { font-size: 10px; color: #A09088; text-transform: uppercase; letter-spacing: 0.08em; margin: 0; padding-left: 10px; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .counselor-name { font-size: 18px; font-weight: 700; color: #FFFFFF; margin: 0; padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .counselor-name-secondary { font-size: 18px; font-weight: 700; color: #1C1917; margin: 0; padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-family: 'Plus Jakarta Sans', sans-serif; }
         .info-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
-        .info-row-secondary { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid #F0EDE8; }
-        .info-key { font-size: 12px; color: rgba(255,255,255,0.4); }
-        .info-key-secondary { font-size: 12px; color: #A0A0B0; }
-        .info-val { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 500; }
-        .info-val-secondary { font-size: 13px; color: #2D2D3F; font-weight: 500; }
+        .info-row-secondary { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid #F0ECE8; }
+        .info-key { font-size: 12px; color: rgba(255,255,255,0.4); font-family: 'Plus Jakarta Sans', sans-serif; }
+        .info-key-secondary { font-size: 12px; color: #A09088; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .info-val { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 500; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .info-val-secondary { font-size: 13px; color: #1C1917; font-weight: 500; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        .ai-explanation-box { background: linear-gradient(135deg, #F8F5FF 0%, #FDF9FF 100%); border: 1px solid rgba(139,92,246,0.15); border-left: 3px solid #8B5CF6; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
-        .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; }
+        .ai-explanation-box { background: linear-gradient(135deg, #FFF5F2 0%, #FFFAF8 100%); border: 1px solid rgba(201,99,106,0.15); border-left: 3px solid #C9636A; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
+        .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #C9636A, #A84E55); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; font-family: 'Plus Jakarta Sans', sans-serif; }
         .ai-reason-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
         .ai-reason-row:last-child { margin-bottom: 0; }
         .ai-reason-icon { flex-shrink: 0; margin-top: 2px; }
-        .ai-reason-text { font-size: 14.5px; color: #2D2D3F; line-height: 1.5; font-weight: 400; }
+        .ai-reason-text { font-size: 14.5px; color: #2A2420; line-height: 1.5; font-weight: 400; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        div[data-testid="stTabs"] button { font-family: 'DM Sans', sans-serif !important; font-size: 14px !important; font-weight: 500 !important; }
+        div[data-testid="stTabs"] button { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 14px !important; font-weight: 500 !important; }
 
         [data-testid="block-container"] div[data-testid="stButton"] button:not([kind="primary"]) {
             background: transparent !important;
-            border: 1.5px solid rgba(109,40,217,0.25) !important;
-            color: #6D28D9 !important;
+            border: 1.5px solid rgba(201,99,106,0.25) !important;
+            color: #C9636A !important;
             border-radius: 12px !important;
-            font-family: 'DM Sans', sans-serif !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-size: 13px !important;
             font-weight: 600 !important;
             letter-spacing: 0.03em !important;
@@ -131,14 +132,14 @@ def inject_styles():
             box-shadow: none !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button:not([kind="primary"]):hover {
-            background: rgba(109,40,217,0.06) !important;
-            border-color: #6D28D9 !important;
-            color: #5B21B6 !important;
+            background: rgba(201,99,106,0.06) !important;
+            border-color: #C9636A !important;
+            color: #A84E55 !important;
         }
 
         div[data-testid="stExpander"] {
             background: #FFFFFF;
-            border: 1px solid rgba(109,40,217,0.15) !important;
+            border: 1px solid rgba(201,99,106,0.14) !important;
             border-radius: 16px !important;
             overflow: hidden;
             margin-bottom: 24px;
@@ -146,22 +147,22 @@ def inject_styles():
         }
         div[data-testid="stExpander"] summary {
             padding: 12px 20px !important;
-            font-family: 'DM Sans', sans-serif !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-size: 13px !important;
             font-weight: 700 !important;
             letter-spacing: 0.07em !important;
             text-transform: uppercase !important;
-            color: #6D28D9 !important;
-            background: linear-gradient(135deg, #F8F5FF 0%, #FDF9FF 100%) !important;
+            color: #C9636A !important;
+            background: linear-gradient(135deg, #FFF5F2 0%, #FFFAF8 100%) !important;
             border-radius: 16px !important;
-            border-bottom: 1px solid rgba(109,40,217,0.10);
+            border-bottom: 1px solid rgba(201,99,106,0.08);
             list-style: none;
         }
         div[data-testid="stExpander"] summary:hover {
-            background: linear-gradient(135deg, #F0EBFF 0%, #F8F5FF 100%) !important;
-            color: #5B21B6 !important;
+            background: linear-gradient(135deg, #FFE8E4 0%, #FFF5F2 100%) !important;
+            color: #A84E55 !important;
         }
-        div[data-testid="stExpander"] summary svg { color: #8B5CF6 !important; }
+        div[data-testid="stExpander"] summary svg { color: #C9636A !important; }
         div[data-testid="stExpander"] > details > div[data-testid="stExpanderDetails"] {
             padding: 24px !important;
             background: #FFFFFF;
@@ -200,22 +201,22 @@ def render_step_progress(step: int, total: int = 3):
     nodes_html = ""
     for i, name in enumerate(step_names, 1):
         if i < step:
-            circle_bg = "linear-gradient(135deg,#8B5CF6 0%,#6D28D9 100%)"
-            circle_color = "#FFFFFF"; circle_border = "none"; shadow = "0 4px 12px rgba(124,58,237,0.30)"
-            label_color = "#6D28D9"; weight = "600"; inner = "✓"
+            circle_bg = "linear-gradient(135deg,#C9636A 0%,#A84E55 100%)"
+            circle_color = "#FFFFFF"; circle_border = "none"; shadow = "0 4px 12px rgba(201,99,106,0.30)"
+            label_color = "#C9636A"; weight = "600"; inner = "✓"
         elif i == step:
-            circle_bg = "linear-gradient(135deg,#8B5CF6 0%,#6D28D9 100%)"
-            circle_color = "#FFFFFF"; circle_border = "none"; shadow = "0 6px 16px rgba(124,58,237,0.40), 0 0 0 4px rgba(139,92,246,0.15)"
-            label_color = "#1A1A2E"; weight = "700"; inner = str(i)
+            circle_bg = "linear-gradient(135deg,#1A2332 0%,#0E1823 100%)"
+            circle_color = "#FFFFFF"; circle_border = "none"; shadow = "0 6px 16px rgba(14,24,35,0.35), 0 0 0 4px rgba(26,35,50,0.12)"
+            label_color = "#1C1917"; weight = "700"; inner = str(i)
         else:
-            circle_bg = "#FFFFFF"; circle_color = "#B0A9A0"; circle_border = "1.5px solid #E5E0D8"
+            circle_bg = "#FFFFFF"; circle_color = "#B0A9A0"; circle_border = "1.5px solid #E8E2DC"
             shadow = "none"; label_color = "#B0A9A0"; weight = "500"; inner = str(i)
         nodes_html += (
             f'<div style="display:flex;flex-direction:column;align-items:center;gap:8px;z-index:2;background:transparent;">'
             f'<div style="width:34px;height:34px;border-radius:50%;background:{circle_bg};color:{circle_color};'
             f'border:{circle_border};display:flex;align-items:center;justify-content:center;'
-            f'font-family:\'DM Sans\',sans-serif;font-weight:700;font-size:13px;box-shadow:{shadow};">{inner}</div>'
-            f'<span style="font-size:11.5px;color:{label_color};font-weight:{weight};letter-spacing:0.02em;">{name}</span>'
+            f'font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:13px;box-shadow:{shadow};">{inner}</div>'
+            f'<span style="font-size:11.5px;color:{label_color};font-weight:{weight};letter-spacing:0.02em;font-family:\'Plus Jakarta Sans\',sans-serif;">{name}</span>'
             f'</div>'
         )
     fill_pct = max(0, min(100, int((step - 1) / (total - 1) * 100))) if total > 1 else 0
@@ -223,7 +224,7 @@ def render_step_progress(step: int, total: int = 3):
         f"""
         <div style="position:relative;padding:4px 8px 8px;margin-bottom:30px;">
             <div style="position:absolute;left:calc(8px + 17px);right:calc(8px + 17px);top:calc(4px + 17px);height:2px;background:#EDE8E3;border-radius:2px;z-index:1;"></div>
-            <div style="position:absolute;left:calc(8px + 17px);top:calc(4px + 17px);width:calc((100% - 16px - 34px) * {fill_pct} / 100);height:2px;background:linear-gradient(90deg,#8B5CF6,#6D28D9);border-radius:2px;z-index:1;"></div>
+            <div style="position:absolute;left:calc(8px + 17px);top:calc(4px + 17px);width:calc((100% - 16px - 34px) * {fill_pct} / 100);height:2px;background:linear-gradient(90deg,#C9636A,#A84E55);border-radius:2px;z-index:1;"></div>
             <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;">{nodes_html}</div>
         </div>
         """,
@@ -264,16 +265,16 @@ def render_page_header():
                     <span class="page-header-stat-label">Match Factors</span>
                 </div>
                 <div class="page-header-stat">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9636A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span class="page-header-stat-label">Personalised</span>
                 </div>
                 <div class="page-header-stat">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9636A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     <span class="page-header-stat-label">Explainable AI</span>
                 </div>
             </div>
-            <p style="font-size:12px; color:#9090A8; margin:12px 0 0; line-height:1.55; display:flex; align-items:center; gap:6px;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B0A8C0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p style="font-size:12px; color:#9C9790; margin:12px 0 0; line-height:1.55; display:flex; align-items:center; gap:6px; font-family:'Plus Jakarta Sans',sans-serif;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C0B8B0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 AI-generated estimates only — not a clinical assessment. Always consult a qualified mental health professional.
             </p>
         </div>
@@ -427,28 +428,29 @@ def show_profile_dialog(c: dict, score=None):
     .prof-header-band {
         background: linear-gradient(135deg, #F3F0FF 0%, #FFF8F3 100%);
         border-radius: 16px; padding: 20px 20px 16px; margin-bottom: 4px;
-        border: 1px solid rgba(139,92,246,0.1);
+        border: 1px solid rgba(201,99,106,0.1);
     }
     .prof-header { display:flex; align-items:center; gap:18px; }
-    .prof-name { font-family:'DM Serif Display',serif; font-size:23px; color:#1A1A2E; margin:0 0 3px; line-height:1.2; }
-    .prof-role { font-size:12px; color:#8B5CF6; font-weight:700; margin:0 0 8px; letter-spacing:0.03em; }
+    .prof-name { font-family:'Fraunces',serif; font-size:23px; font-weight:600; color:#1C1917; margin:0 0 3px; line-height:1.2; }
+    .prof-role { font-size:12px; color:#C9636A; font-weight:700; margin:0 0 8px; letter-spacing:0.03em; font-family:'Plus Jakarta Sans',sans-serif; }
     .prof-meta { display:flex; flex-wrap:wrap; column-gap:12px; row-gap:4px; }
-    .prof-meta-item { font-size:12px; color:#5A5A6E; display:flex; align-items:center; gap:3px; }
-    .prof-meta-score { font-size:18px; color:#7C3AED; font-weight:700; }
-    .prof-score-chip { display:inline-flex; align-items:center; background:#F3F0FF; color:#6D28D9; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:2px 10px; border-radius:20px; border:1px solid rgba(109,40,217,0.2); margin-bottom:6px; }
+    .prof-meta-item { font-size:12px; color:#6B6560; display:flex; align-items:center; gap:3px; }
+    .prof-meta-score { font-size:18px; color:#C9636A; font-weight:700; }
+    .prof-score-chip { display:inline-flex; align-items:center; background:#FFF5F2; color:#A84E55; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:2px 10px; border-radius:20px; border:1px solid rgba(201,99,106,0.2); margin-bottom:6px; }
     .prof-rule { border:none; border-top:1px solid #EBEBEB; margin:14px 0 16px; }
 
     .prof-section { margin-bottom:12px; background:#FAFAFA; border-radius:12px; padding:14px 16px; border:1px solid rgba(0,0,0,0.04); }
-    .prof-label { font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#8B5CF6; margin:0 0 10px; }
+    .prof-label { font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#C9636A; margin:0 0 10px; font-family:'Plus Jakarta Sans',sans-serif; }
     .prof-about { font-size:15px !important; color:#2D2D3F; line-height:1.8; margin:0; }
 
     .prof-pills { display:flex; flex-wrap:wrap; gap:6px; }
     .prof-pill {
-        background: linear-gradient(135deg, #F3F0FF, #EDE8FF);
-        color:#6D28D9; font-size:12px; font-weight:600;
+        background: linear-gradient(135deg, #FFF5F2, #FFE8E4);
+        color:#A84E55; font-size:12px; font-weight:600;
         padding:5px 14px; border-radius:20px;
-        border:1px solid rgba(109,40,217,0.18);
-        box-shadow: 0 1px 3px rgba(109,40,217,0.08);
+        border:1px solid rgba(201,99,106,0.18);
+        box-shadow: 0 1px 3px rgba(201,99,106,0.08);
+        font-family:'Plus Jakarta Sans',sans-serif;
     }
 
     .prof-thoughts-wrap { display:flex; flex-direction:column; gap:8px; }
@@ -464,8 +466,8 @@ def show_profile_dialog(c: dict, score=None):
 
     div[data-testid="stExpander"] { background:#FFFFFF !important; border:1px solid #EBEBEB !important; border-radius:12px !important; box-shadow:none !important; margin-bottom:0 !important; }
     div[data-testid="stExpander"] summary { background:#FFFFFF !important; font-size:13px !important; font-weight:600 !important; color:#4A4A5A !important; text-transform:none !important; letter-spacing:0 !important; padding:12px 16px !important; border-radius:12px !important; }
-    div[data-testid="stExpander"] summary:hover { background:#F7F5FF !important; color:#6D28D9 !important; }
-    div[data-testid="stExpander"] svg { color:#8B5CF6 !important; }
+    div[data-testid="stExpander"] summary:hover { background:#FFF5F2 !important; color:#C9636A !important; }
+    div[data-testid="stExpander"] svg { color:#C9636A !important; }
     div[data-testid="stDialog"] [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:first-child { margin-top:-16px !important; }
 
     div[data-testid="stDialog"] button[kind="primary"] {
@@ -487,7 +489,7 @@ def show_profile_dialog(c: dict, score=None):
     """, unsafe_allow_html=True)
 
     score_item = f'<span class="prof-meta-score">✦ {score:.1f}%</span>' if score else ""
-    _translate = '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5A5A6E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>'
+    _translate = '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6560" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>'
     age    = c.get("age", "")
     gender = c.get("gender", "")
     meta_html = (
@@ -575,7 +577,7 @@ def show_profile_dialog(c: dict, score=None):
             f'<span style="font-size:22px;">✅</span>'
             f'<div>'
             f'<div style="font-size:13px;font-weight:600;color:#065F46;">{sent_title}</div>'
-            f'<div style="font-size:12px;color:#5A5A6E;margin-top:2px;">{sent_body}</div>'
+            f'<div style="font-size:12px;color:#6B6560;margin-top:2px;">{sent_body}</div>'
             f'</div></div>',
             unsafe_allow_html=True,
         )
@@ -589,7 +591,7 @@ def show_profile_dialog(c: dict, score=None):
             f'<span style="font-size:22px;">🚫</span>'
             f'<div>'
             f'<div style="font-size:13px;font-weight:600;color:#B91C1C;">Fully booked</div>'
-            f'<div style="font-size:12px;color:#5A5A6E;margin-top:2px;">{name} is at full capacity right now. '
+            f'<div style="font-size:12px;color:#6B6560;margin-top:2px;">{name} is at full capacity right now. '
             f'Please explore another counselor — you can still view this profile anytime.</div>'
             f'</div></div>',
             unsafe_allow_html=True,
@@ -664,12 +666,12 @@ def show_request_success_dialog(name: str):
                 margin:0 auto 18px;box-shadow:0 8px 24px rgba(249,115,22,0.35);">
                 <span style="font-size:30px;line-height:1;">✉️</span>
             </div>
-            <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#1A1A2E;margin-bottom:10px;">
+            <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:#1C1917;margin-bottom:10px;">
                 Your request is on its way!
             </div>
-            <div style="font-size:13px;color:#5A5A6E;line-height:1.75;max-width:280px;margin:0 auto;">
+            <div style="font-size:13px;color:#6B6560;line-height:1.75;max-width:280px;margin:0 auto;font-family:'Plus Jakarta Sans',sans-serif;">
                 We've received your request and will connect you with
-                <strong style="color:#1A1A2E;">{name}</strong> via email within 1–2 business days.
+                <strong style="color:#1C1917;">{name}</strong> via email within 1-2 business days.
             </div>
         </div>
         """,
@@ -928,28 +930,28 @@ def show_matching_page():
 
     # ── STEP 0: Welcome ──────────────────────────────────────────────────────
     if st.session_state.quiz_step == 0:
-        st.markdown("<h3 style='color: #1A1A2E; text-align: center; margin-bottom: 10px; font-family: \"DM Serif Display\", serif;'>Let's find someone who truly gets you.</h3>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #5A5A6E; margin-bottom: 30px;'>Take a short, guided questionnaire so we can match you with the right counselor based on your unique needs and preferences.</p>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #1C1917; text-align: center; margin-bottom: 10px; font-family: \"Fraunces\", serif; font-weight: 600;'>Let's find someone who truly gets you.</h3>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #6B6560; margin-bottom: 30px; font-family: \"Plus Jakarta Sans\", sans-serif;'>Take a short, guided questionnaire so we can match you with the right counselor based on your unique needs and preferences.</p>", unsafe_allow_html=True)
         st.markdown(
             """
             <style>
             div[data-testid="stButton"] button[kind="primary"] {
-                background-image: radial-gradient(134.26% 244.64% at 42.92% -80.36%, #B301B3 25.45%, #381DBD 100%) !important;
-                background-size: 100% 100% !important;
-                border: 1px solid #8043C8 !important;
-                transition: background-size 150ms ease-in-out, box-shadow 150ms ease-in-out, transform 100ms ease !important;
+                background: #1A2332 !important;
+                border: none !important;
+                transition: background 150ms ease-in-out, box-shadow 150ms ease-in-out, transform 100ms ease !important;
                 font-size: 16px !important;
                 letter-spacing: 0.03em !important;
                 padding: 14px 28px !important;
                 font-weight: 700 !important;
+                font-family: 'Plus Jakarta Sans', sans-serif !important;
             }
             div[data-testid="stButton"] button[kind="primary"]:hover {
-                background-size: 100% 200% !important;
-                box-shadow: 0px 0px 8px 0px rgba(180,40,180,0.35), 0px 0px 24px 0px rgba(102,43,223,0.35) !important;
+                background: #C9636A !important;
+                box-shadow: 0px 0px 8px 0px rgba(201,99,106,0.3), 0px 0px 24px 0px rgba(201,99,106,0.2) !important;
             }
             div[data-testid="stButton"] button[kind="primary"]:active {
                 transform: scale(0.95) !important;
-                box-shadow: 0px 0px 11.7px 0px rgba(180,40,180,0.50), 0px 0px 28.8px 0px rgba(102,43,223,0.50) !important;
+                background: #A84E55 !important;
             }
             </style>
             """,
@@ -968,19 +970,19 @@ def show_matching_page():
             <div style="display:flex; justify-content:center; align-items:center; gap:0; max-width:480px; margin:0 auto 8px;">
                 <div style="flex:1; text-align:center; padding:12px 8px;">
                     <div style="font-size:20px; margin-bottom:6px;">🧩</div>
-                    <div style="font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:3px;">3 Quick Steps</div>
+                    <div style="font-size:13px; font-weight:600; color:#1C1917; margin-bottom:3px; font-family:'Plus Jakarta Sans',sans-serif;">3 Quick Steps</div>
                     <div style="font-size:12px; color:#8B8B9A; line-height:1.5;">Answer a few short questions about yourself</div>
                 </div>
                 <div style="width:1px; height:60px; background:rgba(0,0,0,0.08); flex-shrink:0;"></div>
                 <div style="flex:1; text-align:center; padding:12px 8px;">
                     <div style="font-size:20px; margin-bottom:6px;">🤖</div>
-                    <div style="font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:3px;">AI-Powered Matching</div>
+                    <div style="font-size:13px; font-weight:600; color:#1C1917; margin-bottom:3px; font-family:'Plus Jakarta Sans',sans-serif;">AI-Powered Matching</div>
                     <div style="font-size:12px; color:#8B8B9A; line-height:1.5;">Our model ranks counselors by predicted fit</div>
                 </div>
                 <div style="width:1px; height:60px; background:rgba(0,0,0,0.08); flex-shrink:0;"></div>
                 <div style="flex:1; text-align:center; padding:12px 8px;">
                     <div style="font-size:20px; margin-bottom:6px;">✨</div>
-                    <div style="font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:3px;">Personalised Results</div>
+                    <div style="font-size:13px; font-weight:600; color:#1C1917; margin-bottom:3px; font-family:'Plus Jakarta Sans',sans-serif;">Personalised Results</div>
                     <div style="font-size:12px; color:#8B8B9A; line-height:1.5;">See why each counselor is right for you</div>
                 </div>
             </div>
@@ -1099,7 +1101,7 @@ def show_matching_page():
         counselor_name = best_c.get("name", "Your Top Match").upper()
 
         # Paired header row
-        st.markdown('<p style="color:#6D28D9; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'DM Sans\', sans-serif; font-weight:600; margin:8px 0 24px;">YOUR MATCHES</p>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#C9636A; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'Plus Jakarta Sans\', sans-serif; font-weight:700; margin:8px 0 24px;">YOUR MATCHES</p>', unsafe_allow_html=True)
 
         col1, col2 = st.columns(2, gap="large")
         with col1:
@@ -1169,8 +1171,8 @@ def show_matching_page():
 
                         st.markdown(
                             f"""
-                            <div style="font-size:11px; font-weight:600; color:#8B5CF6; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;">Feature contributions</div>
-                            <div style="display:flex; align-items:center; gap:8px; padding:0 0 6px; border-bottom:2px solid #E8E4F0;">
+                            <div style="font-size:11px; font-weight:600; color:#C9636A; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px; font-family:'Plus Jakarta Sans',sans-serif;">Feature contributions</div>
+                            <div style="display:flex; align-items:center; gap:8px; padding:0 0 6px; border-bottom:2px solid #F0E8E6;">
                                 <div style="flex:2; min-width:0; font-size:11px; color:#A0A0B8; text-align:right;">Feature</div>
                                 <div style="width:32px; font-size:11px; color:#A0A0B8; text-align:right; flex-shrink:0;">Value</div>
                                 <div style="flex:1.5; min-width:30px; font-size:11px; color:#A0A0B8; text-align:center;">Impact</div>

@@ -3,8 +3,8 @@ import io
 from pathlib import Path
 
 _AVATAR_COLORS = [
-    "#8B5CF6", "#F97316", "#10B981",
-    "#3B82F6", "#EC4899", "#0EA5E9",
+    "#C9636A", "#C4954A", "#4A8C6A",
+    "#1A2332", "#A84E55", "#7A9E8A",
 ]
 
 _IMG_DIR = Path(__file__).parent.parent / "assets" / "profile"
@@ -59,7 +59,7 @@ def avatar_html(name: str, image: str | None, size: int = 72, radius: int = 14) 
     return (
         f'<div style="width:{size}px;height:{size}px;border-radius:{radius}px;'
         f'background:{color};display:flex;align-items:center;justify-content:center;'
-        f'font-family:DM Sans,sans-serif;font-size:{font}px;font-weight:700;'
+        f'font-family:Plus Jakarta Sans,sans-serif;font-size:{font}px;font-weight:700;'
         f'color:#fff;flex-shrink:0;letter-spacing:0.04em;">'
         f'{initials}</div>'
     )

@@ -6,29 +6,32 @@ def show_login_page():
     st.markdown(
         """
         <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
         div[data-testid="stForm"] {
             background-color: #FFFFFF !important;
             border-radius: 20px !important;
             padding: 48px 40px !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04) !important;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06) !important;
             border: 1px solid rgba(0,0,0,0.06) !important;
             margin-top: 16px;
         }
         .login-title {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 32px;
-            font-weight: 700;
-            color: #1A1A2E;
+            font-weight: 600;
+            color: #1C1917;
             margin-bottom: 8px;
             text-align: center;
-            line-height: 1.2;
+            line-height: 1.15;
         }
         .login-subtitle {
             font-size: 15px;
-            color: #5A5A6E;
+            color: #9C9790;
             line-height: 1.6;
             text-align: center;
             margin-bottom: 32px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         </style>
         """,

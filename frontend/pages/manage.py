@@ -19,7 +19,7 @@ def inject_styles():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
         /* ── Action cards row ─────────────────────────────────────────── */
         .mg-action-grid {
@@ -33,34 +33,38 @@ def inject_styles():
             border-radius: 16px;
             padding: 24px 28px;
             border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
         }
         .mg-stat-eyebrow {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #8B5CF6;
+            color: #C9636A;
             margin-bottom: 12px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .mg-stat-value {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 40px;
             line-height: 1;
-            color: #1A1A2E;
+            color: #1C1917;
             margin-bottom: 6px;
+            font-weight: 600;
         }
         .mg-stat-label {
             font-size: 13px;
-            color: #8B8B9A;
+            color: #9C9790;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .mg-action-label {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #8B8B9A;
+            color: #9C9790;
             margin-bottom: 14px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* ── Table card ───────────────────────────────────────────────── */
@@ -69,19 +73,21 @@ def inject_styles():
             border-radius: 16px;
             padding: 18px 24px;
             border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
             margin-bottom: 20px;
         }
         .mg-card-title {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 20px;
-            color: #1A1A2E;
+            color: #1C1917;
             margin: 0 0 4px;
+            font-weight: 600;
         }
         .mg-card-copy {
             font-size: 14px;
-            color: #8B8B9A;
+            color: #9C9790;
             margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* ── st.container(border=True) styled as action card ─────────── */
@@ -89,36 +95,39 @@ def inject_styles():
             background: #FFFFFF !important;
             border-radius: 16px !important;
             border: 1px solid rgba(0,0,0,0.06) !important;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03) !important;
             padding: 8px 4px !important;
         }
 
-        /* ── Button overrides (purple primary, ghost secondary) ───────── */
+        /* ── Button overrides (navy primary, ghost secondary) ─────────── */
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"],
         div[data-testid="stButton"] button[kind="primary"] {
-            background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
+            background: #1A2332 !important;
             color: #FFFFFF !important;
             border: none !important;
             border-radius: 10px !important;
             font-weight: 600 !important;
-            box-shadow: 0 4px 12px rgba(124,58,237,0.3) !important;
+            box-shadow: 0 4px 12px rgba(14,24,35,0.25) !important;
             transition: all 0.2s ease !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover {
-            box-shadow: 0 6px 18px rgba(124,58,237,0.4) !important;
+            background: #C9636A !important;
+            box-shadow: 0 6px 18px rgba(201,99,106,0.35) !important;
             transform: translateY(-1px) !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="secondary"] {
             border-radius: 10px !important;
-            border: 1.5px solid #E5E2DC !important;
+            border: 1.5px solid #E8E2DC !important;
             background: #FFFFFF !important;
-            color: #2D2D3F !important;
+            color: #1C1917 !important;
             font-weight: 600 !important;
             transition: all 0.18s ease !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="secondary"]:hover {
-            border-color: #8B5CF6 !important;
-            color: #7C3AED !important;
+            border-color: #C9636A !important;
+            color: #C9636A !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button:disabled {
             opacity: 0.4 !important;
@@ -345,13 +354,13 @@ def show_manage_page():
 
     st.markdown(
         """
-        <div style="position: relative; overflow: hidden; background-color: #FAFAFF; background-image: radial-gradient(at 0% 0%, #E9DFFF 0px, transparent 60%), radial-gradient(at 100% 100%, #F0E6FF 0px, transparent 60%), radial-gradient(at 100% 0%, #FFFFFF 0px, transparent 50%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(124,58,237,0.15); box-shadow: 0 16px 32px -8px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 236px;">
+        <div style="position: relative; overflow: hidden; background-color: #FFF9F7; background-image: radial-gradient(at 0% 0%, #FFE0DC 0px, transparent 55%), radial-gradient(at 100% 100%, #FFF0EB 0px, transparent 55%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(201,99,106,0.14); box-shadow: 0 16px 32px -8px rgba(201,99,106,0.1), inset 0 1px 0 rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 220px;">
             <div style="position: relative; z-index: 2; max-width: 65%;">
-                <div style="color: #8B5CF6; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.25); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block;">Directory</div>
-                <div style="font-family: 'DM Serif Display', serif; font-size: 42px; color: #1A1A2E; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Counselor Management</div>
-                <p style="font-size: 16px; color: #4A4A5C; margin: 0; line-height: 1.65; max-width: 480px;">Review counselor records, add new entries, and update existing profiles in one place.</p>
+                <div style="color: #C9636A; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(201,99,106,0.1); border: 1px solid rgba(201,99,106,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Directory</div>
+                <div style="font-family: 'Fraunces', serif; font-size: 42px; color: #1C1917; margin-bottom: 16px; line-height: 1.1; letter-spacing: -0.5px; font-weight: 600;">Counselor Management</div>
+                <p style="font-size: 16px; color: #6B6560; margin: 0; line-height: 1.65; max-width: 480px; font-family: 'Plus Jakarta Sans', sans-serif;">Review counselor records, add new entries, and update existing profiles in one place.</p>
             </div>
-            <div style="font-size: 100px; line-height: 1; position: absolute; right: 20px; bottom: -15px; z-index: 1; opacity: 0.15; transform: rotate(-10deg); pointer-events: none;">
+            <div style="font-size: 100px; line-height: 1; position: absolute; right: 20px; bottom: -15px; z-index: 1; opacity: 0.12; transform: rotate(-10deg); pointer-events: none;">
                 🗂️
             </div>
         </div>

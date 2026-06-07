@@ -14,12 +14,12 @@ from frontend.pages.counselors import show_counselors_page
 if "login" in st.query_params:
     target = st.query_params["login"]
     del st.query_params["login"]
-    
+
     if target == "client":
         st.session_state.role = "client"
     elif target == "admin":
         st.session_state.role = "admin_login"
-        
+
     st.rerun()
 
 
@@ -27,14 +27,14 @@ def inject_app_styles():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
         html, body, [class*="css"] {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         .stApp {
-            background: #F7F5F0;
+            background: #FFF9F7;
         }
 
         [data-stale="true"] { opacity: 0 !important; transition: none !important; }
@@ -53,17 +53,17 @@ def inject_app_styles():
         div[data-testid="stNumberInput"] input,
         div[data-testid="stSelectbox"] > div > div {
             border-radius: 10px !important;
-            border: 1.5px solid #E5E2DC !important;
-            background: #FAFAF8 !important;
-            font-family: 'DM Sans', sans-serif !important;
+            border: 1.5px solid #E8E2DC !important;
+            background: #FFFAF8 !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-size: 14px !important;
             transition: border-color 0.2s;
         }
         div[data-testid="stTextInput"] input:focus,
         div[data-testid="stNumberInput"] input:focus,
         div[data-testid="stSelectbox"] > div > div:focus-within {
-            border-color: #8B5CF6 !important;
-            box-shadow: 0 0 0 3px rgba(139,92,246,0.1) !important;
+            border-color: #C9636A !important;
+            box-shadow: 0 0 0 3px rgba(201,99,106,0.1) !important;
         }
 
         div[data-testid="stModal"] > div > div {
@@ -72,22 +72,19 @@ def inject_app_styles():
 
         /* ── Sidebar styling ──────────────────────────────────────────── */
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #1A1A2E 0%, #2D2D45 100%);
-            border-right: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        /* Apply font to text components but prevent icon override */
-        section[data-testid="stSidebar"] .stMarkdown p, 
-        section[data-testid="stSidebar"] .stMarkdown div, 
-        section[data-testid="stSidebar"] .stRadio p, 
-        section[data-testid="stSidebar"] strong {
-            color: rgba(255,255,255,0.95);
-            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(180deg, #0E1823 0%, #1A2B3C 100%);
+            border-right: 1px solid rgba(255,255,255,0.04);
         }
 
-        /* ── Nav radio group — fill full sidebar width ────────────────── */
-        /* Streamlit gives the radio stElementContainer width="fit-content" (confirmed via DOM).
-           All other sidebar elements get width="100%". Target it directly. */
+        section[data-testid="stSidebar"] .stMarkdown p,
+        section[data-testid="stSidebar"] .stMarkdown div,
+        section[data-testid="stSidebar"] .stRadio p,
+        section[data-testid="stSidebar"] strong {
+            color: rgba(255,255,255,0.95);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* ── Nav radio group ─────────────────────────────────────────── */
         section[data-testid="stSidebar"] [data-testid="stElementContainer"][width="fit-content"],
         section[data-testid="stSidebar"] [data-testid="stRadio"],
         section[data-testid="stSidebar"] [role="radiogroup"] {
@@ -97,20 +94,17 @@ def inject_app_styles():
             display: flex !important;
             flex-direction: column !important;
             align-items: stretch !important;
-            gap: 6px !important;
+            gap: 4px !important;
         }
 
-        /* Hide the radio bullet — Streamlit renders this as label[data-baseweb="radio"]
-           NOT div[role="radio"], so we target the correct element here */
         section[data-testid="stSidebar"] [data-baseweb="radio"] > div:first-child {
             display: none !important;
         }
 
-        /* Style each nav item as a clean row */
         section[data-testid="stSidebar"] [data-baseweb="radio"] {
             padding: 11px 16px !important;
             background: rgba(255,255,255,0.04) !important;
-            border: 1px solid rgba(255,255,255,0.08) !important;
+            border: 1px solid rgba(255,255,255,0.06) !important;
             border-radius: 10px !important;
             transition: background 0.18s ease, border-color 0.18s ease !important;
             margin-bottom: 0 !important;
@@ -120,21 +114,21 @@ def inject_app_styles():
             align-items: center !important;
         }
         section[data-testid="stSidebar"] [data-baseweb="radio"]:hover {
-            background: rgba(255,255,255,0.09) !important;
-            border-color: rgba(139,92,246,0.45) !important;
+            background: rgba(255,255,255,0.08) !important;
+            border-color: rgba(201,99,106,0.35) !important;
         }
-        /* Active nav item — :has(input:checked) targets the selected radio */
         section[data-testid="stSidebar"] [data-baseweb="radio"]:has(input:checked) {
-            background: rgba(139,92,246,0.18) !important;
-            border-color: rgba(139,92,246,0.65) !important;
-            box-shadow: 0 2px 10px rgba(139,92,246,0.15) !important;
+            background: rgba(201,99,106,0.15) !important;
+            border-color: rgba(201,99,106,0.55) !important;
+            box-shadow: 0 2px 10px rgba(201,99,106,0.1) !important;
         }
         section[data-testid="stSidebar"] [data-baseweb="radio"] p,
         section[data-testid="stSidebar"] [data-baseweb="radio"] span {
             font-size: 14px !important;
             font-weight: 600 !important;
             margin: 0 !important;
-            color: rgba(255,255,255,0.9) !important;
+            color: rgba(255,255,255,0.8) !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         section[data-testid="stSidebar"] [data-baseweb="radio"]:has(input:checked) p,
         section[data-testid="stSidebar"] [data-baseweb="radio"]:has(input:checked) span {
@@ -153,13 +147,11 @@ def inject_app_styles():
             flex-direction: column !important;
             min-height: 0 !important;
         }
-        /* Make every stVerticalBlock in the sidebar a flex column */
         [data-testid="stSidebarUserContent"] [data-testid="stVerticalBlock"] {
             flex: 1 !important;
             display: flex !important;
             flex-direction: column !important;
         }
-        /* The spacer element's Streamlit wrapper grows to fill remaining space */
         [data-testid="stSidebarUserContent"] [data-testid="stElementContainer"]:has(.sidebar-spacer),
         [data-testid="stSidebarUserContent"] .element-container:has(.sidebar-spacer) {
             flex: 1 !important;
@@ -170,18 +162,20 @@ def inject_app_styles():
             width: 100%;
         }
 
-        /* ── Primary buttons — keep purple without config.toml ──────── */
+        /* ── Primary buttons ─────────────────────────────────────────── */
         button[kind="primary"] {
-            background-color: #7C3AED !important;
-            border: 1px solid #6D28D9 !important;
+            background-color: #1A2332 !important;
+            border: 1px solid #0E1823 !important;
             color: #FFFFFF !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-weight: 600 !important;
         }
         button[kind="primary"]:hover {
-            background-color: #6D28D9 !important;
-            border-color: #5B21B6 !important;
+            background-color: #C9636A !important;
+            border-color: #B85960 !important;
         }
         button[kind="primary"]:active {
-            background-color: #5B21B6 !important;
+            background-color: #A84E55 !important;
         }
 
         /* ── Logout — destructive ghost button ────────────────────────── */
@@ -201,35 +195,34 @@ def inject_app_styles():
             color: #EF4444 !important;
         }
 
-        /* ── Sidebar collapse (<<) button inside sidebar ──────────────── */
+        /* ── Sidebar collapse/expand buttons ─────────────────────────── */
         button[aria-label="Collapse sidebar"],
         section[data-testid="stSidebar"] button[data-testid="baseButton-headerNoPadding"] {
-            background: rgba(139,92,246,0.25) !important;
+            background: rgba(201,99,106,0.2) !important;
             color: #FFFFFF !important;
-            border: 1.5px solid rgba(139,92,246,0.5) !important;
+            border: 1.5px solid rgba(201,99,106,0.45) !important;
             border-radius: 8px !important;
             opacity: 1 !important;
         }
         button[aria-label="Collapse sidebar"]:hover,
         section[data-testid="stSidebar"] button[data-testid="baseButton-headerNoPadding"]:hover {
-            background: rgba(139,92,246,0.45) !important;
-            border-color: #8B5CF6 !important;
+            background: rgba(201,99,106,0.4) !important;
+            border-color: #C9636A !important;
         }
 
-        /* ── Sidebar expand (>>) button shown when sidebar is closed ───── */
         button[data-testid="collapsedControl"],
         button[aria-label="Expand sidebar"] {
-            background: #8B5CF6 !important;
+            background: #C9636A !important;
             color: #FFFFFF !important;
             border-radius: 0 10px 10px 0 !important;
             border: none !important;
-            box-shadow: 2px 0 14px rgba(139,92,246,0.4) !important;
+            box-shadow: 2px 0 14px rgba(201,99,106,0.4) !important;
             opacity: 1 !important;
         }
         button[data-testid="collapsedControl"]:hover,
         button[aria-label="Expand sidebar"]:hover {
-            background: #7C3AED !important;
-            box-shadow: 2px 0 18px rgba(139,92,246,0.55) !important;
+            background: #B85960 !important;
+            box-shadow: 2px 0 18px rgba(201,99,106,0.55) !important;
         }
         button[data-testid="collapsedControl"] svg,
         button[aria-label="Collapse sidebar"] svg,
@@ -240,16 +233,14 @@ def inject_app_styles():
 
         /* ── Sidebar divider ──────────────────────────────────────────── */
         section[data-testid="stSidebar"] hr {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             margin: 20px 0;
         }
 
         /* ── Landing page ─────────────────────────────────────────────── */
-
-        /* Shared button */
         .land-cta-btn {
             display: inline-block;
-            background: #8B5CF6;
+            background: #C9636A;
             color: #FFFFFF !important;
             font-size: 15px;
             font-weight: 700;
@@ -257,19 +248,19 @@ def inject_app_styles():
             border-radius: 50px;
             text-decoration: none !important;
             transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-            box-shadow: 0 4px 20px rgba(139,92,246,0.4);
+            box-shadow: 0 4px 20px rgba(201,99,106,0.4);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: 0.01em;
         }
         .land-cta-btn:hover {
-            background: #7C3AED;
-            box-shadow: 0 8px 28px rgba(139,92,246,0.55);
-            transform: translateY(-1px);
+            background: #B85960;
+            box-shadow: 0 8px 28px rgba(201,99,106,0.55);
+            transform: translateY(-2px);
         }
 
-        /* Full-bleed band wrapper */
         .land-band {
             padding: 80px clamp(24px, 8vw, 120px);
         }
-        /* Inner max-width centering */
         .land-inner {
             max-width: 1080px;
             margin: 0 auto;
@@ -277,7 +268,7 @@ def inject_app_styles():
 
         /* Hero band */
         .land-hero-band {
-            background: #0F0E1A;
+            background: #0E1823;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -286,16 +277,16 @@ def inject_app_styles():
             content: '';
             position: absolute;
             top: -120px; right: -80px;
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 60%);
+            width: 520px; height: 520px;
+            background: radial-gradient(circle, rgba(201,99,106,0.14) 0%, transparent 60%);
             pointer-events: none;
         }
         .land-hero-band::after {
             content: '';
             position: absolute;
             bottom: -80px; left: -40px;
-            width: 350px; height: 350px;
-            background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 60%);
+            width: 380px; height: 380px;
+            background: radial-gradient(circle, rgba(196,149,74,0.1) 0%, transparent 60%);
             pointer-events: none;
         }
         .land-hero-eyebrow {
@@ -304,50 +295,55 @@ def inject_app_styles():
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #A78BFA;
-            background: rgba(167,139,250,0.12);
-            border: 1px solid rgba(167,139,250,0.25);
+            color: #E8B4B8;
+            background: rgba(201,99,106,0.12);
+            border: 1px solid rgba(201,99,106,0.28);
             border-radius: 20px;
             padding: 5px 16px;
             margin-bottom: 28px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .land-hero-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 58px;
-            line-height: 1.08;
+            font-family: 'Fraunces', serif;
+            font-size: 60px;
+            line-height: 1.06;
             color: #FFFFFF;
             margin: 0 auto 24px;
             letter-spacing: -1.5px;
-            max-width: 720px;
+            max-width: 740px;
+            font-weight: 600;
         }
         .land-hero-copy {
             font-size: 18px;
-            color: rgba(255,255,255,0.52);
+            color: rgba(255,255,255,0.48);
             max-width: 500px;
             line-height: 1.72;
-            margin: 0 auto 44px;
-            text-align: center;
+            margin: 0 auto 44px !important;
+            text-align: center !important;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* Steps band */
         .land-steps-band {
-            background: #F5F3FF;
+            background: #FFF5F2;
         }
         .land-band-label {
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #8B5CF6;
+            color: #C9636A;
             text-align: center;
             margin-bottom: 12px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .land-band-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 36px;
-            color: #1A1A2E;
+            font-family: 'Fraunces', serif;
+            font-size: 38px;
+            color: #1C1917;
             text-align: center;
             margin: 0 0 48px;
+            font-weight: 600;
         }
         .land-steps {
             display: grid;
@@ -357,29 +353,33 @@ def inject_app_styles():
         .land-step {
             padding: 36px 32px;
             background: #FFFFFF;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px rgba(139,92,246,0.06);
+            border-radius: 18px;
+            box-shadow: 0 2px 16px rgba(201,99,106,0.06);
+            border: 1px solid rgba(201,99,106,0.08);
         }
         .land-step-num {
-            font-family: 'DM Serif Display', serif;
-            font-size: 44px;
+            font-family: 'Fraunces', serif;
+            font-size: 48px;
             line-height: 1;
             margin-bottom: 20px;
+            font-weight: 300;
         }
-        .land-step-num.n1 { color: #C4B5FD; }
-        .land-step-num.n2 { color: #8B5CF6; }
-        .land-step-num.n3 { color: #5B21B6; }
+        .land-step-num.n1 { color: #E8C4A8; }
+        .land-step-num.n2 { color: #C9636A; }
+        .land-step-num.n3 { color: #7A3A3F; }
         .land-step-title {
             font-size: 16px;
             font-weight: 700;
-            color: #1A1A2E;
+            color: #1C1917;
             margin-bottom: 10px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .land-step-copy {
             font-size: 14px;
-            color: #5A5A6E;
-            line-height: 1.7;
+            color: #6B6560;
+            line-height: 1.72;
             margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* Why band */
@@ -402,25 +402,27 @@ def inject_app_styles():
             margin-bottom: 20px;
             line-height: 1;
         }
-        .land-why-icon.purple { background: rgba(139,92,246,0.12); }
-        .land-why-icon.green  { background: rgba(16,185,129,0.12); }
-        .land-why-icon.blue   { background: rgba(59,130,246,0.12); }
+        .land-why-icon.rose { background: rgba(201,99,106,0.1); }
+        .land-why-icon.gold { background: rgba(196,149,74,0.12); }
+        .land-why-icon.sage { background: rgba(74,140,106,0.1); }
         .land-why-title {
             font-size: 16px;
             font-weight: 700;
-            color: #1A1A2E;
+            color: #1C1917;
             margin-bottom: 10px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .land-why-copy {
             font-size: 14px;
-            color: #5A5A6E;
+            color: #6B6560;
             line-height: 1.72;
             margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* CTA band */
         .land-cta-band {
-            background: linear-gradient(135deg, #0F0E1A 0%, #1E1048 100%);
+            background: linear-gradient(135deg, #0E1823 0%, #1A2B3C 100%);
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -430,43 +432,44 @@ def inject_app_styles():
             position: absolute;
             top: -80px; right: -80px;
             width: 360px; height: 360px;
-            background: radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 60%);
+            background: radial-gradient(circle, rgba(201,99,106,0.18) 0%, transparent 60%);
             pointer-events: none;
         }
         .land-cta-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 38px;
+            font-family: 'Fraunces', serif;
+            font-size: 40px;
             color: #FFFFFF;
             margin: 0 0 14px;
+            font-weight: 600;
         }
         .land-cta-copy {
             font-size: 16px;
             color: rgba(255,255,255,0.48);
             margin: 0 0 36px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* Staff link */
         .land-staff-link {
-            background: #FFFFFF;
+            background: #FFF9F7;
             text-align: center;
             padding: 18px 0 20px;
             border-top: 1px solid rgba(0,0,0,0.06);
         }
         .land-staff-link a {
             font-size: 12px;
-            color: #C4C4D0 !important;
+            color: #9C9790 !important;
             text-decoration: none !important;
             letter-spacing: 0.04em;
             transition: color 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .land-staff-link a:hover { color: #8B5CF6 !important; }
+        .land-staff-link a:hover { color: #C9636A !important; }
 
         @media (max-width: 768px) {
-            .hero-title { font-size: 32px; }
-            .landing-title { font-size: 22px; }
             .land-hero-title { font-size: 36px; }
+            .land-band-title { font-size: 28px; }
             .land-steps, .land-why-grid { grid-template-columns: 1fr; }
-            .land-step:first-child, .land-step:last-child { border-radius: 16px; }
         }
         </style>
         """,
@@ -479,7 +482,6 @@ inject_app_styles()
 
 
 if "role" not in st.session_state:
-    # Override Streamlit container so sections bleed edge-to-edge
     st.markdown(
         """
         <style>
@@ -500,6 +502,7 @@ if "role" not in st.session_state:
             <div class="land-inner" style="position:relative;z-index:2;">
                 <div class="land-hero-eyebrow">AI-Powered Counselor Matching</div>
                 <div class="land-hero-title">Find the right counselor,<br>matched just for you</div>
+                <p class="land-hero-copy">Answer a few questions. Our model does the rest — surfacing your best-fit counselor from our verified directory.</p>
                 <a href="/?login=client" target="_self" class="land-cta-btn">Find your counselor &rarr;</a>
             </div>
         </div>
@@ -536,17 +539,17 @@ if "role" not in st.session_state:
                 <div class="land-band-title">Built around you</div>
                 <div class="land-why-grid">
                     <div>
-                        <div class="land-why-icon purple">✦</div>
+                        <div class="land-why-icon rose">✦</div>
                         <div class="land-why-title">Personalised Matching</div>
                         <p class="land-why-copy">Not a random list — every recommendation is scored for compatibility with your specific profile, concerns, and preferences.</p>
                     </div>
                     <div>
-                        <div class="land-why-icon green">◎</div>
+                        <div class="land-why-icon gold">◎</div>
                         <div class="land-why-title">Full Transparency</div>
                         <p class="land-why-copy">We don't just show you a match — we explain exactly why each counselor is suitable for you, so you can make an informed choice.</p>
                     </div>
                     <div>
-                        <div class="land-why-icon blue">⬡</div>
+                        <div class="land-why-icon sage">⬡</div>
                         <div class="land-why-title">No Account Needed</div>
                         <p class="land-why-copy">No sign-up, no password, no tracking. Just answer a few questions and get matched instantly — your privacy is respected.</p>
                     </div>
@@ -634,28 +637,38 @@ def _back_dialog():
             st.rerun()
 
 
+# ── Sidebar brand wordmark ────────────────────────────────────────────────────
+st.sidebar.markdown(
+    """
+    <div style="padding: 4px 2px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 20px;">
+        <div style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: #FFFFFF; letter-spacing: -0.3px; line-height: 1;">CC Match</div>
+        <div style="font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 3px; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.03em;">Counselor Matching System</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 if role == "admin":
     st.sidebar.markdown(
-        '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Admin Navigation</div>',
-        unsafe_allow_html=True
+        '<div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: rgba(201,99,106,0.8); text-transform: uppercase; margin-bottom: 10px; font-family: \'Plus Jakarta Sans\', sans-serif;">Admin</div>',
+        unsafe_allow_html=True,
     )
     page = st.sidebar.radio("Navigation", ["Match a Client", "Counselor Management", "Our Counselors", "Review Requests", "Enquiries", "Model Management"], label_visibility="collapsed")
 else:
     st.sidebar.markdown(
-        '<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #A78BFA; text-transform: uppercase; margin-bottom: 12px;">Client Navigation</div>',
-        unsafe_allow_html=True
+        '<div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: rgba(201,99,106,0.8); text-transform: uppercase; margin-bottom: 10px; font-family: \'Plus Jakarta Sans\', sans-serif;">Navigation</div>',
+        unsafe_allow_html=True,
     )
     page = st.sidebar.radio("Navigation", ["Find a Counselor", "Our Counselors", "Chat with Mira", "About Us", "Contact Us"], label_visibility="collapsed")
 
-# Invisible spacer — pushes the footer to the bottom of the sidebar
 st.sidebar.markdown('<div class="sidebar-spacer" style="flex-grow: 1; min-height: 50px;"></div>', unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
 
 if role == "admin":
     st.sidebar.markdown(
-        f'<div style="font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 12px; padding: 0 2px;">Signed in as <strong style="color:rgba(255,255,255,0.9)">Admin</strong></div>',
-        unsafe_allow_html=True
+        '<div style="font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 12px; padding: 0 2px; font-family: \'Plus Jakarta Sans\', sans-serif;">Signed in as <strong style="color:rgba(255,255,255,0.85)">Admin</strong></div>',
+        unsafe_allow_html=True,
     )
     if st.sidebar.button("Log out", use_container_width=True):
         _logout_dialog()

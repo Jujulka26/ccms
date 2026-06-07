@@ -9,7 +9,7 @@ def _client_context_html(row) -> str:
     coordinator can sanity-check the match before approving."""
     parts = []
     if row.get("client_issue"):
-        parts.append(f"🧩 <strong style='color:#4A4A5C;'>Issue:</strong> {row['client_issue']}")
+        parts.append(f"🧩 <strong style='color:#6B6560;'>Issue:</strong> {row['client_issue']}")
     demo = " / ".join(
         str(x) for x in [row.get("client_age"), row.get("client_gender"), row.get("client_ethnicity")]
         if x not in (None, "")
@@ -23,7 +23,7 @@ def _client_context_html(row) -> str:
     if row.get("prev_exp") is not None:
         prefs.append("has prior counseling" if row.get("prev_exp") else "first time")
     if prefs:
-        parts.append("💡 <strong style='color:#4A4A5C;'>Prefers:</strong> " + ", ".join(prefs))
+        parts.append("💡 <strong style='color:#6B6560;'>Prefers:</strong> " + ", ".join(prefs))
     if not parts:
         return ""
     return (
@@ -54,13 +54,16 @@ def confirm_approve_dialog(request_id, client_name, client_email, counselor_name
 def render():
     st.markdown(
         """
-        <div style="position: relative; overflow: hidden; background-color: #FAFAFF; background-image: radial-gradient(at 0% 0%, #E0F2FE 0px, transparent 60%), radial-gradient(at 100% 100%, #BAE6FD 0px, transparent 60%), radial-gradient(at 100% 0%, #FFFFFF 0px, transparent 50%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(14,165,233,0.15); box-shadow: 0 16px 32px -8px rgba(14,165,233,0.12), inset 0 1px 0 rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 236px;">
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        </style>
+        <div style="position: relative; overflow: hidden; background-color: #FFF5F2; background-image: radial-gradient(at 0% 0%, #FFE0DC 0px, transparent 60%), radial-gradient(at 100% 100%, #FFDDD8 0px, transparent 60%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(201,99,106,0.15); box-shadow: 0 16px 32px -8px rgba(201,99,106,0.1), inset 0 1px 0 rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 220px;">
             <div style="position: relative; z-index: 2; max-width: 65%;">
-                <div style="color: #0EA5E9; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(14,165,233,0.12); border: 1px solid rgba(14,165,233,0.25); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block;">Approvals</div>
-                <div style="font-family: 'DM Serif Display', serif; font-size: 42px; color: #1A1A2E; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Review Requests</div>
-                <p style="font-size: 16px; color: #4A4A5C; margin: 0; line-height: 1.65; max-width: 480px;">Review and manage client-counselor matching requests below.</p>
+                <div style="color: #C9636A; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(201,99,106,0.1); border: 1px solid rgba(201,99,106,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Approvals</div>
+                <div style="font-family: 'Fraunces', serif; font-size: 42px; color: #1C1917; margin-bottom: 16px; line-height: 1.1; letter-spacing: -0.5px; font-weight: 600;">Review Requests</div>
+                <p style="font-size: 16px; color: #6B6560; margin: 0; line-height: 1.65; max-width: 480px; font-family: 'Plus Jakarta Sans', sans-serif;">Review and manage client-counselor matching requests below.</p>
             </div>
-            <div style="font-size: 100px; line-height: 1; position: absolute; right: 20px; bottom: -15px; z-index: 1; opacity: 0.15; transform: rotate(10deg); pointer-events: none;">
+            <div style="font-size: 100px; line-height: 1; position: absolute; right: 20px; bottom: -15px; z-index: 1; opacity: 0.12; transform: rotate(10deg); pointer-events: none;">
                 📝
             </div>
         </div>
@@ -90,20 +93,20 @@ def render():
     st.markdown(
         f"""
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;">
-            <div style="background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(249,115,22,0.2);">
-                <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #F97316; margin-bottom: 12px;">New</div>
-                <div style="font-family: 'DM Serif Display', serif; font-size: 40px; line-height: 1; color: #1A1A2E; margin-bottom: 6px;">{total_new}</div>
-                <div style="font-size: 13px; color: #8B8B9A;">received in last 24h</div>
+            <div style="background: linear-gradient(135deg, #FFF5F2 0%, #FFE8E4 100%); border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(201,99,106,0.2);">
+                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #C9636A; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">New</div>
+                <div style="font-family: 'Fraunces', serif; font-size: 40px; line-height: 1; color: #1C1917; margin-bottom: 6px; font-weight: 600;">{total_new}</div>
+                <div style="font-size: 13px; color: #9C9790; font-family: 'Plus Jakarta Sans', sans-serif;">received in last 24h</div>
             </div>
             <div style="background: #FFFFFF; border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(0,0,0,0.06);">
-                <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #0EA5E9; margin-bottom: 12px;">Pending</div>
-                <div style="font-family: 'DM Serif Display', serif; font-size: 40px; line-height: 1; color: #1A1A2E; margin-bottom: 6px;">{total_pending}</div>
-                <div style="font-size: 13px; color: #8B8B9A;">awaiting your review</div>
+                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #C4954A; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">Pending</div>
+                <div style="font-family: 'Fraunces', serif; font-size: 40px; line-height: 1; color: #1C1917; margin-bottom: 6px; font-weight: 600;">{total_pending}</div>
+                <div style="font-size: 13px; color: #9C9790; font-family: 'Plus Jakarta Sans', sans-serif;">awaiting your review</div>
             </div>
             <div style="background: #FFFFFF; border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(0,0,0,0.06);">
-                <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #10B981; margin-bottom: 12px;">Approved</div>
-                <div style="font-family: 'DM Serif Display', serif; font-size: 40px; line-height: 1; color: #1A1A2E; margin-bottom: 6px;">{total_approved}</div>
-                <div style="font-size: 13px; color: #8B8B9A;">matched clients</div>
+                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #4A8C6A; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">Approved</div>
+                <div style="font-family: 'Fraunces', serif; font-size: 40px; line-height: 1; color: #1C1917; margin-bottom: 6px; font-weight: 600;">{total_approved}</div>
+                <div style="font-size: 13px; color: #9C9790; font-family: 'Plus Jakarta Sans', sans-serif;">matched clients</div>
             </div>
         </div>
         """,
@@ -123,13 +126,13 @@ def render():
     df_closed   = df_requests[df_requests["status"] == "Closed"]
 
     with tab_pending:
-        st.markdown("<h3 style='font-family: \"DM Serif Display\", serif; margin-top: 16px; margin-bottom: 8px; color: #1A1A2E;'>Pending Approvals</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='font-family: \"Fraunces\", serif; margin-top: 16px; margin-bottom: 8px; color: #1C1917; font-weight: 600;'>Pending Approvals</h3>", unsafe_allow_html=True)
         if df_pending.empty:
             st.markdown(
                 """
                 <div style="background: #FFFFFF; border: 1px dashed rgba(0,0,0,0.1); border-radius: 12px; padding: 48px 20px; text-align: center; margin-top: 16px;">
                     <div style="font-size: 36px; margin-bottom: 12px; opacity: 0.7;">⏳</div>
-                    <div style="font-size: 16px; font-weight: 600; color: #1A1A2E; margin-bottom: 4px;">You're all caught up!</div>
+                    <div style="font-size: 16px; font-weight: 600; color: #1C1917; margin-bottom: 4px;">You're all caught up!</div>
                     <div style="font-size: 14px; color: #8B8B9A;">There are no pending requests waiting for your approval at this time.</div>
                 </div>
                 """,
@@ -145,11 +148,11 @@ def render():
                         st.markdown(
                             f"""
                             <div style="padding: 0px 8px 8px 8px; margin-top: -8px;">
-                                <div style="font-size: 22px; font-weight: 600; color: #1A1A2E; margin-bottom: 12px;">{row['client_name']}{new_badge}</div>
-                                <div style="font-size: 16px; color: #5A5A6E;">
-                                    <div style="margin-bottom: 8px;">✉️ <strong style="color: #4A4A5C; margin-left: 4px;">Email:</strong> {row['client_email']}</div>
-                                    <div style="margin-bottom: 8px;">🧑‍⚕️ <strong style="color: #4A4A5C; margin-left: 4px;">Requested Counselor:</strong> {row['counselor_name']}</div>
-                                    <div style="margin-bottom: 4px;">🎯 <strong style="color: #4A4A5C; margin-left: 4px;">Match Score:</strong> <span style="background: rgba(16,185,129,0.15); color: #10B981; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 14px;">{score_str}</span></div>
+                                <div style="font-size: 22px; font-weight: 600; color: #1C1917; margin-bottom: 12px;">{row['client_name']}{new_badge}</div>
+                                <div style="font-size: 16px; color: #6B6560;">
+                                    <div style="margin-bottom: 8px;">✉️ <strong style="color: #6B6560; margin-left: 4px;">Email:</strong> {row['client_email']}</div>
+                                    <div style="margin-bottom: 8px;">🧑‍⚕️ <strong style="color: #6B6560; margin-left: 4px;">Requested Counselor:</strong> {row['counselor_name']}</div>
+                                    <div style="margin-bottom: 4px;">🎯 <strong style="color: #6B6560; margin-left: 4px;">Match Score:</strong> <span style="background: rgba(16,185,129,0.15); color: #10B981; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 14px;">{score_str}</span></div>
                                 </div>
                                 {_client_context_html(row)}
                             </div>
@@ -161,13 +164,13 @@ def render():
                             confirm_approve_dialog(row["request_id"], row["client_name"], row["client_email"], row["counselor_name"])
 
     with tab_approved:
-        st.markdown("<h3 style='font-family: \"DM Serif Display\", serif; margin-top: 16px; margin-bottom: 8px; color: #10B981;'>Approved Requests</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='font-family: \"Fraunces\", serif; margin-top: 16px; margin-bottom: 8px; color: #4A8C6A; font-weight: 600;'>Approved Requests</h3>", unsafe_allow_html=True)
         if df_approved.empty:
             st.markdown(
                 """
                 <div style="background: #FFFFFF; border: 1px dashed rgba(0,0,0,0.1); border-radius: 12px; padding: 48px 20px; text-align: center; margin-top: 16px;">
                     <div style="font-size: 36px; margin-bottom: 12px; opacity: 0.7;">✅</div>
-                    <div style="font-size: 16px; font-weight: 600; color: #1A1A2E; margin-bottom: 4px;">No active approved matches</div>
+                    <div style="font-size: 16px; font-weight: 600; color: #1C1917; margin-bottom: 4px;">No active approved matches</div>
                     <div style="font-size: 14px; color: #8B8B9A;">Approved matches awaiting an outcome will appear here.</div>
                 </div>
                 """,
@@ -182,11 +185,11 @@ def render():
                         st.markdown(
                             f"""
                             <div style="padding: 0px 8px 8px 8px; margin-top: -8px;">
-                                <div style="font-size: 20px; font-weight: 600; color: #1A1A2E; margin-bottom: 10px;">{row['client_name']}</div>
-                                <div style="font-size: 15px; color: #5A5A6E;">
-                                    <div style="margin-bottom: 6px;">✉️ <strong style="color: #4A4A5C; margin-left: 4px;">Email:</strong> {row['client_email']}</div>
-                                    <div style="margin-bottom: 6px;">🧑‍⚕️ <strong style="color: #4A4A5C; margin-left: 4px;">Counselor:</strong> {row['counselor_name']}</div>
-                                    <div>🎯 <strong style="color: #4A4A5C; margin-left: 4px;">Match Score:</strong> <span style="background: rgba(16,185,129,0.15); color: #10B981; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 13px;">{score_str}</span></div>
+                                <div style="font-size: 20px; font-weight: 600; color: #1C1917; margin-bottom: 10px;">{row['client_name']}</div>
+                                <div style="font-size: 15px; color: #6B6560;">
+                                    <div style="margin-bottom: 6px;">✉️ <strong style="color: #6B6560; margin-left: 4px;">Email:</strong> {row['client_email']}</div>
+                                    <div style="margin-bottom: 6px;">🧑‍⚕️ <strong style="color: #6B6560; margin-left: 4px;">Counselor:</strong> {row['counselor_name']}</div>
+                                    <div>🎯 <strong style="color: #6B6560; margin-left: 4px;">Match Score:</strong> <span style="background: rgba(16,185,129,0.15); color: #10B981; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 13px;">{score_str}</span></div>
                                 </div>
                                 {_client_context_html(row)}
                             </div>
@@ -202,13 +205,13 @@ def render():
                             st.rerun()
 
     with tab_closed:
-        st.markdown("<h3 style='font-family: \"DM Serif Display\", serif; margin-top: 16px; margin-bottom: 8px; color: #6366F1;'>Closed Matches</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='font-family: \"Fraunces\", serif; margin-top: 16px; margin-bottom: 8px; color: #6B6560; font-weight: 600;'>Closed Matches</h3>", unsafe_allow_html=True)
         if df_closed.empty:
             st.markdown(
                 """
                 <div style="background: #FFFFFF; border: 1px dashed rgba(0,0,0,0.1); border-radius: 12px; padding: 48px 20px; text-align: center; margin-top: 16px;">
                     <div style="font-size: 36px; margin-bottom: 12px; opacity: 0.7;">🗂️</div>
-                    <div style="font-size: 16px; font-weight: 600; color: #1A1A2E; margin-bottom: 4px;">No closed matches yet</div>
+                    <div style="font-size: 16px; font-weight: 600; color: #1C1917; margin-bottom: 4px;">No closed matches yet</div>
                     <div style="font-size: 14px; color: #8B8B9A;">Matches you close will be archived here.</div>
                 </div>
                 """,
@@ -221,13 +224,13 @@ def render():
                     st.markdown(
                         f"""
                         <div style="padding: 0px 8px 8px 8px; margin-top: -8px; opacity: 0.85;">
-                            <div style="font-size: 20px; font-weight: 600; color: #1A1A2E; margin-bottom: 10px;">{row['client_name']}
-                                <span style="background: rgba(99,102,241,0.12); color: #6366F1; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-left: 8px; vertical-align: middle;">Closed</span>
+                            <div style="font-size: 20px; font-weight: 600; color: #1C1917; margin-bottom: 10px;">{row['client_name']}
+                                <span style="background: rgba(107,101,96,0.1); color: #6B6560; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-left: 8px; vertical-align: middle;">Closed</span>
                             </div>
-                            <div style="font-size: 15px; color: #5A5A6E;">
-                                <div style="margin-bottom: 6px;">✉️ <strong style="color: #4A4A5C; margin-left: 4px;">Email:</strong> {row['client_email']}</div>
-                                <div style="margin-bottom: 6px;">🧑‍⚕️ <strong style="color: #4A4A5C; margin-left: 4px;">Counselor:</strong> {row['counselor_name']}</div>
-                                <div>🎯 <strong style="color: #4A4A5C; margin-left: 4px;">Match Score:</strong> <span style="background: rgba(16,185,129,0.15); color: #10B981; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 13px;">{score_str}</span></div>
+                            <div style="font-size: 15px; color: #6B6560;">
+                                <div style="margin-bottom: 6px;">✉️ <strong style="color: #6B6560; margin-left: 4px;">Email:</strong> {row['client_email']}</div>
+                                <div style="margin-bottom: 6px;">🧑‍⚕️ <strong style="color: #6B6560; margin-left: 4px;">Counselor:</strong> {row['counselor_name']}</div>
+                                <div>🎯 <strong style="color: #6B6560; margin-left: 4px;">Match Score:</strong> <span style="background: rgba(16,185,129,0.15); color: #10B981; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 13px;">{score_str}</span></div>
                             </div>
                         </div>
                         """,

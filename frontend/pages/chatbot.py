@@ -7,9 +7,9 @@ def show_chatbot_page():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         .botbox {
-            background:#F8F5FF;border:1px solid #E9E1FF;border-radius:14px;padding:24px;margin-bottom:24px;
+            background:#FFF5F2;border:1px solid #FFD5D0;border-radius:14px;padding:24px;margin-bottom:24px;
         }
         </style>
         """,
@@ -19,20 +19,20 @@ def show_chatbot_page():
     st.markdown(
         '''
         <div style="padding:24px 0 20px; border-bottom:1px solid rgba(0,0,0,0.07); margin-bottom:24px;">
-            <div style="font-family:'DM Serif Display',serif; font-size:clamp(22px,3vw,34px); color:#1A1A2E; margin:0 0 8px; letter-spacing:-0.3px; line-height:1.15; display:flex; align-items:center; gap:16px;">
+            <div style="font-family:'Fraunces',serif; font-size:clamp(22px,3vw,36px); color:#1C1917; margin:0 0 8px; letter-spacing:-0.4px; line-height:1.12; font-weight:600; display:flex; align-items:center; gap:16px;">
                 <svg width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
                     <defs>
                         <linearGradient id="mira-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#4285F4"/>
-                            <stop offset="50%" stop-color="#9B72CB"/>
-                            <stop offset="100%" stop-color="#D96570"/>
+                            <stop offset="0%" stop-color="#C9636A"/>
+                            <stop offset="50%" stop-color="#C4954A"/>
+                            <stop offset="100%" stop-color="#A84E55"/>
                         </linearGradient>
                     </defs>
                     <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#mira-grad)"/>
                 </svg>
                 Chat with Mira
             </div>
-            <p style="font-size:14px; color:#6B6B80; margin:0; line-height:1.6;">Ask any questions about counseling, mental health, and our platform. Powered by Gemini AI.</p>
+            <p style="font-size:14px; color:#6B6560; margin:0; line-height:1.6; font-family:'Plus Jakarta Sans',sans-serif;">Ask any questions about counseling, mental health, and our platform. Powered by Gemini AI.</p>
         </div>
         ''',
         unsafe_allow_html=True
@@ -151,23 +151,23 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
                         '}' +
                         '.sugg-pill{' +
                             'background:#FFFFFF;' +
-                            'border:1px solid #E9E1FF;' +
+                            'border:1px solid #FFD5D0;' +
                             'border-radius:20px;' +
                             'padding:9px 18px;' +
                             'font-size:13px;' +
-                            'font-family:DM Sans,sans-serif;' +
-                            'color:#5A5A6E;' +
+                            'font-family:Plus Jakarta Sans,sans-serif;' +
+                            'color:#6B6560;' +
                             'white-space:nowrap;' +
-                            'box-shadow:0 2px 8px rgba(124,58,237,0.08);' +
+                            'box-shadow:0 2px 8px rgba(201,99,106,0.08);' +
                             'cursor:pointer;' +
                             'pointer-events:auto;' +
                             'transition:background 0.18s,border-color 0.18s,color 0.18s;' +
                             'user-select:none;' +
                         '}' +
                         '.sugg-pill:hover{' +
-                            'background:#F3F0FF;' +
-                            'border-color:#8B5CF6;' +
-                            'color:#6D28D9;' +
+                            'background:#FFF5F2;' +
+                            'border-color:#C9636A;' +
+                            'color:#A84E55;' +
                         '}' +
                         '@keyframes sugg-scroll{' +
                             '0%{transform:translateX(0);}' +
@@ -234,9 +234,6 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
                     }
 
                     // Dismiss when user navigates away (e.g. logout) — chat input leaves the DOM.
-                    // Inject the watcher as a <script> tag into parent document so it runs in
-                    // parent's own scope; closures defined in this iframe die when Streamlit
-                    // tears the iframe down on logout, leaving pills orphaned.
                     var oldWatcher = doc.getElementById('sugg-watcher');
                     if (oldWatcher) oldWatcher.remove();
                     var watcher = doc.createElement('script');
@@ -286,7 +283,7 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
 
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
-            
+
             try:
                 # Skip any initial assistant greeting — Gemini history must start with "user"
                 _SKIP = {
@@ -300,16 +297,16 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
                     valid_history.append({"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]})
 
                 chat_session = model.start_chat(history=valid_history)
-                
+
                 response = chat_session.send_message(prompt, stream=True)
                 full_response = ""
-                
+
                 for chunk in response:
                     full_response += chunk.text
                     message_placeholder.markdown(full_response + "▌")
-                
+
                 message_placeholder.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
-                
+
             except Exception as e:
                 st.error(f"Error connecting to Gemini: {str(e)}")

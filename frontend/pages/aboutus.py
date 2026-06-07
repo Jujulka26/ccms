@@ -5,20 +5,22 @@ def show_aboutus_page():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
         /* ── Section title ────────────────────────────────────────────── */
         .au-section-title {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 28px;
-            color: #1A1A2E;
+            color: #1C1917;
             margin: 0 0 8px;
+            font-weight: 600;
         }
         .au-section-sub {
             font-size: 15px;
-            color: #8B8B9A;
+            color: #9C9790;
             margin: 0 0 28px;
             line-height: 1.6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* ── Value cards ──────────────────────────────────────────────── */
@@ -27,13 +29,13 @@ def show_aboutus_page():
             border-radius: 16px;
             padding: 28px 28px;
             border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
             height: 100%;
             transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
         }
         .au-card:hover {
-            box-shadow: 0 8px 24px rgba(124,58,237,0.1);
-            border-color: rgba(139,92,246,0.3);
+            box-shadow: 0 8px 24px rgba(201,99,106,0.1);
+            border-color: rgba(201,99,106,0.25);
             transform: translateY(-2px);
         }
         .au-card-icon {
@@ -42,16 +44,18 @@ def show_aboutus_page():
             line-height: 1;
         }
         .au-card-title {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 18px;
-            color: #1A1A2E;
+            color: #1C1917;
             margin-bottom: 8px;
+            font-weight: 600;
         }
         .au-card-body {
             font-size: 14px;
-            color: #5A5A6E;
+            color: #6B6560;
             line-height: 1.7;
             margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* ── How it works steps ───────────────────────────────────────── */
@@ -65,7 +69,7 @@ def show_aboutus_page():
             flex-shrink: 0;
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+            background: linear-gradient(135deg, #C9636A 0%, #A84E55 100%);
             color: #FFFFFF;
             font-size: 15px;
             font-weight: 700;
@@ -73,23 +77,26 @@ def show_aboutus_page():
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .au-step-content-title {
             font-size: 15px;
             font-weight: 600;
-            color: #1A1A2E;
+            color: #1C1917;
             margin-bottom: 4px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .au-step-content-body {
             font-size: 14px;
-            color: #5A5A6E;
+            color: #6B6560;
             line-height: 1.65;
             margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* ── Mission banner ───────────────────────────────────────────── */
         .au-mission {
-            background: linear-gradient(135deg, #1A1A2E 0%, #2D1B6E 100%);
+            background: linear-gradient(135deg, #0E1823 0%, #1A2B3C 100%);
             border-radius: 20px;
             padding: 44px 48px;
             margin: 32px 0;
@@ -100,31 +107,42 @@ def show_aboutus_page():
             content: '';
             position: absolute;
             top: -60px; right: -60px;
-            width: 260px; height: 260px;
-            background: radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%);
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(201,99,106,0.2) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .au-mission::after {
+            content: '';
+            position: absolute;
+            bottom: -40px; left: -40px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(196,149,74,0.1) 0%, transparent 70%);
             pointer-events: none;
         }
         .au-mission-label {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: #A78BFA;
+            color: #E8B4B8;
             margin-bottom: 14px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .au-mission-text {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Fraunces', serif;
             font-size: 26px;
             color: #FFFFFF;
             line-height: 1.45;
             margin: 0;
             max-width: 680px;
+            font-weight: 400;
+            font-style: italic;
         }
 
         /* ── Divider ──────────────────────────────────────────────────── */
         .au-divider {
             border: none;
-            border-top: 1px solid rgba(0,0,0,0.08);
+            border-top: 1px solid rgba(0,0,0,0.07);
             margin: 36px 0;
         }
         </style>
@@ -136,8 +154,8 @@ def show_aboutus_page():
     st.markdown(
         """
         <div style="padding:24px 0 20px; border-bottom:1px solid rgba(0,0,0,0.07); margin-bottom:24px;">
-            <div style="font-family:'DM Serif Display',serif; font-size:clamp(22px,3vw,34px); color:#1A1A2E; margin:0 0 8px; letter-spacing:-0.3px; line-height:1.15;">About Us</div>
-            <p style="font-size:14px; color:#6B6B80; margin:0; line-height:1.6;">Learn about the mission and values behind CC Match.</p>
+            <div style="font-family:'Fraunces',serif; font-size:clamp(22px,3vw,36px); color:#1C1917; margin:0 0 8px; letter-spacing:-0.4px; line-height:1.12; font-weight:600;">About Us</div>
+            <p style="font-size:14px; color:#6B6560; margin:0; line-height:1.6; font-family:'Plus Jakarta Sans',sans-serif;">Learn about the mission and values behind CC Match.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -147,8 +165,8 @@ def show_aboutus_page():
     st.markdown(
         """
         <div class="au-mission">
-            <div class="au-mission-label">Our Mission</div>
-            <p class="au-mission-text">"To bridge the gap between individuals seeking mental health support and the counselors best equipped to help them — with transparency, empathy, and intelligent technology."</p>
+            <div class="au-mission-label" style="position:relative;z-index:2;">Our Mission</div>
+            <p class="au-mission-text" style="position:relative;z-index:2;">"To bridge the gap between individuals seeking mental health support and the counselors best equipped to help them — with transparency, empathy, and intelligent technology."</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -209,7 +227,7 @@ def show_aboutus_page():
             ("Answer a short questionnaire", "Tell us about yourself — your concerns, preferences, language, and therapy style. It takes under 2 minutes."),
             ("Our AI finds your best match", "The model evaluates 8 compatibility factors across our counselor directory and calculates a personalised score for each."),
             ("Review your top matches", "See your top recommended counselors with full profiles and a clear breakdown of why each one was suggested."),
-            ("Send a request", "Express interest in a counselor directly from the platform. Our team will be in touch within 24–48 hours to get you started."),
+            ("Send a request", "Express interest in a counselor directly from the platform. Our team will be in touch within 24-48 hours to get you started."),
         ]
 
         for i, (title, body) in enumerate(steps, 1):
@@ -256,8 +274,8 @@ def show_aboutus_page():
     st.markdown(
         """
         <div style="text-align: center; padding: 8px 0 24px;">
-            <div style="font-family: 'DM Serif Display', serif; font-size: 20px; color: #1A1A2E; margin-bottom: 8px;">Ready to find your match?</div>
-            <p style="font-size: 14px; color: #8B8B9A; margin: 0;">Head to <strong style="color: #7C3AED;">Find a Counselor</strong> in the sidebar to get started.</p>
+            <div style="font-family: 'Fraunces', serif; font-size: 22px; color: #1C1917; margin-bottom: 8px; font-weight: 600;">Ready to find your match?</div>
+            <p style="font-size: 14px; color: #9C9790; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;">Head to <strong style="color: #C9636A;">Find a Counselor</strong> in the sidebar to get started.</p>
         </div>
         """,
         unsafe_allow_html=True,
