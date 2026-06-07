@@ -21,15 +21,17 @@ class CounselorBase(BaseModel):
 
 
 class CounselorCreate(CounselorBase):
-    pass
+    availability: List[str] = []
 
 
 class CounselorUpdate(CounselorBase):
-    pass
+    availability: List[str] = []
 
 
 class CounselorResponse(CounselorBase):
     counselor_id: int
+    caseload: int = 0           # computed: open cases (pending + approved)
+    availability: Optional[str] = None  # computed: comma-joined time blocks
 
     class Config:
         from_attributes = True
@@ -45,7 +47,6 @@ class IntroRequestCreate(BaseModel):
     client_email: str
     counselor_id: int
     compatibility_score: float
-    outcome_consent: bool = False
     client_age: Optional[int] = None
     client_gender: Optional[str] = None
     client_ethnicity: Optional[str] = None
@@ -64,24 +65,19 @@ class RequestResponse(BaseModel):
     compatibility_score: Optional[float] = None
     status: str
     created_at: Optional[datetime] = None
-    match_outcome: Optional[str] = None
-    outcome_consent: Optional[int] = None
+    # Client context shown to the coordinator when reviewing the match.
+    client_age: Optional[int] = None
+    client_gender: Optional[str] = None
+    client_ethnicity: Optional[str] = None
+    client_issue: Optional[str] = None
+    prev_exp: Optional[int] = None
+    preferred_language: Optional[str] = None
+    preferred_modality: Optional[str] = None
+    preferred_c_gender: Optional[str] = None
 
 
 class UpdateRequestStatus(BaseModel):
     status: str
-
-
-class UpdateMatchOutcome(BaseModel):
-    outcome: str
-
-    @field_validator("outcome")
-    @classmethod
-    def valid_outcome(cls, v):
-        allowed = {"Successful", "Unsuccessful"}
-        if v not in allowed:
-            raise ValueError(f"outcome must be one of {allowed}")
-        return v
 
 
 class EnquiryRequest(BaseModel):
@@ -106,6 +102,7 @@ class MatchRequest(BaseModel):
     preferred_language: str
     preferred_modality: str
     preferred_c_gender: str
+    preferred_time: str = "Any time"
     exclude_ids: List[int] = []
 
 
@@ -119,6 +116,8 @@ class MatchedCounselor(BaseModel):
     counselor_language: str
     counselor_modality: str
     experience_years: int
+    caseload: int = 0
+    availability: Optional[str] = None
     about_me: Optional[str] = None
     expertise_tags: Optional[str] = None
     helpful_thought_1: Optional[str] = None
@@ -148,6 +147,7 @@ class ReferenceDataResponse(BaseModel):
     preferred_modality: List[str]
     preferred_language: List[str]
     preferred_counselor_gender: List[str]
+    preferred_time: List[str]
 
 
 class ShapRequest(BaseModel):

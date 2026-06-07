@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from schemas import (
     IntroRequestCreate, RequestResponse,
-    UpdateRequestStatus, ApprovalEmailRequest, UpdateMatchOutcome,
+    UpdateRequestStatus, ApprovalEmailRequest,
 )
 from email_utils import send_approval_email
 import db
@@ -31,11 +31,12 @@ def create_request(payload: IntroRequestCreate):
         db.save_intro_request(
             payload.client_name, payload.client_email,
             payload.counselor_id, payload.compatibility_score,
-            payload.outcome_consent,
             payload.client_age, payload.client_gender, payload.client_ethnicity, payload.client_issue,
             payload.prev_exp, payload.preferred_language, payload.preferred_modality, payload.preferred_c_gender,
         )
         return {"message": "Request saved successfully."}
+    except db.CounselorAtCapacity as e:
+        raise HTTPException(status_code=409, detail=str(e))
     except Exception:
         raise HTTPException(status_code=500, detail="Failed to save request.")
 
@@ -49,29 +50,13 @@ def approve_request(request_id: int, payload: UpdateRequestStatus):
         raise HTTPException(status_code=500, detail="Failed to update request status.")
 
 
-@router.patch("/{request_id}/outcome")
-def update_outcome(request_id: int, payload: UpdateMatchOutcome):
+@router.patch("/{request_id}/close")
+def close_request(request_id: int):
     try:
-        db.update_match_outcome(request_id, payload.outcome)
-        return {"message": f"Outcome updated to {payload.outcome}."}
+        db.close_request(request_id)
+        return {"message": f"Request {request_id} closed."}
     except Exception:
-        raise HTTPException(status_code=500, detail="Failed to update outcome.")
-
-
-@router.get("/outcome-stats")
-def get_outcome_stats():
-    try:
-        return db.get_outcome_stats()
-    except Exception:
-        raise HTTPException(status_code=500, detail="Failed to fetch outcome stats.")
-
-
-@router.get("/export-outcomes")
-def export_outcomes():
-    try:
-        return db.get_consented_outcomes()
-    except Exception:
-        raise HTTPException(status_code=500, detail="Failed to export outcomes.")
+        raise HTTPException(status_code=500, detail="Failed to close request.")
 
 
 @router.post("/{request_id}/send-approval-email")

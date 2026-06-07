@@ -1,7 +1,35 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
-from frontend.utils.api import get_requests, approve_request, send_approval_email, update_match_outcome
+from frontend.utils.api import get_requests, get_counselors, approve_request, close_request, send_approval_email
+
+
+def _client_context_html(row) -> str:
+    """Compact summary of the client's questionnaire answers, shown so the
+    coordinator can sanity-check the match before approving."""
+    parts = []
+    if row.get("client_issue"):
+        parts.append(f"🧩 <strong style='color:#4A4A5C;'>Issue:</strong> {row['client_issue']}")
+    demo = " / ".join(
+        str(x) for x in [row.get("client_age"), row.get("client_gender"), row.get("client_ethnicity")]
+        if x not in (None, "")
+    )
+    if demo:
+        parts.append(f"👤 {demo}")
+    prefs = []
+    if row.get("preferred_modality"):  prefs.append(str(row["preferred_modality"]))
+    if row.get("preferred_language"):  prefs.append(str(row["preferred_language"]))
+    if row.get("preferred_c_gender"):  prefs.append(f"{row['preferred_c_gender']} counselor")
+    if row.get("prev_exp") is not None:
+        prefs.append("has prior counseling" if row.get("prev_exp") else "first time")
+    if prefs:
+        parts.append("💡 <strong style='color:#4A4A5C;'>Prefers:</strong> " + ", ".join(prefs))
+    if not parts:
+        return ""
+    return (
+        '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed rgba(0,0,0,0.08);'
+        'font-size:13px;color:#6B6B80;line-height:1.8;">' + "<br>".join(parts) + "</div>"
+    )
 
 
 @st.dialog("Confirm Approval")
@@ -15,6 +43,7 @@ def confirm_approve_dialog(request_id, client_name, client_email, counselor_name
             approve_request(request_id)
             send_approval_email(request_id, client_name, client_email, counselor_name)
             get_requests.clear()
+            get_counselors.clear()  # caseload changed → refresh directory + matching
             st.success("Request approved!")
             st.rerun()
     with col2:
@@ -74,7 +103,7 @@ def render():
             <div style="background: #FFFFFF; border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(0,0,0,0.06);">
                 <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #10B981; margin-bottom: 12px;">Approved</div>
                 <div style="font-family: 'DM Serif Display', serif; font-size: 40px; line-height: 1; color: #1A1A2E; margin-bottom: 6px;">{total_approved}</div>
-                <div style="font-size: 13px; color: #8B8B9A;">successful matches</div>
+                <div style="font-size: 13px; color: #8B8B9A;">matched clients</div>
             </div>
         </div>
         """,
@@ -90,14 +119,8 @@ def render():
     tab_pending, tab_approved, tab_closed = st.tabs(["Pending", "Approved", "Closed"])
 
     df_pending  = df_requests[df_requests["status"] == "Pending"]
-    df_approved = df_requests[
-        (df_requests["status"] == "Approved") &
-        (~df_requests["match_outcome"].isin(["Successful", "Unsuccessful"]))
-    ]
-    df_closed   = df_requests[
-        (df_requests["status"] == "Approved") &
-        (df_requests["match_outcome"].isin(["Successful", "Unsuccessful"]))
-    ]
+    df_approved = df_requests[df_requests["status"] == "Approved"]
+    df_closed   = df_requests[df_requests["status"] == "Closed"]
 
     with tab_pending:
         st.markdown("<h3 style='font-family: \"DM Serif Display\", serif; margin-top: 16px; margin-bottom: 8px; color: #1A1A2E;'>Pending Approvals</h3>", unsafe_allow_html=True)
@@ -128,6 +151,7 @@ def render():
                                     <div style="margin-bottom: 8px;">🧑‍⚕️ <strong style="color: #4A4A5C; margin-left: 4px;">Requested Counselor:</strong> {row['counselor_name']}</div>
                                     <div style="margin-bottom: 4px;">🎯 <strong style="color: #4A4A5C; margin-left: 4px;">Match Score:</strong> <span style="background: rgba(16,185,129,0.15); color: #10B981; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 14px;">{score_str}</span></div>
                                 </div>
+                                {_client_context_html(row)}
                             </div>
                             """,
                             unsafe_allow_html=True,
@@ -152,7 +176,7 @@ def render():
         else:
             for _, row in df_approved.iterrows():
                 with st.container(border=True):
-                    col_info, col_outcome = st.columns([3, 1], vertical_alignment="center")
+                    col_info, col_action = st.columns([3, 1], vertical_alignment="center")
                     with col_info:
                         score_str = f"{row['compatibility_score']:.2f}%" if pd.notnull(row.get("compatibility_score")) else "N/A"
                         st.markdown(
@@ -164,38 +188,18 @@ def render():
                                     <div style="margin-bottom: 6px;">🧑‍⚕️ <strong style="color: #4A4A5C; margin-left: 4px;">Counselor:</strong> {row['counselor_name']}</div>
                                     <div>🎯 <strong style="color: #4A4A5C; margin-left: 4px;">Match Score:</strong> <span style="background: rgba(16,185,129,0.15); color: #10B981; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 13px;">{score_str}</span></div>
                                 </div>
+                                {_client_context_html(row)}
                             </div>
                             """,
                             unsafe_allow_html=True,
                         )
-                    with col_outcome:
-                        if row.get("outcome_consent"):
-                            current = row.get("match_outcome")
-                            if current in ("Successful", "Unsuccessful"):
-                                color = "#10B981" if current == "Successful" else "#EF4444"
-                                st.markdown(
-                                    f'<div style="background: rgba({("16,185,129" if current == "Successful" else "239,68,68")},0.1); '
-                                    f'border: 1px solid {color}; border-radius: 10px; padding: 8px 14px; text-align: center;">'
-                                    f'<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: {color};">Outcome</div>'
-                                    f'<div style="font-size: 14px; font-weight: 700; color: {color}; margin-top: 4px;">{current}</div>'
-                                    f'</div>',
-                                    unsafe_allow_html=True,
-                                )
-                            else:
-                                options = ["— Not recorded —", "Successful", "Unsuccessful"]
-                                selected = st.selectbox(
-                                    "Outcome",
-                                    options=options,
-                                    index=0,
-                                    key=f"outcome_{row['request_id']}",
-                                )
-                                if selected != "— Not recorded —":
-                                    if st.button("Save", key=f"save_outcome_{row['request_id']}", type="primary", use_container_width=True):
-                                        update_match_outcome(row["request_id"], selected)
-                                        get_requests.clear()
-                                        st.rerun()
-                        else:
-                            st.caption("No consent given")
+                    with col_action:
+                        if st.button("✓ Close case", key=f"close_{row['request_id']}", use_container_width=True,
+                                     help="Mark this engagement as finished. Frees one slot in the counselor's caseload."):
+                            close_request(row["request_id"])
+                            get_requests.clear()
+                            get_counselors.clear()  # caseload changed → refresh directory + matching
+                            st.rerun()
 
     with tab_closed:
         st.markdown("<h3 style='font-family: \"DM Serif Display\", serif; margin-top: 16px; margin-bottom: 8px; color: #6366F1;'>Closed Matches</h3>", unsafe_allow_html=True)
@@ -205,38 +209,27 @@ def render():
                 <div style="background: #FFFFFF; border: 1px dashed rgba(0,0,0,0.1); border-radius: 12px; padding: 48px 20px; text-align: center; margin-top: 16px;">
                     <div style="font-size: 36px; margin-bottom: 12px; opacity: 0.7;">🗂️</div>
                     <div style="font-size: 16px; font-weight: 600; color: #1A1A2E; margin-bottom: 4px;">No closed matches yet</div>
-                    <div style="font-size: 14px; color: #8B8B9A;">Matches will appear here once an outcome has been recorded.</div>
+                    <div style="font-size: 14px; color: #8B8B9A;">Matches you close will be archived here.</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
         else:
             for _, row in df_closed.iterrows():
-                outcome = row.get("match_outcome")
-                color = "#10B981" if outcome == "Successful" else "#EF4444"
-                rgba  = "16,185,129" if outcome == "Successful" else "239,68,68"
                 score_str = f"{row['compatibility_score']:.2f}%" if pd.notnull(row.get("compatibility_score")) else "N/A"
                 with st.container(border=True):
-                    col_info, col_badge = st.columns([3, 1], vertical_alignment="center")
-                    with col_info:
-                        st.markdown(
-                            f"""
-                            <div style="padding: 0px 8px 8px 8px; margin-top: -8px;">
-                                <div style="font-size: 20px; font-weight: 600; color: #1A1A2E; margin-bottom: 10px;">{row['client_name']}</div>
-                                <div style="font-size: 15px; color: #5A5A6E;">
-                                    <div style="margin-bottom: 6px;">✉️ <strong style="color: #4A4A5C; margin-left: 4px;">Email:</strong> {row['client_email']}</div>
-                                    <div style="margin-bottom: 6px;">🧑‍⚕️ <strong style="color: #4A4A5C; margin-left: 4px;">Counselor:</strong> {row['counselor_name']}</div>
-                                    <div>🎯 <strong style="color: #4A4A5C; margin-left: 4px;">Match Score:</strong> <span style="background: rgba(16,185,129,0.15); color: #10B981; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 13px;">{score_str}</span></div>
-                                </div>
+                    st.markdown(
+                        f"""
+                        <div style="padding: 0px 8px 8px 8px; margin-top: -8px; opacity: 0.85;">
+                            <div style="font-size: 20px; font-weight: 600; color: #1A1A2E; margin-bottom: 10px;">{row['client_name']}
+                                <span style="background: rgba(99,102,241,0.12); color: #6366F1; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-left: 8px; vertical-align: middle;">Closed</span>
                             </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                    with col_badge:
-                        st.markdown(
-                            f'<div style="background: rgba({rgba},0.1); border: 1px solid {color}; border-radius: 10px; padding: 8px 14px; text-align: center;">'
-                            f'<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: {color};">Outcome</div>'
-                            f'<div style="font-size: 14px; font-weight: 700; color: {color}; margin-top: 4px;">{outcome}</div>'
-                            f'</div>',
-                            unsafe_allow_html=True,
-                        )
+                            <div style="font-size: 15px; color: #5A5A6E;">
+                                <div style="margin-bottom: 6px;">✉️ <strong style="color: #4A4A5C; margin-left: 4px;">Email:</strong> {row['client_email']}</div>
+                                <div style="margin-bottom: 6px;">🧑‍⚕️ <strong style="color: #4A4A5C; margin-left: 4px;">Counselor:</strong> {row['counselor_name']}</div>
+                                <div>🎯 <strong style="color: #4A4A5C; margin-left: 4px;">Match Score:</strong> <span style="background: rgba(16,185,129,0.15); color: #10B981; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 13px;">{score_str}</span></div>
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )

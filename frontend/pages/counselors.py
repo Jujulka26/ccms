@@ -3,7 +3,7 @@ import streamlit.components.v1 as components
 
 from frontend.utils.api import get_counselors
 from frontend.utils.avatar import avatar_html
-from frontend.pages.matching import show_profile_dialog, show_request_success_dialog
+from frontend.pages.matching import show_profile_dialog, show_request_success_dialog, MAX_CASELOAD
 
 
 _SPEC_COLORS = {
@@ -185,10 +185,16 @@ def show_counselors_page():
         exp      = c.get("experience_years", "—")
         lang     = c.get("counselor_language", "—")
         modality = c.get("counselor_modality", "—")
+        avail    = c.get("availability") or "—"
 
         spec_bg, spec_color = _SPEC_COLORS.get(spec, ("#F3F4F6", "#374151"))
         mod_icon = _MODALITY_ICONS.get(modality.split(",")[0].strip(), "💬")
         av = avatar_html(name, c.get("image"), size=56, radius=12)
+        is_full = int(c.get("caseload") or 0) >= MAX_CASELOAD
+        full_badge = (
+            '<span class="c-spec-badge" style="background:#FEF2F2; color:#B91C1C; margin-left:6px;">🚫 Fully booked</span>'
+            if is_full else ""
+        )
 
         with cols[i % 3]:
             st.markdown(
@@ -202,11 +208,12 @@ def show_counselors_page():
                         </div>
                     </div>
                     <span class="c-spec-badge"
-                          style="background:{spec_bg}; color:{spec_color};">{spec}</span>
+                          style="background:{spec_bg}; color:{spec_color};">{spec}</span>{full_badge}
                     <div class="c-info">
                         <div class="c-info-row"><span class="c-info-icon">🏅</span>{exp} yrs experience</div>
                         <div class="c-info-row"><span class="c-info-icon">{mod_icon}</span>{modality}</div>
                         <div class="c-info-row"><span class="c-info-icon">💬</span>{lang}</div>
+                        <div class="c-info-row"><span class="c-info-icon">🕒</span>{avail}</div>
                     </div>
                     <button class="card-view-btn-dir">VIEW FULL PROFILE →</button>
                 </div>

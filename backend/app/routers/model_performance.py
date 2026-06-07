@@ -1,3 +1,4 @@
+import io
 import json
 import shutil
 import subprocess
@@ -8,8 +9,8 @@ from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, UploadFile, File
+
 from schemas import ModelPerformanceResponse
 
 _jobs: dict[str, dict] = {}
@@ -28,19 +29,18 @@ _TUNED_CSV      = ML_DIR / "tuned_result.csv"
 _BEST_MODEL_BAK = STORE_DIR / "tuned_lgbm_backup.pkl"
 _TUNED_CSV_BAK  = STORE_DIR / "tuned_result_backup.csv"
 _DATASET_CSV    = ML_DIR / "client_counselor_dataset.csv"
+_DATASET_BAK    = STORE_DIR / "client_counselor_dataset_backup.csv"
 
-
-
-ISSUE_SIMILARITY = {
-    "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.6},
-    "Stress":     {"Stress":  1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.6},
-    "Trauma":     {"Trauma":  1.0, "Stress":  0.6, "Anxiety": 0.6, "Depression": 0.6},
-    "Depression": {"Depression": 1.0, "Anxiety": 0.6, "Stress": 0.6, "Trauma": 0.6},
+# Raw columns the training scripts (trainmodels.py / tunemodels.py) need to
+# engineer features and the target. An uploaded dataset must contain all of these.
+REQUIRED_COLUMNS = {
+    "client_age", "client_ethnicity", "client_issue",
+    "preferred_modality", "preferred_counselor_gender",
+    "previous_counseling_experience",
+    "counselor_age", "counselor_gender", "counselor_ethnicity",
+    "counselor_modality", "specialization", "experience_years",
+    "match_success",
 }
-
-
-class RetrainRequest(BaseModel):
-    real_data: list = []
 
 
 def _deployed_metrics(tuned_csv: Path) -> dict:
@@ -73,46 +73,6 @@ def _save_meta(version_dir: Path, meta: dict):
 def _load_meta(version_dir: Path) -> dict:
     p = version_dir / "metadata.json"
     return json.loads(p.read_text()) if p.exists() else {}
-
-
-def _append_real_data(rows: list) -> int:
-    valid_issues = set(ISSUE_SIMILARITY.keys())
-    mapped = []
-    for r in rows:
-        if r.get("match_outcome") not in ("Successful", "Unsuccessful"):
-            continue
-        if r.get("client_issue") not in valid_issues:
-            continue
-        if r.get("specialization") not in valid_issues:
-            continue
-        mapped.append({
-            "client_id":                      -1,
-            "client_age":                     r.get("client_age") or 30,
-            "client_gender":                  r.get("client_gender") or "Male",
-            "client_ethnicity":               r.get("client_ethnicity") or "Malay",
-            "client_issue":                   r["client_issue"],
-            "previous_counseling_experience": r.get("prev_exp") or 0,
-            "preferred_language":             r.get("preferred_language") or "English",
-            "preferred_modality":             r.get("preferred_modality") or "Cognitive",
-            "preferred_counselor_gender":     r.get("preferred_c_gender") or "No preference",
-            "counselor_id":                   -1,
-            "counselor_age":                  r.get("counselor_age") or 35,
-            "counselor_gender":               r.get("counselor_gender") or "Female",
-            "counselor_ethnicity":            r.get("counselor_ethnicity") or "Malay",
-            "counselor_language":             r.get("counselor_language") or "English",
-            "specialization":                 r["specialization"],
-            "counselor_modality":             r.get("counselor_modality") or "Cognitive",
-            "experience_years":               r.get("experience_years") or 5,
-            "match_success":                  1 if r["match_outcome"] == "Successful" else 0,
-        })
-
-    if not mapped or not _DATASET_CSV.exists():
-        return 0
-
-    df_syn  = pd.read_csv(str(_DATASET_CSV))
-    df_real = pd.DataFrame(mapped)
-    pd.concat([df_syn, df_real], ignore_index=True).to_csv(str(_DATASET_CSV), index=False)
-    return len(mapped)
 
 
 # ── GET / ─────────────────────────────────────────────────────────────────────
@@ -153,11 +113,13 @@ def _ensure_initial_version():
     STORE_DIR.mkdir(exist_ok=True)
     VERSIONS_DIR.mkdir(exist_ok=True)
     initial_dir = VERSIONS_DIR / "v_initial"
-    if initial_dir.exists():
+    # Gate on the metadata file, not the directory — a half-created (empty)
+    # v_initial dir must still be populated, otherwise history stays empty forever.
+    if (initial_dir / "metadata.json").exists():
         return
     if not _BEST_MODEL.exists():
         return
-    initial_dir.mkdir()
+    initial_dir.mkdir(exist_ok=True)
     shutil.copy2(str(_BEST_MODEL), str(initial_dir / "tuned_lgbm.pkl"))
     if _TUNED_CSV.exists():
         shutil.copy2(str(_TUNED_CSV), str(initial_dir / "tuned_result.csv"))
@@ -165,9 +127,9 @@ def _ensure_initial_version():
     meta = {
         "version_id":   "v_initial",
         "timestamp":    "2026-01-01T00:00:00",
-        "display_date": "Initial model (pre-versioning)",
+        "display_date": "Initial model (synthetic baseline)",
         "mode":         "synthetic",
-        "real_rows":    0,
+        "rows":         0,
         "metrics":      metrics,
         "is_active":    False,
     }
@@ -197,36 +159,41 @@ def get_history():
 
 # ── POST /retrain ─────────────────────────────────────────────────────────────
 
-def _run_training(job_id: str, payload: RetrainRequest):
+def _run_training(job_id: str, df: pd.DataFrame):
     job = _jobs[job_id]
     version_dir = None
     try:
         STORE_DIR.mkdir(exist_ok=True)
         VERSIONS_DIR.mkdir(exist_ok=True)
 
-        job["step"]     = "Backing up current model..."
+        job["step"]     = "Backing up current model and dataset..."
         job["progress"] = 0.05
         if _BEST_MODEL.exists():
             shutil.copy2(str(_BEST_MODEL), str(_BEST_MODEL_BAK))
         if _TUNED_CSV.exists():
             shutil.copy2(str(_TUNED_CSV), str(_TUNED_CSV_BAK))
+        if _DATASET_CSV.exists():
+            shutil.copy2(str(_DATASET_CSV), str(_DATASET_BAK))
 
         old_metrics = _deployed_metrics(_TUNED_CSV_BAK)
         version_id  = "v_" + datetime.now().strftime("%Y%m%d_%H%M%S")
         version_dir = VERSIONS_DIR / version_id
         version_dir.mkdir(exist_ok=True)
 
-        scripts        = [ML_DIR / "datascript.py", ML_DIR / "trainmodels.py", ML_DIR / "tunemodels.py"]
-        labels         = [
-            "Step 1 / 3 — Generating dataset (datascript.py)",
-            "Step 2 / 3 — Training models (trainmodels.py)",
-            "Step 3 / 3 — Tuning hyperparameters (tunemodels.py)",
-        ]
-        progress_after = [0.35, 0.70, 0.88]
-        output_parts   = []
-        real_rows      = 0
+        # The uploaded dataset becomes the training input both scripts read.
+        row_count = len(df)
+        df.to_csv(str(_DATASET_CSV), index=False)
 
-        for idx, (script, label, prog) in enumerate(zip(scripts, labels, progress_after)):
+        scripts        = [ML_DIR / "trainmodels.py", ML_DIR / "tunemodels.py"]
+        labels         = [
+            "Step 1 / 2 — Training models (trainmodels.py)",
+            "Step 2 / 2 — Tuning hyperparameters (tunemodels.py)",
+        ]
+        progress_start = [0.15, 0.55]
+        progress_after = [0.55, 0.85]
+        output_parts = []
+
+        for idx, (script, label) in enumerate(zip(scripts, labels)):
             if not script.exists():
                 shutil.rmtree(str(version_dir), ignore_errors=True)
                 job["status"] = "error"
@@ -234,7 +201,7 @@ def _run_training(job_id: str, payload: RetrainRequest):
                 return
 
             job["step"]     = label
-            job["progress"] = progress_after[idx - 1] if idx > 0 else 0.10
+            job["progress"] = progress_start[idx]
 
             result = subprocess.run(
                 [sys.executable, str(script)],
@@ -248,31 +215,31 @@ def _run_training(job_id: str, payload: RetrainRequest):
                 job["error"]  = f"{script.name} failed:\n{result.stderr}"
                 return
 
-            job["progress"] = prog
-
-            if idx == 0 and payload.real_data:
-                real_rows = _append_real_data(payload.real_data)
+            job["progress"] = progress_after[idx]
 
         job["step"]     = "Saving version artifacts..."
-        job["progress"] = 0.93
+        job["progress"] = 0.90
         new_metrics = _deployed_metrics(_TUNED_CSV)
         if _BEST_MODEL.exists():
             shutil.copy2(str(_BEST_MODEL), str(version_dir / "tuned_lgbm.pkl"))
         if _TUNED_CSV.exists():
             shutil.copy2(str(_TUNED_CSV), str(version_dir / "tuned_result.csv"))
 
+        # Leave the active model and dataset exactly as they were — the new
+        # version is only deployed when the admin explicitly chooses to.
         if _BEST_MODEL_BAK.exists():
             shutil.copy2(str(_BEST_MODEL_BAK), str(_BEST_MODEL))
         if _TUNED_CSV_BAK.exists():
             shutil.copy2(str(_TUNED_CSV_BAK), str(_TUNED_CSV))
+        if _DATASET_BAK.exists():
+            shutil.copy2(str(_DATASET_BAK), str(_DATASET_CSV))
 
-        mode = "hybrid" if real_rows > 0 else "synthetic"
         meta = {
             "version_id":   version_id,
             "timestamp":    datetime.now().isoformat(),
             "display_date": datetime.now().strftime("%d %b %Y, %H:%M"),
-            "mode":         mode,
-            "real_rows":    real_rows,
+            "mode":         "uploaded",
+            "rows":         row_count,
             "metrics":      new_metrics,
             "is_active":    False,
         }
@@ -287,21 +254,46 @@ def _run_training(job_id: str, payload: RetrainRequest):
             "output":      "\n".join(output_parts),
             "old_metrics": old_metrics,
             "new_metrics": new_metrics,
-            "real_rows":   real_rows,
-            "mode":        mode,
+            "rows":        row_count,
         }
     except Exception as e:
         if version_dir and version_dir.exists():
             shutil.rmtree(str(version_dir), ignore_errors=True)
+        # Restore the dataset if training was interrupted mid-way.
+        if _DATASET_BAK.exists():
+            shutil.copy2(str(_DATASET_BAK), str(_DATASET_CSV))
         job["status"] = "error"
         job["error"]  = str(e)
 
 
 @router.post("/retrain")
-def retrain_model(payload: RetrainRequest):
+def retrain_model(file: UploadFile = File(...)):
+    raw  = file.file.read()
+    name = (file.filename or "").lower()
+    try:
+        if name.endswith((".xlsx", ".xls")):
+            df = pd.read_excel(io.BytesIO(raw))
+        elif name.endswith(".csv"):
+            df = pd.read_csv(io.BytesIO(raw))
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file type. Upload a .csv, .xlsx or .xls file.")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read the uploaded file. Make sure it is a valid CSV or Excel file.")
+
+    missing = REQUIRED_COLUMNS - set(df.columns)
+    if missing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Dataset is missing required columns: {', '.join(sorted(missing))}",
+        )
+    if df.empty:
+        raise HTTPException(status_code=400, detail="The uploaded dataset has no rows.")
+
     job_id = uuid.uuid4().hex[:12]
     _jobs[job_id] = {"status": "running", "step": "Initialising...", "progress": 0.0, "result": None, "error": None}
-    threading.Thread(target=_run_training, args=(job_id, payload), daemon=True).start()
+    threading.Thread(target=_run_training, args=(job_id, df), daemon=True).start()
     return {"job_id": job_id, "status": "running"}
 
 
@@ -346,15 +338,3 @@ def delete_version(version_id: str):
         raise HTTPException(status_code=400, detail="Cannot delete the currently active version.")
     shutil.rmtree(str(version_dir))
     return {"message": f"Version {version_id} deleted."}
-
-
-# ── POST /rollback ────────────────────────────────────────────────────────────
-
-@router.post("/rollback")
-def rollback_model():
-    if not _BEST_MODEL_BAK.exists():
-        raise HTTPException(status_code=404, detail="No backup found. Cannot rollback.")
-    shutil.copy2(str(_BEST_MODEL_BAK), str(_BEST_MODEL))
-    if _TUNED_CSV_BAK.exists():
-        shutil.copy2(str(_TUNED_CSV_BAK), str(_TUNED_CSV))
-    return {"message": "Rollback successful. Previous model restored."}

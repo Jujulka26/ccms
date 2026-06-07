@@ -2,7 +2,7 @@ import time
 import pandas as pd
 import streamlit as st
 from frontend.utils.api import (
-    get_model_performance, get_consented_outcomes,
+    get_model_performance,
     trigger_retrain, get_retrain_status, get_model_history, deploy_version, discard_version,
 )
 
@@ -233,42 +233,43 @@ def _render_performance_metrics(data):
     )
 
 
-def _render_outcome_data():
-    st.markdown(
-        """
-        <div class="pm-card">
-            <div class="pm-card-title">Export outcome data</div>
-            <p class="pm-card-copy">Downloads client + counselor features with finalised outcome labels (Successful / Unsuccessful only). Ongoing matches are excluded — they have no definitive label yet. No personal identifiers included.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+_REQUIRED_COLUMNS = [
+    "client_age", "client_ethnicity", "client_issue",
+    "preferred_modality", "preferred_counselor_gender",
+    "previous_counseling_experience",
+    "counselor_age", "counselor_gender", "counselor_ethnicity",
+    "counselor_modality", "specialization", "experience_years",
+    "match_success",
+]
 
-    rows = get_consented_outcomes()
-    if rows:
-        df_export = pd.DataFrame(rows)
-        csv_bytes = df_export.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label="Download outcomes CSV",
-            data=csv_bytes,
-            file_name="match_outcomes.csv",
-            mime="text/csv",
-            type="primary",
-        )
-        st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
-        st.dataframe(df_export, use_container_width=True, hide_index=True)
-    else:
-        st.info("No finalised outcomes yet. Outcomes appear here once consented users are marked Successful or Unsuccessful.")
+
+def _template_csv_bytes() -> bytes:
+    example = {
+        "client_age": 29,
+        "client_ethnicity": "Malay",
+        "client_issue": "Anxiety",
+        "preferred_modality": "Cognitive",
+        "preferred_counselor_gender": "No preference",
+        "previous_counseling_experience": 1,
+        "counselor_age": 38,
+        "counselor_gender": "Female",
+        "counselor_ethnicity": "Malay",
+        "counselor_modality": "Cognitive, Behavioral",
+        "specialization": "Anxiety",
+        "experience_years": 10,
+        "match_success": 1,
+    }
+    return pd.DataFrame([example], columns=_REQUIRED_COLUMNS).to_csv(index=False).encode("utf-8")
 
 
 def _render_model_management(data):
-    deployed_model = data.get("deployed_model", "Tuned LightGBM")
-
     st.markdown(
         """
         <div class="pm-card">
             <div class="pm-card-title">Train a new version</div>
-            <p class="pm-card-copy">Runs <strong>datascript.py → trainmodels.py → tunemodels.py</strong>. Takes several minutes. The active model is untouched until you choose to deploy.</p>
+            <p class="pm-card-copy">Upload a training dataset (CSV or Excel), then start training. Runs
+            <strong>trainmodels.py → tunemodels.py</strong> on your data in the background — takes a few minutes.
+            The active model is untouched until you choose to deploy the new version.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -276,51 +277,47 @@ def _render_model_management(data):
 
     retrain_result = st.session_state.get("retrain_result")
 
-    # ── No active job, no result yet: show uploader + start button ─────────────
+    # ── No active job, no result yet: upload dataset + start button ───────────
     if retrain_result is None:
+        with st.expander("Required columns", expanded=False):
+            st.markdown(
+                "Your file must contain these columns (extra columns are ignored):\n\n"
+                + "  ·  ".join(f"`{c}`" for c in _REQUIRED_COLUMNS)
+            )
+            st.download_button(
+                "Download CSV template",
+                data=_template_csv_bytes(),
+                file_name="training_template.csv",
+                mime="text/csv",
+            )
+
         uploaded = st.file_uploader(
-            "Upload real outcomes CSV (optional)",
-            type="csv",
-            help="Upload the CSV exported from the Outcome Data tab to include real match data in training. Leave empty to train on synthetic data only.",
+            "Upload training dataset",
+            type=["csv", "xlsx", "xls"],
+            help="The dataset the models will be trained on. Must contain the required columns above.",
         )
 
-        real_data = []
-        if uploaded is not None:
-            try:
-                df_upload = pd.read_csv(uploaded)
-                real_data = df_upload.to_dict(orient="records")
-                st.markdown(
-                    f'<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);'
-                    f'border-radius:10px;padding:10px 14px;margin-top:8px;font-size:13px;color:#065F46;">'
-                    f'<strong>{len(real_data)}</strong> real outcome row{"s" if len(real_data) != 1 else ""} loaded — '
-                    f'will be appended to synthetic data before training.</div>',
-                    unsafe_allow_html=True,
-                )
-            except Exception:
-                st.warning("Could not read the uploaded CSV. Training will use synthetic data only.")
+        st.markdown("<div style='margin-top:8px;'></div>", unsafe_allow_html=True)
 
-        st.markdown("<div style='margin-top:16px;'></div>", unsafe_allow_html=True)
-
-        if st.button("Start Training", type="primary"):
-            result = trigger_retrain(real_data if real_data else None)
+        if st.button("Start Training", type="primary", disabled=uploaded is None):
+            result = trigger_retrain(uploaded.getvalue(), uploaded.name)
             if result:
                 st.session_state["training_job_id"] = result["job_id"]
                 st.rerun()
 
     # ── Training result panel ──────────────────────────────────────────────────
     else:
-        version_id  = retrain_result.get("version_id", "")
-        result_mode = retrain_result.get("mode", "synthetic")
-        result_real = retrain_result.get("real_rows", 0)
-        old_m       = retrain_result.get("old_metrics", {})
-        new_m       = retrain_result.get("new_metrics", {})
+        version_id = retrain_result.get("version_id", "")
+        old_m      = retrain_result.get("old_metrics", {})
+        new_m      = retrain_result.get("new_metrics", {})
+        rows       = retrain_result.get("rows", 0)
+        rows_note  = f" Trained on <strong>{rows}</strong> rows." if rows else ""
 
-        mode_label = f"Hybrid · {result_real} real rows" if result_mode == "hybrid" and result_real else "Synthetic"
         st.markdown(
             f'<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);'
             f'border-radius:12px;padding:16px 20px;margin-bottom:20px;">'
-            f'<div style="font-size:12px;font-weight:600;color:#10B981;margin-bottom:6px;">TRAINING COMPLETE — {mode_label}</div>'
-            f'<div style="font-size:13px;color:#1A1A2E;">Version <code>{version_id}</code> is ready. '
+            f'<div style="font-size:12px;font-weight:600;color:#10B981;margin-bottom:6px;">TRAINING COMPLETE</div>'
+            f'<div style="font-size:13px;color:#1A1A2E;">Version <code>{version_id}</code> is ready.{rows_note} '
             f'Save it to version history, or discard if the metrics are not good enough.</div>'
             f'</div>',
             unsafe_allow_html=True,
@@ -391,9 +388,11 @@ def _render_model_management(data):
             vid      = v.get("version_id", "")
             is_active = v.get("is_active", False)
             m        = v.get("metrics", {})
-            mode_tag = "Hybrid" if v.get("mode") == "hybrid" else "Synthetic"
-            rr       = v.get("real_rows", 0)
-            mode_display = f"Hybrid · {rr} real rows" if mode_tag == "Hybrid" and rr else mode_tag
+            rows     = v.get("rows", v.get("real_rows", 0))
+            if v.get("mode") == "uploaded":
+                mode_display = f"Uploaded · {rows} rows" if rows else "Uploaded"
+            else:
+                mode_display = "Synthetic"
             active_badge = (
                 '<span style="background:#10B981;color:#fff;font-size:10px;font-weight:700;'
                 'padding:2px 8px;border-radius:20px;margin-left:8px;">ACTIVE</span>'
@@ -442,7 +441,7 @@ def show_model_performance_page():
             <div style="position: relative; z-index: 2; max-width: 65%;">
                 <div style="color: #10B981; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block;">Analytics</div>
                 <div style="font-family: 'DM Serif Display', serif; font-size: 42px; color: #1A1A2E; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Model Management</div>
-                <p style="font-size: 16px; color: #4A4A5C; margin: 0; line-height: 1.65; max-width: 480px;">Accuracy, F1 and ROC-AUC across all models — plus outcome data and model management.</p>
+                <p style="font-size: 16px; color: #4A4A5C; margin: 0; line-height: 1.65; max-width: 480px;">Accuracy, F1 and ROC-AUC across all models — plus model version management and retraining.</p>
             </div>
             <div style="font-size: 110px; line-height: 1; position: absolute; right: 28px; bottom: -20px; z-index: 1; opacity: 0.15; transform: rotate(-5deg); pointer-events: none;">
                 📊
@@ -504,17 +503,13 @@ def show_model_performance_page():
     # ── Normal view: tabs ─────────────────────────────────────────────────────
     data = get_model_performance()
 
-    tab_metrics, tab_outcomes, tab_management = st.tabs([
+    tab_metrics, tab_management = st.tabs([
         "📊  Performance",
-        "📋  Outcome Data",
         "⚙️  Model Training",
     ])
 
     with tab_metrics:
         _render_performance_metrics(data)
-
-    with tab_outcomes:
-        _render_outcome_data()
 
     with tab_management:
         _render_model_management(data)

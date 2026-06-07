@@ -134,6 +134,7 @@ ETHNICITY_OPTIONS = ["Malay", "Chinese", "Indian", "Other"]
 LANGUAGE_OPTIONS = ["English", "Malay", "Mandarin", "Tamil"]
 SPECIALIZATION_OPTIONS = ["Anxiety", "Depression", "Stress", "Trauma"]
 MODALITY_OPTIONS = ["Cognitive", "Behavioral", "Humanistic", "Psychodynamic"]
+TIME_BLOCK_OPTIONS = ["Weekday Morning", "Weekday Afternoon", "Weekday Evening", "Weekend"]
 
 
 def _option_index(options, value, default=0):
@@ -170,6 +171,8 @@ def render_add_counselor_dialog():
                 specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=SPECIALIZATION_OPTIONS.index("Stress"))
                 counselor_modality = st.multiselect("Modality", MODALITY_OPTIONS, default=["Cognitive"], max_selections=2)
                 experience_years = st.number_input("Years of Experience", 0, 30, 3)
+                availability = st.multiselect("Availability", TIME_BLOCK_OPTIONS, default=TIME_BLOCK_OPTIONS,
+                                              help="General working times. Used to match clients by preferred time.")
 
         with tab2:
             profile_img = st.file_uploader("Profile Photo", type=["jpg", "jpeg", "png"])
@@ -204,6 +207,7 @@ def render_add_counselor_dialog():
                 "counselor_language": ", ".join(counselor_language),
                 "counselor_modality": ", ".join(counselor_modality),
                 "experience_years": experience_years,
+                "availability": availability,
                 "about_me": about_me, "expertise_tags": expertise_tags,
                 "helpful_thought_1": helpful_thought_1, "helpful_thought_2": helpful_thought_2,
                 "modality_desc": modality_desc, "image": img_filename,
@@ -254,6 +258,9 @@ def render_edit_counselor_dialog():
                 edit_specialization = st.selectbox("Specialization", SPECIALIZATION_OPTIONS, index=specialization_index)
                 edit_modality = st.multiselect("Modality", MODALITY_OPTIONS, default=current_mods, max_selections=2)
                 edit_year_exp = st.number_input("Years of Experience", 0, 30, int(row["experience_years"]))
+                current_avail = [b.strip() for b in str(row.get("availability") or "").split(",") if b.strip() in TIME_BLOCK_OPTIONS]
+                edit_availability = st.multiselect("Availability", TIME_BLOCK_OPTIONS, default=current_avail,
+                                                   help="General working times. Used to match clients by preferred time.")
 
         with tab2:
             current_img = safe_str(row.get("image"))
@@ -294,6 +301,7 @@ def render_edit_counselor_dialog():
                 "counselor_language": ", ".join(edit_language),
                 "counselor_modality": ", ".join(edit_modality),
                 "experience_years": edit_year_exp,
+                "availability": edit_availability,
                 "about_me": edit_about_me, "expertise_tags": edit_expertise_tags,
                 "helpful_thought_1": edit_thought_1, "helpful_thought_2": edit_thought_2,
                 "modality_desc": edit_modality_desc, "image": img_filename,

@@ -2,6 +2,14 @@ import hashlib
 import math
 import mysql.connector
 
+# Max concurrent open cases a counselor can hold (pending + approved, i.e. not
+# yet closed). Single source of truth for the cap — ml.py imports it for matching.
+MAX_CASELOAD = 5
+
+
+class CounselorAtCapacity(Exception):
+    """Raised when a new request would push a counselor past MAX_CASELOAD open cases."""
+
 
 def get_connection():
     return mysql.connector.connect(
@@ -28,9 +36,25 @@ def load_counselors() -> list[dict]:
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
+        # caseload is computed live = open cases (Pending or Approved, i.e. not
+        # Closed). A new request raises it; closing lowers it. No stored counter
+        # to drift. Availability is aggregated from the child table in one pass.
         cursor.execute("""
-            SELECT c.*, p.about_me, p.expertise_tags, p.helpful_thought_1, p.helpful_thought_2,
-                   p.modality_desc, p.image
+            SELECT
+                c.*,
+                p.about_me, p.expertise_tags, p.helpful_thought_1,
+                p.helpful_thought_2, p.modality_desc, p.image,
+                (
+                    SELECT COUNT(*)
+                    FROM tbl_request r
+                    WHERE r.counselor_id = c.counselor_id
+                      AND r.status IN ('Pending', 'Approved')
+                ) AS caseload,
+                (
+                    SELECT GROUP_CONCAT(a.time_block ORDER BY a.time_block SEPARATOR ', ')
+                    FROM tbl_counselor_availability a
+                    WHERE a.counselor_id = c.counselor_id
+                ) AS availability
             FROM tbl_counselor c
             LEFT JOIN tbl_counselor_profile p ON c.counselor_id = p.counselor_id
         """)
@@ -65,9 +89,19 @@ def verify_admin_credentials(email: str, password: str) -> bool:
         conn.close()
 
 
+def _set_availability(cursor, counselor_id: int, availability):
+    """Replace a counselor's availability rows with the given list of time blocks."""
+    cursor.execute("DELETE FROM tbl_counselor_availability WHERE counselor_id=%s", (counselor_id,))
+    for block in (availability or []):
+        cursor.execute(
+            "INSERT INTO tbl_counselor_availability (counselor_id, time_block) VALUES (%s, %s)",
+            (counselor_id, block),
+        )
+
+
 def add_counselor(
     *, name, age, gender, ethnicity, specialization,
-    counselor_language, counselor_modality, experience_years,
+    counselor_language, counselor_modality, experience_years, availability=None,
     about_me=None, expertise_tags=None, helpful_thought_1=None,
     helpful_thought_2=None, modality_desc=None, image=None,
 ):
@@ -87,6 +121,7 @@ def add_counselor(
                VALUES (%s, %s, %s, %s, %s, %s, %s)""",
             (counselor_id, about_me, expertise_tags, helpful_thought_1, helpful_thought_2, modality_desc, image),
         )
+        _set_availability(cursor, counselor_id, availability)
         conn.commit()
     except Exception:
         conn.rollback()
@@ -98,7 +133,7 @@ def add_counselor(
 
 def update_counselor(
     counselor_id: int, *, name, age, gender, ethnicity, specialization,
-    counselor_language, counselor_modality, experience_years,
+    counselor_language, counselor_modality, experience_years, availability=None,
     about_me=None, expertise_tags=None, helpful_thought_1=None,
     helpful_thought_2=None, modality_desc=None, image=None,
 ):
@@ -128,6 +163,7 @@ def update_counselor(
                    VALUES (%s, %s, %s, %s, %s, %s, %s)""",
                 (counselor_id, about_me, expertise_tags, helpful_thought_1, helpful_thought_2, modality_desc, image),
             )
+        _set_availability(cursor, counselor_id, availability)
         conn.commit()
     except Exception:
         conn.rollback()
@@ -163,26 +199,41 @@ def has_pending_request(email: str) -> bool:
 
 
 def save_intro_request(
-    client_name, client_email, counselor_id, compatibility_score, outcome_consent=False,
+    client_name, client_email, counselor_id, compatibility_score,
     client_age=None, client_gender=None, client_ethnicity=None, client_issue=None,
     prev_exp=None, preferred_language=None, preferred_modality=None, preferred_c_gender=None,
 ):
     conn = get_connection()
     cursor = conn.cursor()
     try:
+        # Backstop: never let a counselor exceed MAX_CASELOAD open cases, even if
+        # the client's view was stale or two requests race in. The front-end
+        # already hides full counselors; this guarantees the rule server-side.
+        cursor.execute(
+            "SELECT COUNT(*) FROM tbl_request WHERE counselor_id=%s AND status IN ('Pending', 'Approved')",
+            (counselor_id,),
+        )
+        if cursor.fetchone()[0] >= MAX_CASELOAD:
+            raise CounselorAtCapacity(
+                "This counselor is now fully booked. Please choose another counselor."
+            )
+
         cursor.execute(
             """INSERT INTO tbl_request
-               (client_name, client_email, counselor_id, compatibility_score, status, outcome_consent,
+               (client_name, client_email, counselor_id, compatibility_score, status,
                 client_age, client_gender, client_ethnicity, client_issue,
                 prev_exp, preferred_language, preferred_modality, preferred_c_gender)
-               VALUES (%s, %s, %s, %s, 'Pending', %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+               VALUES (%s, %s, %s, %s, 'Pending', %s, %s, %s, %s, %s, %s, %s, %s)""",
             (
-                client_name, client_email, counselor_id, compatibility_score, int(outcome_consent),
+                client_name, client_email, counselor_id, compatibility_score,
                 client_age, client_gender, client_ethnicity, client_issue,
                 prev_exp, preferred_language, preferred_modality, preferred_c_gender,
             ),
         )
         conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         cursor.close()
         conn.close()
@@ -194,7 +245,9 @@ def get_all_requests() -> list[dict]:
     try:
         cursor.execute(
             """SELECT r.request_id, r.client_name, r.client_email, r.compatibility_score,
-                      r.status, r.created_at, r.match_outcome, r.outcome_consent, c.name as counselor_name
+                      r.status, r.created_at, c.name as counselor_name,
+                      r.client_age, r.client_gender, r.client_ethnicity, r.client_issue,
+                      r.prev_exp, r.preferred_language, r.preferred_modality, r.preferred_c_gender
                FROM tbl_request r
                JOIN tbl_counselor c ON r.counselor_id = c.counselor_id
                ORDER BY r.request_id DESC"""
@@ -205,18 +258,9 @@ def get_all_requests() -> list[dict]:
         conn.close()
 
 
-def update_match_outcome(request_id: int, outcome: str):
-    conn = get_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("UPDATE tbl_request SET match_outcome=%s WHERE request_id=%s", (outcome, request_id))
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
-
-
 def update_request_status(request_id: int, status: str):
+    # Caseload is derived from request status, so approving (Pending→Approved)
+    # keeps the case "open" and needs no counter bookkeeping.
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -227,45 +271,60 @@ def update_request_status(request_id: int, status: str):
         conn.close()
 
 
-def get_outcome_stats() -> dict:
+def close_request(request_id: int):
+    """Mark an approved match as Closed. This drops it out of the counselor's
+    live caseload count, freeing a slot. Only an Approved match can be closed."""
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     try:
-        cursor.execute("""
-            SELECT
-                COUNT(*) AS total_consented,
-                SUM(match_outcome = 'Successful') AS successful,
-                SUM(match_outcome = 'Unsuccessful') AS unsuccessful,
-                SUM(match_outcome = 'Ongoing') AS ongoing,
-                SUM(match_outcome IS NULL) AS not_recorded
-            FROM tbl_request
-            WHERE outcome_consent = 1
-        """)
+        cursor.execute("SELECT status FROM tbl_request WHERE request_id=%s", (request_id,))
         row = cursor.fetchone()
-        return {k: int(v) if v is not None else 0 for k, v in row.items()}
+        if not row or row[0] != "Approved":
+            return  # only an active approved match can be closed
+        cursor.execute("UPDATE tbl_request SET status='Closed' WHERE request_id=%s", (request_id,))
+        conn.commit()
     finally:
         cursor.close()
         conn.close()
 
 
-def get_consented_outcomes() -> list[dict]:
+def save_enquiry(name: str, email: str, subject: str, message: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """INSERT INTO tbl_enquiry (name, email, subject, message)
+               VALUES (%s, %s, %s, %s)""",
+            (name, email, subject, message),
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_enquiries() -> list[dict]:
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("""
-            SELECT
-                r.client_age, r.client_gender, r.client_ethnicity, r.client_issue,
-                r.prev_exp, r.preferred_language, r.preferred_modality, r.preferred_c_gender,
-                c.age AS counselor_age, c.gender AS counselor_gender,
-                c.ethnicity AS counselor_ethnicity, c.specialization,
-                c.counselor_language, c.counselor_modality, c.experience_years,
-                r.compatibility_score, r.match_outcome
-            FROM tbl_request r
-            JOIN tbl_counselor c ON r.counselor_id = c.counselor_id
-            WHERE r.outcome_consent = 1 AND r.match_outcome IN ('Successful', 'Unsuccessful')
-            ORDER BY r.request_id DESC
-        """)
+        cursor.execute(
+            """SELECT enquiry_id, name, email, subject, message, status, created_at
+               FROM tbl_enquiry ORDER BY enquiry_id DESC"""
+        )
         return [_clean_row(r) for r in cursor.fetchall()]
     finally:
         cursor.close()
         conn.close()
+
+
+def update_enquiry_status(enquiry_id: int, status: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE tbl_enquiry SET status=%s WHERE enquiry_id=%s", (status, enquiry_id))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+

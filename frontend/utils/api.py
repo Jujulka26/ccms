@@ -115,7 +115,7 @@ def delete_counselor(counselor_id: int):
 
 def login(email: str, password: str) -> bool:
     result = _post("/auth/login", {"email": email, "password": password})
-    return result.get("success", False)
+    return bool(result.get("access_token"))
 
 
 # ── Requests ───────────────────────────────────────────────────────────────────
@@ -132,7 +132,6 @@ def check_pending_request(email: str) -> bool:
 
 def save_intro_request(
     client_name: str, client_email: str, counselor_id: int, compatibility_score: float,
-    outcome_consent: bool = False,
     client_age: int = None, client_gender: str = None, client_ethnicity: str = None,
     client_issue: str = None, prev_exp: int = None, preferred_language: str = None,
     preferred_modality: str = None, preferred_c_gender: str = None,
@@ -142,7 +141,6 @@ def save_intro_request(
         "client_email": client_email,
         "counselor_id": counselor_id,
         "compatibility_score": compatibility_score,
-        "outcome_consent": outcome_consent,
         "client_age": client_age,
         "client_gender": client_gender,
         "client_ethnicity": client_ethnicity,
@@ -158,16 +156,8 @@ def approve_request(request_id: int):
     _put(f"/requests/{request_id}/approve", {"status": "Approved"})
 
 
-def update_match_outcome(request_id: int, outcome: str):
-    _patch(f"/requests/{request_id}/outcome", {"outcome": outcome})
-
-
-def get_outcome_stats() -> dict:
-    return _get("/requests/outcome-stats")
-
-
-def get_consented_outcomes() -> list[dict]:
-    return _get("/requests/export-outcomes")
+def close_request(request_id: int):
+    _patch(f"/requests/{request_id}/close", {})
 
 
 def send_approval_email(request_id: int, client_name: str, client_email: str, counselor_name: str):
@@ -193,6 +183,15 @@ def send_enquiry_email(name: str, email: str, subject: str, message: str):
     r.raise_for_status()
 
 
+@st.cache_data(ttl=60)
+def get_enquiries() -> list[dict]:
+    return _get("/contact/enquiries")
+
+
+def update_enquiry_status(enquiry_id: int, status: str):
+    _patch(f"/contact/enquiries/{enquiry_id}", {"status": status})
+
+
 # ── Matching ───────────────────────────────────────────────────────────────────
 
 @st.cache_data(ttl=300)
@@ -215,11 +214,11 @@ def get_model_performance() -> dict:
     return _get("/model-performance/")
 
 
-def trigger_retrain(real_data: list = None) -> dict:
+def trigger_retrain(file_bytes: bytes, filename: str) -> dict:
     try:
         r = requests.post(
             f"{BASE_URL}/model-performance/retrain",
-            json={"real_data": real_data or []},
+            files={"file": (filename, file_bytes)},
             timeout=30,
         )
         r.raise_for_status()
@@ -284,22 +283,4 @@ def deploy_version(version_id: str) -> dict:
         except Exception:
             detail = str(e)
         st.error(f"Deploy failed: {detail}")
-        st.stop()
-
-
-def trigger_rollback() -> dict:
-    try:
-        r = requests.post(f"{BASE_URL}/model-performance/rollback", timeout=30)
-        r.raise_for_status()
-        return r.json()
-    except requests.exceptions.ConnectionError:
-        st.error(_BACKEND_CONN_ERROR)
-        st.stop()
-    except requests.exceptions.HTTPError as e:
-        detail = ""
-        try:
-            detail = e.response.json().get("detail", str(e))
-        except Exception:
-            detail = str(e)
-        st.error(f"Rollback failed: {detail}")
         st.stop()

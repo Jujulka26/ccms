@@ -5,6 +5,13 @@ import numpy as np
 import pandas as pd
 import joblib
 
+from db import MAX_CASELOAD  # single source of truth for the capacity cap
+
+# Coarse availability blocks: a counselor's general working times. Used as a
+# hard pre-filter in matching (like language), NOT a model feature, so it needs
+# no retraining and is unrelated to booking.
+TIME_BLOCKS = ["Weekday Morning", "Weekday Afternoon", "Weekday Evening", "Weekend"]
+
 # app/ml.py is at backend/app/ml.py, so parent.parent.parent = ccms/
 BASE_DIR = Path(__file__).parent.parent.parent / "ml"
 
@@ -74,6 +81,7 @@ def run_match(match_req, counselors: list[dict]) -> dict:
     preferred_language  = match_req.preferred_language
     preferred_modality  = match_req.preferred_modality
     preferred_c_gender  = match_req.preferred_c_gender
+    preferred_time      = getattr(match_req, "preferred_time", "Any time") or "Any time"
     exclude_ids = set(getattr(match_req, "exclude_ids", []) or [])
 
     model, _ = load_resources()
@@ -82,9 +90,20 @@ def run_match(match_req, counselors: list[dict]) -> dict:
     for c in counselors:
         if c.get("counselor_id") in exclude_ids:
             continue
+        # caseload = open cases (pending + approved). A counselor leaves the pool
+        # once committed to MAX_CASELOAD, so we never over-route applicants.
+        if _prev_exp_value(c.get("caseload")) >= MAX_CASELOAD:
+            continue
         counselor_languages  = [v.strip() for v in str(c.get("counselor_language", "")).split(",") if v.strip()]
         if preferred_language not in counselor_languages:
             continue
+        # Availability filter (hard, like language). A counselor who hasn't
+        # declared any availability is left in (benefit of the doubt); one who
+        # has declared blocks must cover the client's chosen time.
+        if preferred_time != "Any time":
+            counselor_availability = [v.strip() for v in str(c.get("availability") or "").split(",") if v.strip()]
+            if counselor_availability and preferred_time not in counselor_availability:
+                continue
         counselor_modalities = [v.strip() for v in str(c.get("counselor_modality", "")).split(",") if v.strip()]
         exp_yrs = _exp_years_value(c.get("experience_years"))
         rows.append({
@@ -100,7 +119,7 @@ def run_match(match_req, counselors: list[dict]) -> dict:
         })
 
     if not rows:
-        return {"error": f"No counselors found who support {preferred_language}."}
+        return {"error": f"No available counselors right now. They may be fully booked, or none currently support {preferred_language}. Please adjust your preferences or try again later."}
 
     df = pd.DataFrame(rows)
     X  = df[FEATURE_ORDER]
@@ -109,10 +128,17 @@ def run_match(match_req, counselors: list[dict]) -> dict:
         warnings.filterwarnings("ignore", message="X does not have valid feature names")
         prob = model.predict_proba(X)[:, 1]
 
-    T = 1.5
-    prob   = np.clip(prob, 1e-7, 1 - 1e-7)
-    logits = np.log(prob / (1 - prob))
-    df["compatibility"] = (1 / (1 + np.exp(-logits / T))) * 100
+    prob = np.clip(prob, 1e-7, 1 - 1e-7)
+
+    # Tier by issue-specialization fit, then let the model rank within each tier.
+    # Exact-issue specialists sit in the top band, related issues in a clearly
+    # lower band, weak or unrelated in the lowest. The bands do not overlap, so a
+    # non-specialist can never outrank a specialist; the model probability only
+    # positions counselors within their own band.
+    im = df["issue_match"].to_numpy()
+    lo = np.select([im >= 1.0, im >= 0.55], [70.0, 40.0], default=10.0)
+    hi = np.select([im >= 1.0, im >= 0.55], [99.0, 65.0], default=38.0)
+    df["compatibility"] = lo + (hi - lo) * prob
 
     ranked        = df.sort_values("compatibility", ascending=False)
     counselor_map = {c["counselor_id"]: c for c in counselors}
@@ -129,6 +155,8 @@ def run_match(match_req, counselors: list[dict]) -> dict:
             "counselor_language":  c.get("counselor_language"),
             "counselor_modality":  c.get("counselor_modality"),
             "experience_years":    int(c.get("experience_years", 0)),
+            "caseload":            _prev_exp_value(c.get("caseload")),
+            "availability":        c.get("availability"),
             "about_me":            c.get("about_me"),
             "expertise_tags":      c.get("expertise_tags"),
             "helpful_thought_1":   c.get("helpful_thought_1"),
@@ -169,6 +197,7 @@ def get_reference_data() -> dict:
         "preferred_modality":         sorted_unique("preferred_modality"),
         "preferred_language":         sorted_unique("preferred_language"),
         "preferred_counselor_gender": sorted_unique("preferred_counselor_gender"),
+        "preferred_time":             ["Any time"] + TIME_BLOCKS,
     }
 
 

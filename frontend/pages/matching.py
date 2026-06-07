@@ -6,6 +6,10 @@ import streamlit.components.v1 as components
 from frontend.utils.api import get_reference_data, post_match, post_shap, save_intro_request, check_pending_request
 from frontend.utils.avatar import avatar_html
 
+# Counselors at/over this many active clients are full: excluded from matching
+# and not applyable in the directory (kept in sync with backend ml.MAX_CASELOAD).
+MAX_CASELOAD = 5
+
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 def inject_styles():
     st.markdown(
@@ -332,6 +336,7 @@ def _match_badges(c: dict, primary: bool) -> str:
 def render_counselor_card(c: dict, score: float, is_primary=True, dismiss_key: str | None = None):
     langs = c.get("counselor_language") or "—"
     mods = c.get("counselor_modality") or "—"
+    avail = c.get("availability") or "—"
     av = avatar_html(c['name'], c.get('image'), size=80, radius=16)
     dismiss_btn_html = f'<div class="dismiss-x" data-dismiss="{dismiss_key}">✕</div>' if dismiss_key else ""
     dismiss_btn_light = f'<div class="dismiss-x-light" data-dismiss="{dismiss_key}">✕</div>' if dismiss_key else ""
@@ -354,7 +359,8 @@ def render_counselor_card(c: dict, score: float, is_primary=True, dismiss_key: s
                 <div class="info-row"><span class="info-key">Experience</span><span class="info-val">{c['experience_years']} yrs</span></div>
                 <div class="info-row"><span class="info-key">Specialization</span><span class="info-val">{c['specialization']}</span></div>
                 <div class="info-row"><span class="info-key">Modality</span><span class="info-val">{mods}</span></div>
-                <div class="info-row" style="border:none"><span class="info-key">Language</span><span class="info-val">{langs}</span></div>
+                <div class="info-row"><span class="info-key">Language</span><span class="info-val">{langs}</span></div>
+                <div class="info-row" style="border:none"><span class="info-key">Availability</span><span class="info-val">{avail}</span></div>
                 <button class="card-view-btn">VIEW FULL PROFILE →</button>
             </div>
             """,
@@ -378,7 +384,8 @@ def render_counselor_card(c: dict, score: float, is_primary=True, dismiss_key: s
                 <div class="info-row-secondary"><span class="info-key-secondary">Experience</span><span class="info-val-secondary">{c['experience_years']} yrs</span></div>
                 <div class="info-row-secondary"><span class="info-key-secondary">Specialization</span><span class="info-val-secondary">{c['specialization']}</span></div>
                 <div class="info-row-secondary"><span class="info-key-secondary">Modality</span><span class="info-val-secondary">{mods}</span></div>
-                <div class="info-row-secondary" style="border:none"><span class="info-key-secondary">Language</span><span class="info-val-secondary">{langs}</span></div>
+                <div class="info-row-secondary"><span class="info-key-secondary">Language</span><span class="info-val-secondary">{langs}</span></div>
+                <div class="info-row-secondary" style="border:none"><span class="info-key-secondary">Availability</span><span class="info-val-secondary">{avail}</span></div>
                 <button class="card-view-btn">VIEW FULL PROFILE →</button>
             </div>
             """,
@@ -528,6 +535,16 @@ def show_profile_dialog(c: dict, score=None):
             f'<div class="prof-thoughts-wrap">{rows}</div></div>'
         )
 
+    availability = c.get("availability")
+    if availability:
+        blocks = [b.strip() for b in str(availability).split(",") if b.strip()]
+        if blocks:
+            avail_html = "".join(f'<span class="prof-pill">🕒 {b}</span>' for b in blocks)
+            right_col += (
+                f'<div class="prof-section"><div class="prof-label">Availability</div>'
+                f'<div class="prof-pills">{avail_html}</div></div>'
+            )
+
     if left_col or right_col:
         st.markdown(
             f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px;">'
@@ -565,6 +582,21 @@ def show_profile_dialog(c: dict, score=None):
         st.write("")
         return
 
+    if int(c.get("caseload") or 0) >= MAX_CASELOAD:
+        st.markdown(
+            f'<div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.25);'
+            f'border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:8px;">'
+            f'<span style="font-size:22px;">🚫</span>'
+            f'<div>'
+            f'<div style="font-size:13px;font-weight:600;color:#B91C1C;">Fully booked</div>'
+            f'<div style="font-size:12px;color:#5A5A6E;margin-top:2px;">{name} is at full capacity right now. '
+            f'Please explore another counselor — you can still view this profile anytime.</div>'
+            f'</div></div>',
+            unsafe_allow_html=True,
+        )
+        st.write("")
+        return
+
     if not st.session_state[req_state_key]:
         st.button(f"✉️ Get to know {name}", use_container_width=True, type="primary",
                   on_click=toggle_req, args=(True,))
@@ -574,9 +606,9 @@ def show_profile_dialog(c: dict, score=None):
         )
         client_name  = st.text_input("Your Full Name")
         client_email = st.text_input("Your Email Address")
-        consent = st.checkbox(
-            "I consent to my match outcome being recorded anonymously to help improve the system.",
-            value=False,
+        st.caption(
+            "🔒 Your details and questionnaire answers are used only to make and review your match. "
+            "They are not shared or used for any other purpose."
         )
         st.write("")
 
@@ -594,7 +626,6 @@ def show_profile_dialog(c: dict, score=None):
                 save_intro_request(
                     client_name.strip(), client_email.strip(),
                     int(counselor_id), float(score) if score else 0.0,
-                    consent,
                     client_age=st.session_state.get("client_age"),
                     client_gender=st.session_state.get("client_gender"),
                     client_ethnicity=st.session_state.get("client_ethnicity"),
@@ -776,6 +807,23 @@ def _step2_form(ref):
         st.rerun()
 
 
+def _snapshot_match_inputs() -> dict:
+    """Freeze the questionnaire answers into a plain dict. Read on the results
+    page so reruns (e.g. opening a profile dialog) can't recompute the match
+    with reverted widget state — which previously dropped the time filter."""
+    return {
+        "client_age":         st.session_state.get("client_age"),
+        "client_gender":      st.session_state.get("client_gender"),
+        "client_ethnicity":   st.session_state.get("client_ethnicity"),
+        "client_issue":       st.session_state.get("client_issue"),
+        "prev_exp":           int(st.session_state.get("previous_exp") or 0),
+        "preferred_language": st.session_state.get("preferred_language"),
+        "preferred_modality": st.session_state.get("preferred_modality"),
+        "preferred_c_gender": st.session_state.get("preferred_c_gender"),
+        "preferred_time":     st.session_state.get("preferred_time", "Any time"),
+    }
+
+
 @st.fragment
 def _step3_form(ref):
     render_step_progress(3)
@@ -790,12 +838,20 @@ def _step3_form(ref):
     st.radio("Preferred language for sessions", ref["preferred_language"], horizontal=True, key="preferred_language")
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     st.radio("Preferred counselor gender", ref["preferred_counselor_gender"], horizontal=True, key="preferred_c_gender")
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    st.selectbox(
+        "Preferred session time",
+        ref.get("preferred_time", ["Any time"]),
+        help="When you'd generally like sessions. 'Any time' won't filter on availability.",
+        key="preferred_time",
+    )
     st.markdown("<br>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1])
     if col1.button("← Back", use_container_width=True):
         st.session_state.quiz_step = 2
         st.rerun()
     if col2.button("Find My Best Match ✨", use_container_width=True, type="primary"):
+        st.session_state["_committed_match"] = _snapshot_match_inputs()
         st.session_state.quiz_step = 4
         st.rerun()
 
@@ -829,6 +885,7 @@ def show_matching_page():
     if "preferred_modality" not in st.session_state:  st.session_state.preferred_modality = ref["preferred_modality"][0] if ref["preferred_modality"] else ""
     if "preferred_language" not in st.session_state:  st.session_state.preferred_language = ref["preferred_language"][0] if ref["preferred_language"] else ""
     if "preferred_c_gender" not in st.session_state:  st.session_state.preferred_c_gender = ref["preferred_counselor_gender"][0] if ref["preferred_counselor_gender"] else ""
+    if "preferred_time" not in st.session_state:      st.session_state.preferred_time = ref["preferred_time"][0] if ref.get("preferred_time") else "Any time"
 
     render_page_header()
 
@@ -948,24 +1005,34 @@ def show_matching_page():
         def _full_reset():
             for fk in ["client_age", "client_gender", "client_ethnicity", "client_issue",
                        "previous_exp", "preferred_modality", "preferred_language", "preferred_c_gender",
+                       "preferred_time",
                        "_age_ui", "_gender_ui", "_ethnicity_ui", "_issue_ui", "_prev_exp_ui"]:
                 st.session_state.pop(fk, None)
             st.session_state.quiz_step = 0
             st.session_state.excluded_counselor_ids = []
+            st.session_state.pop("_committed_match", None)
             st.session_state.pop("_global_sent_to", None)
             st.session_state.pop("_success_name", None)
             for k in list(st.session_state.keys()):
                 if k.startswith("match_") or k.startswith("shap_") or k.startswith("explanation_single_"):
                     del st.session_state[k]
 
-        client_age = st.session_state.client_age
-        client_gender = st.session_state.client_gender
-        client_ethnicity = st.session_state.client_ethnicity
-        client_issue = st.session_state.client_issue
-        previous_exp = st.session_state.previous_exp
-        preferred_language = st.session_state.preferred_language
-        preferred_modality = st.session_state.preferred_modality
-        preferred_c_gender = st.session_state.preferred_c_gender
+        # Read the FROZEN inputs captured when "Find My Best Match" was clicked,
+        # so reruns on this page (opening a profile, dismissing a card) never
+        # recompute the match with reverted widget state.
+        if "_committed_match" not in st.session_state:
+            st.session_state["_committed_match"] = _snapshot_match_inputs()
+        mi = st.session_state["_committed_match"]
+
+        client_age         = mi["client_age"]
+        client_gender      = mi["client_gender"]
+        client_ethnicity   = mi["client_ethnicity"]
+        client_issue       = mi["client_issue"]
+        previous_exp       = mi["prev_exp"]
+        preferred_language = mi["preferred_language"]
+        preferred_modality = mi["preferred_modality"]
+        preferred_c_gender = mi["preferred_c_gender"]
+        preferred_time     = mi["preferred_time"]
 
         _match_payload = {
             "client_age": client_age,
@@ -976,6 +1043,7 @@ def show_matching_page():
             "preferred_language": preferred_language,
             "preferred_modality": preferred_modality,
             "preferred_c_gender": preferred_c_gender,
+            "preferred_time": preferred_time,
         }
         _match_cache_key = "match_" + hashlib.md5(
             _json.dumps(sorted(_match_payload.items())).encode()
@@ -1024,7 +1092,7 @@ def show_matching_page():
         # ── Match Explanation + SHAP ──────────────────────────────────────────
         def _get_explanation(c):
             key = f"explanation_single_{c.get('counselor_id')}"
-            if not isinstance(st.session_state.get(key), list):
+            if not isinstance(st.session_state.get(key), str):
                 st.session_state[key] = _generate_explanation(c, client_issue)
             return st.session_state[key]
 
