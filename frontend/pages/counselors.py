@@ -149,6 +149,27 @@ def show_counselors_page():
         sel_mod = st.selectbox("Modality", ["All"] + all_modalities, key="dir_mod")
     st.markdown('</div>', unsafe_allow_html=True)
 
+    components.html(
+        """
+        <script>
+        (function() {
+            var doc = window.parent.document;
+            function styleSelects() {
+                doc.querySelectorAll('[data-baseweb="select"] > div').forEach(function(el) {
+                    el.style.setProperty('background-color', '#FFFFFF', 'important');
+                    el.style.setProperty('border', '1.5px solid rgba(181,136,247,0.4)', 'important');
+                    el.style.setProperty('border-radius', '10px', 'important');
+                });
+            }
+            styleSelects();
+            [100, 300, 600].forEach(function(t) { setTimeout(styleSelects, t); });
+            new MutationObserver(styleSelects).observe(doc.body, { subtree: true, childList: true });
+        })();
+        </script>
+        """,
+        height=0, width=0,
+    )
+
     # ── Apply filters ─────────────────────────────────────────────────────────
     filtered = counselors
     if sel_spec != "All":
