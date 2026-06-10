@@ -1,7 +1,11 @@
 import os
+from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 import google.generativeai as genai
+
+# Mira's profile picture, shown next to every assistant message.
+MIRA_AVATAR = str(Path(__file__).parent.parent / "assets" / "brand" / "mira.png")
 
 def show_chatbot_page():
     st.markdown(
@@ -78,7 +82,8 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
         ]
 
     for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
+        avatar = MIRA_AVATAR if msg["role"] == "assistant" else None
+        with st.chat_message(msg["role"], avatar=avatar):
             st.markdown(msg["content"])
 
     # Scrolling Suggestion Pills — injected into the parent document so they
@@ -280,7 +285,7 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar=MIRA_AVATAR):
             message_placeholder = st.empty()
 
             try:
