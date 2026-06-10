@@ -15,8 +15,6 @@ def inject_styles():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
         html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
         .stApp { background: #F5F3FF; }
 
@@ -47,7 +45,6 @@ def inject_styles():
         .step-title { font-family: 'Fraunces', serif; font-size: 24px; color: #1C1917; line-height: 1.2; font-weight: 600; }
         .step-copy { font-size: 14px; color: #6B6560; margin: 4px 0 16px 48px; line-height: 1.55; font-family: 'Plus Jakarta Sans', sans-serif; }
         .section-divider { border: none; border-top: 1px solid #E5E5E5; margin: 0px 0 20px 0 !important; position: relative; z-index: 10; }
-        .anchor-link { display: none !important; }
 
         [data-testid="block-container"] [data-testid="stVerticalBlock"] { gap: 0.5rem !important; }
         [data-testid="stRadio"] > div, [role="radiogroup"] { margin-bottom: 0 !important; padding-bottom: 0 !important; }
@@ -111,10 +108,6 @@ def inject_styles():
 
         .ai-explanation-box { background: linear-gradient(135deg, #F5F3FF 0%, #F5F3FF 100%); border: 1px solid rgba(181,136,247,0.15); border-left: 3px solid #B588F7; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
         .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #B588F7, #83ADF9); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .ai-reason-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
-        .ai-reason-row:last-child { margin-bottom: 0; }
-        .ai-reason-icon { flex-shrink: 0; margin-top: 2px; }
-        .ai-reason-text { font-size: 14.5px; color: #2A2420; line-height: 1.5; font-weight: 400; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         div[data-testid="stTabs"] button { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 14px !important; font-weight: 500 !important; }
 
@@ -283,26 +276,6 @@ def render_page_header():
     )
 
 
-def render_disclaimer():
-    st.markdown(
-        """
-        <div style="display:flex; gap:8px; align-items:flex-start; padding:10px 14px; margin-top:16px;
-            background:rgba(245,158,11,0.04); border:1px solid rgba(245,158,11,0.2); border-radius:10px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span style="font-size:12px; color:#78716C; line-height:1.55;">
-                <strong style="color:#92400E;">Note:</strong>
-                Compatibility scores are AI-generated estimates, not clinical assessments — always consult a qualified mental health professional.
-            </span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
 def _match_badges(c: dict, primary: bool) -> str:
     feats = c.get("features") or {}
     badges = []
@@ -418,8 +391,6 @@ def show_profile_dialog(c: dict, score=None):
 
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
-
     div[role="dialog"] {
         max-width: 730px !important;
         width: 730px !important;
@@ -436,8 +407,6 @@ def show_profile_dialog(c: dict, score=None):
     .prof-meta { display:flex; flex-wrap:wrap; column-gap:12px; row-gap:4px; }
     .prof-meta-item { font-size:12px; color:#6B6560; display:flex; align-items:center; gap:3px; }
     .prof-meta-score { font-size:18px; color:#B588F7; font-weight:700; }
-    .prof-score-chip { display:inline-flex; align-items:center; background:#F5F3FF; color:#B588F7; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:2px 10px; border-radius:20px; border:1px solid rgba(181,136,247,0.2); margin-bottom:6px; }
-    .prof-rule { border:none; border-top:1px solid #EBEBEB; margin:14px 0 16px; }
 
     .prof-section { margin-bottom:12px; background:#FAFAFA; border-radius:12px; padding:14px 16px; border:1px solid rgba(0,0,0,0.04); }
     .prof-label { font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#B588F7; margin:0 0 10px; font-family:'Plus Jakarta Sans',sans-serif; }

@@ -7,64 +7,6 @@ def show_contactus_page():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
-        /* ── Hero ─────────────────────────────────────────────────────── */
-        .cu-hero {
-            position: relative;
-            overflow: hidden;
-            background-color: #F5F3FF;
-            background-image:
-                radial-gradient(at 0% 0%, #F0E8FF 0px, transparent 60%),
-                radial-gradient(at 100% 100%, #E8D5FD 0px, transparent 60%);
-            border-radius: 20px;
-            padding: 48px 52px;
-            margin-bottom: 32px;
-            border: 1px solid rgba(181,136,247,0.15);
-            box-shadow: 0 16px 32px -8px rgba(181,136,247,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
-        }
-        .cu-eyebrow {
-            color: #B588F7;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            background: rgba(181,136,247,0.1);
-            border: 1px solid rgba(181,136,247,0.22);
-            border-radius: 20px;
-            padding: 4px 14px;
-            margin-bottom: 20px;
-            display: inline-block;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .cu-hero-title {
-            font-family: 'Fraunces', serif;
-            font-size: 42px;
-            color: #1C1917;
-            margin-bottom: 16px;
-            line-height: 1.12;
-            letter-spacing: -0.5px;
-            font-weight: 600;
-        }
-        .cu-hero-copy {
-            font-size: 16px;
-            color: #6B6560;
-            margin: 0;
-            line-height: 1.65;
-            max-width: 520px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .cu-hero-emoji {
-            font-size: 90px;
-            line-height: 1;
-            position: absolute;
-            right: 48px;
-            bottom: -10px;
-            opacity: 0.15;
-            transform: rotate(-8deg);
-            pointer-events: none;
-        }
-
         /* ── Info cards ───────────────────────────────────────────────── */
         .cu-info-card {
             background: #FFFFFF;
