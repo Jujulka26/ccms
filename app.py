@@ -508,7 +508,7 @@ if "role" not in st.session_state:
         <!-- ── Hero ──────────────────────────────────────────────────────── -->
         <div class="land-hero-band land-band">
             <div class="land-inner" style="position:relative;z-index:2;">
-                <div class="land-hero-eyebrow">AI-Powered Counselor Matching</div>
+                <div class="land-hero-eyebrow">✦ AI-Powered Counselor Matching</div>
                 <div class="land-hero-title">Find the right counselor,<br>matched just for you</div>
                 <p class="land-hero-copy">Answer a few questions. Our model does the rest — surfacing your best-fit counselor from our verified directory.</p>
                 <a href="/?login=client" target="_self" class="land-cta-btn">Find your counselor &rarr;</a>
