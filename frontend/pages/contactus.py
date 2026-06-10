@@ -1,4 +1,4 @@
-import streamlit as st
+﻿import streamlit as st
 
 from frontend.utils.api import send_enquiry_email
 
@@ -13,24 +13,24 @@ def show_contactus_page():
         .cu-hero {
             position: relative;
             overflow: hidden;
-            background-color: #FFF5F2;
+            background-color: #F5F3FF;
             background-image:
-                radial-gradient(at 0% 0%, #FFE0DC 0px, transparent 60%),
-                radial-gradient(at 100% 100%, #FFDDD8 0px, transparent 60%);
+                radial-gradient(at 0% 0%, #F0E8FF 0px, transparent 60%),
+                radial-gradient(at 100% 100%, #E8D5FD 0px, transparent 60%);
             border-radius: 20px;
             padding: 48px 52px;
             margin-bottom: 32px;
-            border: 1px solid rgba(201,99,106,0.15);
-            box-shadow: 0 16px 32px -8px rgba(201,99,106,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
+            border: 1px solid rgba(181,136,247,0.15);
+            box-shadow: 0 16px 32px -8px rgba(181,136,247,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
         }
         .cu-eyebrow {
-            color: #C9636A;
+            color: #B588F7;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            background: rgba(201,99,106,0.1);
-            border: 1px solid rgba(201,99,106,0.22);
+            background: rgba(181,136,247,0.1);
+            border: 1px solid rgba(181,136,247,0.22);
             border-radius: 20px;
             padding: 4px 14px;
             margin-bottom: 20px;
@@ -76,8 +76,8 @@ def show_contactus_page():
             transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
         }
         .cu-info-card:hover {
-            box-shadow: 0 8px 24px rgba(201,99,106,0.1);
-            border-color: rgba(201,99,106,0.25);
+            box-shadow: 0 8px 24px rgba(181,136,247,0.1);
+            border-color: rgba(181,136,247,0.25);
             transform: translateY(-2px);
         }
         .cu-info-icon {
@@ -90,7 +90,7 @@ def show_contactus_page():
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #C9636A;
+            color: #B588F7;
             margin-bottom: 6px;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
@@ -135,7 +135,7 @@ def show_contactus_page():
 
         /* ── Hours card ───────────────────────────────────────────────── */
         .cu-hours-card {
-            background: linear-gradient(135deg, #0E1823 0%, #1A2B3C 100%);
+            background: linear-gradient(135deg, #B588F7 0%, #83ADF9 100%);
             border-radius: 20px;
             padding: 32px 36px;
             margin-top: 8px;
@@ -147,13 +147,13 @@ def show_contactus_page():
             position: absolute;
             top: -40px; right: -40px;
             width: 200px; height: 200px;
-            background: radial-gradient(circle, rgba(201,99,106,0.2) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
             pointer-events: none;
         }
         .cu-hours-title {
             font-family: 'Fraunces', serif;
             font-size: 20px;
-            color: #FFFFFF;
+            color: #2E1065;
             margin-bottom: 20px;
             font-weight: 600;
         }
@@ -162,20 +162,20 @@ def show_contactus_page():
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            border-bottom: 1px solid rgba(46,16,101,0.12);
         }
         .cu-hours-row:last-child {
             border-bottom: none;
         }
         .cu-hours-day {
             font-size: 14px;
-            color: rgba(255,255,255,0.6);
+            color: rgba(46,16,101,0.65);
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .cu-hours-time {
             font-size: 14px;
             font-weight: 600;
-            color: #FFFFFF;
+            color: #2E1065;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .cu-hours-closed {

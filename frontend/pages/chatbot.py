@@ -1,4 +1,4 @@
-import os
+﻿import os
 import streamlit as st
 import streamlit.components.v1 as components
 import google.generativeai as genai
@@ -9,7 +9,7 @@ def show_chatbot_page():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         .botbox {
-            background:#FFF5F2;border:1px solid #FFD5D0;border-radius:14px;padding:24px;margin-bottom:24px;
+            background:#F5F3FF;border:1px solid #F0E8FF;border-radius:14px;padding:24px;margin-bottom:24px;
         }
         </style>
         """,
@@ -23,9 +23,9 @@ def show_chatbot_page():
                 <svg width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
                     <defs>
                         <linearGradient id="mira-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#C9636A"/>
-                            <stop offset="50%" stop-color="#C4954A"/>
-                            <stop offset="100%" stop-color="#A84E55"/>
+                            <stop offset="0%" stop-color="#B588F7"/>
+                            <stop offset="50%" stop-color="#B588F7"/>
+                            <stop offset="100%" stop-color="#B588F7"/>
                         </linearGradient>
                     </defs>
                     <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#mira-grad)"/>
@@ -151,23 +151,23 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
                         '}' +
                         '.sugg-pill{' +
                             'background:#FFFFFF;' +
-                            'border:1px solid #FFD5D0;' +
+                            'border:1px solid #F0E8FF;' +
                             'border-radius:20px;' +
                             'padding:9px 18px;' +
                             'font-size:13px;' +
                             'font-family:Plus Jakarta Sans,sans-serif;' +
                             'color:#6B6560;' +
                             'white-space:nowrap;' +
-                            'box-shadow:0 2px 8px rgba(201,99,106,0.08);' +
+                            'box-shadow:0 2px 8px rgba(181,136,247,0.08);' +
                             'cursor:pointer;' +
                             'pointer-events:auto;' +
                             'transition:background 0.18s,border-color 0.18s,color 0.18s;' +
                             'user-select:none;' +
                         '}' +
                         '.sugg-pill:hover{' +
-                            'background:#FFF5F2;' +
-                            'border-color:#C9636A;' +
-                            'color:#A84E55;' +
+                            'background:#F5F3FF;' +
+                            'border-color:#B588F7;' +
+                            'color:#B588F7;' +
                         '}' +
                         '@keyframes sugg-scroll{' +
                             '0%{transform:translateX(0);}' +

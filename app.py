@@ -1,4 +1,4 @@
-import streamlit as st
+﻿import streamlit as st
 from frontend.pages.manage import show_manage_page
 from frontend.pages.matching import show_matching_page
 from frontend.pages.model_performance import show_model_performance_page
@@ -34,7 +34,7 @@ def inject_app_styles():
         }
 
         .stApp {
-            background: #FFF9F7;
+            background: #F5F3FF;
         }
 
         [data-stale="true"] { opacity: 0 !important; transition: none !important; }
@@ -53,8 +53,8 @@ def inject_app_styles():
         div[data-testid="stNumberInput"] input,
         div[data-testid="stSelectbox"] > div > div {
             border-radius: 10px !important;
-            border: 1.5px solid #E8E2DC !important;
-            background: #FFFAF8 !important;
+            border: 1.5px solid #F0E8FF !important;
+            background: #F5F3FF !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-size: 14px !important;
             transition: border-color 0.2s;
@@ -62,8 +62,8 @@ def inject_app_styles():
         div[data-testid="stTextInput"] input:focus,
         div[data-testid="stNumberInput"] input:focus,
         div[data-testid="stSelectbox"] > div > div:focus-within {
-            border-color: #C9636A !important;
-            box-shadow: 0 0 0 3px rgba(201,99,106,0.1) !important;
+            border-color: #B588F7 !important;
+            box-shadow: 0 0 0 3px rgba(181,136,247,0.12) !important;
         }
 
         div[data-testid="stModal"] > div > div {
@@ -72,15 +72,15 @@ def inject_app_styles():
 
         /* ── Sidebar styling ──────────────────────────────────────────── */
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #0E1823 0%, #1A2B3C 100%);
-            border-right: 1px solid rgba(255,255,255,0.04);
+            background: linear-gradient(180deg, #B588F7 0%, #83ADF9 100%);
+            border-right: 1px solid rgba(181,136,247,0.2);
         }
 
         section[data-testid="stSidebar"] .stMarkdown p,
         section[data-testid="stSidebar"] .stMarkdown div,
         section[data-testid="stSidebar"] .stRadio p,
         section[data-testid="stSidebar"] strong {
-            color: rgba(255,255,255,0.95);
+            color: rgba(46,16,101,0.9);
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
@@ -103,8 +103,8 @@ def inject_app_styles():
 
         section[data-testid="stSidebar"] [data-baseweb="radio"] {
             padding: 11px 16px !important;
-            background: rgba(255,255,255,0.04) !important;
-            border: 1px solid rgba(255,255,255,0.06) !important;
+            background: rgba(255,255,255,0.35) !important;
+            border: 1px solid rgba(255,255,255,0.5) !important;
             border-radius: 10px !important;
             transition: background 0.18s ease, border-color 0.18s ease !important;
             margin-bottom: 0 !important;
@@ -114,25 +114,25 @@ def inject_app_styles():
             align-items: center !important;
         }
         section[data-testid="stSidebar"] [data-baseweb="radio"]:hover {
-            background: rgba(255,255,255,0.08) !important;
-            border-color: rgba(201,99,106,0.35) !important;
+            background: rgba(255,255,255,0.5) !important;
+            border-color: rgba(255,255,255,0.7) !important;
         }
         section[data-testid="stSidebar"] [data-baseweb="radio"]:has(input:checked) {
-            background: rgba(201,99,106,0.15) !important;
-            border-color: rgba(201,99,106,0.55) !important;
-            box-shadow: 0 2px 10px rgba(201,99,106,0.1) !important;
+            background: rgba(255,255,255,0.92) !important;
+            border-color: rgba(255,255,255,1) !important;
+            box-shadow: 0 2px 12px rgba(255,255,255,0.4) !important;
         }
         section[data-testid="stSidebar"] [data-baseweb="radio"] p,
         section[data-testid="stSidebar"] [data-baseweb="radio"] span {
             font-size: 14px !important;
             font-weight: 600 !important;
             margin: 0 !important;
-            color: rgba(255,255,255,0.8) !important;
+            color: rgba(46,16,101,0.85) !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         section[data-testid="stSidebar"] [data-baseweb="radio"]:has(input:checked) p,
         section[data-testid="stSidebar"] [data-baseweb="radio"]:has(input:checked) span {
-            color: #FFFFFF !important;
+            color: #2E1065 !important;
         }
 
         /* ── Pin footer to bottom of sidebar ─────────────────────────── */
@@ -164,25 +164,30 @@ def inject_app_styles():
 
         /* ── Primary buttons ─────────────────────────────────────────── */
         button[kind="primary"] {
-            background-color: #1A2332 !important;
-            border: 1px solid #0E1823 !important;
+            background: linear-gradient(to right, #B588F7 0%, #83ADF9 48%, #2E1065 52%, #2E1065 100%) !important;
+            background-size: 210% 100% !important;
+            background-position: right center !important;
+            transition: background-position 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.15s ease !important;
+            border: none !important;
             color: #FFFFFF !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-weight: 600 !important;
+            box-shadow: 0 4px 16px rgba(46,16,101,0.45) !important;
         }
         button[kind="primary"]:hover {
-            background-color: #C9636A !important;
-            border-color: #B85960 !important;
+            background-position: left center !important;
+            box-shadow: 0 6px 24px rgba(181,136,247,0.55) !important;
+            transform: translateY(-1px) !important;
         }
         button[kind="primary"]:active {
-            background-color: #A84E55 !important;
+            transform: scale(0.97) translateY(0) !important;
         }
 
         /* ── Logout — destructive ghost button ────────────────────────── */
         section[data-testid="stSidebar"] button[kind="secondary"] {
-            background: transparent !important;
-            color: rgba(239,68,68,0.85) !important;
-            border: 1.5px solid rgba(239,68,68,0.35) !important;
+            background: rgba(196,26,22,0.12) !important;
+            color: #C41A16 !important;
+            border: 1.5px solid rgba(196,26,22,0.6) !important;
             border-radius: 10px !important;
             font-weight: 600 !important;
             transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
@@ -190,42 +195,45 @@ def inject_app_styles():
             margin-bottom: 16px !important;
         }
         section[data-testid="stSidebar"] button[kind="secondary"]:hover {
-            background: rgba(239,68,68,0.1) !important;
-            border-color: rgba(239,68,68,0.65) !important;
-            color: #EF4444 !important;
+            background: rgba(196,26,22,0.12) !important;
+            border-color: #C41A16 !important;
+            color: #B91C1C !important;
         }
 
         /* ── Sidebar collapse/expand buttons ─────────────────────────── */
         button[aria-label="Collapse sidebar"],
         section[data-testid="stSidebar"] button[data-testid="baseButton-headerNoPadding"] {
-            background: rgba(201,99,106,0.2) !important;
-            color: #FFFFFF !important;
-            border: 1.5px solid rgba(201,99,106,0.45) !important;
+            background: rgba(255,255,255,0.5) !important;
+            color: #2E1065 !important;
+            border: 1.5px solid rgba(255,255,255,0.7) !important;
             border-radius: 8px !important;
             opacity: 1 !important;
         }
         button[aria-label="Collapse sidebar"]:hover,
         section[data-testid="stSidebar"] button[data-testid="baseButton-headerNoPadding"]:hover {
-            background: rgba(201,99,106,0.4) !important;
-            border-color: #C9636A !important;
+            background: rgba(255,255,255,0.7) !important;
+            border-color: rgba(255,255,255,0.9) !important;
         }
 
         button[data-testid="collapsedControl"],
         button[aria-label="Expand sidebar"] {
-            background: #C9636A !important;
+            background: #B588F7 !important;
             color: #FFFFFF !important;
             border-radius: 0 10px 10px 0 !important;
             border: none !important;
-            box-shadow: 2px 0 14px rgba(201,99,106,0.4) !important;
+            box-shadow: 2px 0 14px rgba(181,136,247,0.45) !important;
             opacity: 1 !important;
         }
         button[data-testid="collapsedControl"]:hover,
         button[aria-label="Expand sidebar"]:hover {
-            background: #B85960 !important;
-            box-shadow: 2px 0 18px rgba(201,99,106,0.55) !important;
+            background: #B588F7 !important;
+            box-shadow: 2px 0 18px rgba(181,136,247,0.7) !important;
+        }
+        button[aria-label="Collapse sidebar"] svg {
+            fill: #2E1065 !important;
+            color: #2E1065 !important;
         }
         button[data-testid="collapsedControl"] svg,
-        button[aria-label="Collapse sidebar"] svg,
         button[aria-label="Expand sidebar"] svg {
             fill: #FFFFFF !important;
             color: #FFFFFF !important;
@@ -233,14 +241,14 @@ def inject_app_styles():
 
         /* ── Sidebar divider ──────────────────────────────────────────── */
         section[data-testid="stSidebar"] hr {
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid rgba(46,16,101,0.15);
             margin: 20px 0;
         }
 
         /* ── Landing page ─────────────────────────────────────────────── */
         .land-cta-btn {
             display: inline-block;
-            background: #C9636A;
+            background: #B588F7;
             color: #FFFFFF !important;
             font-size: 15px;
             font-weight: 700;
@@ -248,13 +256,13 @@ def inject_app_styles():
             border-radius: 50px;
             text-decoration: none !important;
             transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-            box-shadow: 0 4px 20px rgba(201,99,106,0.4);
+            box-shadow: 0 4px 20px rgba(181,136,247,0.45);
             font-family: 'Plus Jakarta Sans', sans-serif;
             letter-spacing: 0.01em;
         }
         .land-cta-btn:hover {
-            background: #B85960;
-            box-shadow: 0 8px 28px rgba(201,99,106,0.55);
+            background: #B588F7;
+            box-shadow: 0 8px 28px rgba(181,136,247,0.7);
             transform: translateY(-2px);
         }
 
@@ -268,7 +276,7 @@ def inject_app_styles():
 
         /* Hero band */
         .land-hero-band {
-            background: #0E1823;
+            background: #0F0E1A;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -276,17 +284,17 @@ def inject_app_styles():
         .land-hero-band::before {
             content: '';
             position: absolute;
-            top: -120px; right: -80px;
-            width: 520px; height: 520px;
-            background: radial-gradient(circle, rgba(201,99,106,0.14) 0%, transparent 60%);
+            top: -100px; right: -60px;
+            width: 560px; height: 560px;
+            background: radial-gradient(circle, rgba(131,173,249,0.22) 0%, transparent 55%);
             pointer-events: none;
         }
         .land-hero-band::after {
             content: '';
             position: absolute;
             bottom: -80px; left: -40px;
-            width: 380px; height: 380px;
-            background: radial-gradient(circle, rgba(196,149,74,0.1) 0%, transparent 60%);
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(0,168,120,0.14) 0%, transparent 55%);
             pointer-events: none;
         }
         .land-hero-eyebrow {
@@ -295,9 +303,9 @@ def inject_app_styles():
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #E8B4B8;
-            background: rgba(201,99,106,0.12);
-            border: 1px solid rgba(201,99,106,0.28);
+            color: rgba(181,136,247,0.9);
+            background: rgba(181,136,247,0.12);
+            border: 1px solid rgba(181,136,247,0.3);
             border-radius: 20px;
             padding: 5px 16px;
             margin-bottom: 28px;
@@ -315,7 +323,7 @@ def inject_app_styles():
         }
         .land-hero-copy {
             font-size: 18px;
-            color: rgba(255,255,255,0.48);
+            color: rgba(255,255,255,0.55);
             max-width: 500px;
             line-height: 1.72;
             margin: 0 auto 44px !important;
@@ -325,14 +333,14 @@ def inject_app_styles():
 
         /* Steps band */
         .land-steps-band {
-            background: #FFF5F2;
+            background: #F5F3FF;
         }
         .land-band-label {
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #C9636A;
+            color: #B588F7;
             text-align: center;
             margin-bottom: 12px;
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -354,8 +362,8 @@ def inject_app_styles():
             padding: 36px 32px;
             background: #FFFFFF;
             border-radius: 18px;
-            box-shadow: 0 2px 16px rgba(201,99,106,0.06);
-            border: 1px solid rgba(201,99,106,0.08);
+            box-shadow: 0 2px 16px rgba(181,136,247,0.06);
+            border: 1px solid rgba(181,136,247,0.08);
         }
         .land-step-num {
             font-family: 'Fraunces', serif;
@@ -364,9 +372,9 @@ def inject_app_styles():
             margin-bottom: 20px;
             font-weight: 300;
         }
-        .land-step-num.n1 { color: #E8C4A8; }
-        .land-step-num.n2 { color: #C9636A; }
-        .land-step-num.n3 { color: #7A3A3F; }
+        .land-step-num.n1 { color: #D4B8FC; }
+        .land-step-num.n2 { color: #B588F7; }
+        .land-step-num.n3 { color: #83ADF9; }
         .land-step-title {
             font-size: 16px;
             font-weight: 700;
@@ -402,9 +410,9 @@ def inject_app_styles():
             margin-bottom: 20px;
             line-height: 1;
         }
-        .land-why-icon.rose { background: rgba(201,99,106,0.1); }
-        .land-why-icon.gold { background: rgba(196,149,74,0.12); }
-        .land-why-icon.sage { background: rgba(74,140,106,0.1); }
+        .land-why-icon.rose { background: rgba(181,136,247,0.12); }
+        .land-why-icon.gold { background: rgba(59,130,246,0.12); }
+        .land-why-icon.sage { background: rgba(5,150,105,0.1); }
         .land-why-title {
             font-size: 16px;
             font-weight: 700;
@@ -422,7 +430,7 @@ def inject_app_styles():
 
         /* CTA band */
         .land-cta-band {
-            background: linear-gradient(135deg, #0E1823 0%, #1A2B3C 100%);
+            background: #0F0E1A;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -432,7 +440,7 @@ def inject_app_styles():
             position: absolute;
             top: -80px; right: -80px;
             width: 360px; height: 360px;
-            background: radial-gradient(circle, rgba(201,99,106,0.18) 0%, transparent 60%);
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
             pointer-events: none;
         }
         .land-cta-title {
@@ -444,14 +452,14 @@ def inject_app_styles():
         }
         .land-cta-copy {
             font-size: 16px;
-            color: rgba(255,255,255,0.48);
+            color: rgba(255,255,255,0.55);
             margin: 0 0 36px;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         /* Staff link */
         .land-staff-link {
-            background: #FFF9F7;
+            background: #F5F3FF;
             text-align: center;
             padding: 18px 0 20px;
             border-top: 1px solid rgba(0,0,0,0.06);
@@ -464,7 +472,7 @@ def inject_app_styles():
             transition: color 0.2s;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .land-staff-link a:hover { color: #C9636A !important; }
+        .land-staff-link a:hover { color: #B588F7 !important; }
 
         @media (max-width: 768px) {
             .land-hero-title { font-size: 36px; }
@@ -640,9 +648,9 @@ def _back_dialog():
 # ── Sidebar brand wordmark ────────────────────────────────────────────────────
 st.sidebar.markdown(
     """
-    <div style="padding: 4px 2px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 20px;">
-        <div style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: #FFFFFF; letter-spacing: -0.3px; line-height: 1;">CC Match</div>
-        <div style="font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 3px; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.03em;">Counselor Matching System</div>
+    <div style="padding: 4px 2px 20px; border-bottom: 1px solid rgba(46,16,101,0.15); margin-bottom: 20px;">
+        <div style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: #2E1065; letter-spacing: -0.3px; line-height: 1;">CC Match</div>
+        <div style="font-size: 11px; color: rgba(46,16,101,0.55); margin-top: 3px; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.03em;">Counselor Matching System</div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -650,13 +658,13 @@ st.sidebar.markdown(
 
 if role == "admin":
     st.sidebar.markdown(
-        '<div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: rgba(201,99,106,0.8); text-transform: uppercase; margin-bottom: 10px; font-family: \'Plus Jakarta Sans\', sans-serif;">Admin</div>',
+        '<div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: rgba(167,139,250,0.9); text-transform: uppercase; margin-bottom: 10px; font-family: \'Plus Jakarta Sans\', sans-serif;">Admin</div>',
         unsafe_allow_html=True,
     )
     page = st.sidebar.radio("Navigation", ["Match a Client", "Counselor Management", "Our Counselors", "Review Requests", "Enquiries", "Model Management"], label_visibility="collapsed")
 else:
     st.sidebar.markdown(
-        '<div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: rgba(201,99,106,0.8); text-transform: uppercase; margin-bottom: 10px; font-family: \'Plus Jakarta Sans\', sans-serif;">Navigation</div>',
+        '<div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: rgba(167,139,250,0.9); text-transform: uppercase; margin-bottom: 10px; font-family: \'Plus Jakarta Sans\', sans-serif;">Navigation</div>',
         unsafe_allow_html=True,
     )
     page = st.sidebar.radio("Navigation", ["Find a Counselor", "Our Counselors", "Chat with Mira", "About Us", "Contact Us"], label_visibility="collapsed")

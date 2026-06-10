@@ -1,4 +1,4 @@
-import math
+﻿import math
 import streamlit as st
 import pandas as pd
 from pathlib import Path
@@ -40,7 +40,7 @@ def inject_styles():
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #C9636A;
+            color: #B588F7;
             margin-bottom: 12px;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
@@ -102,7 +102,7 @@ def inject_styles():
         /* ── Button overrides (navy primary, ghost secondary) ─────────── */
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"],
         div[data-testid="stButton"] button[kind="primary"] {
-            background: #1A2332 !important;
+            background: #2E1065 !important;
             color: #FFFFFF !important;
             border: none !important;
             border-radius: 10px !important;
@@ -112,13 +112,13 @@ def inject_styles():
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover {
-            background: #C9636A !important;
-            box-shadow: 0 6px 18px rgba(201,99,106,0.35) !important;
+            background: #B588F7 !important;
+            box-shadow: 0 6px 18px rgba(181,136,247,0.35) !important;
             transform: translateY(-1px) !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="secondary"] {
             border-radius: 10px !important;
-            border: 1.5px solid #E8E2DC !important;
+            border: 1.5px solid #F0E8FF !important;
             background: #FFFFFF !important;
             color: #1C1917 !important;
             font-weight: 600 !important;
@@ -126,8 +126,8 @@ def inject_styles():
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="secondary"]:hover {
-            border-color: #C9636A !important;
-            color: #C9636A !important;
+            border-color: #B588F7 !important;
+            color: #B588F7 !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button:disabled {
             opacity: 0.4 !important;
@@ -354,9 +354,9 @@ def show_manage_page():
 
     st.markdown(
         """
-        <div style="position: relative; overflow: hidden; background-color: #FFF9F7; background-image: radial-gradient(at 0% 0%, #FFE0DC 0px, transparent 55%), radial-gradient(at 100% 100%, #FFF0EB 0px, transparent 55%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(201,99,106,0.14); box-shadow: 0 16px 32px -8px rgba(201,99,106,0.1), inset 0 1px 0 rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 220px;">
+        <div style="position: relative; overflow: hidden; background-color: #F5F3FF; background-image: radial-gradient(at 0% 0%, #F0E8FF 0px, transparent 55%), radial-gradient(at 100% 100%, #E8D5FD 0px, transparent 55%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(181,136,247,0.14); box-shadow: 0 16px 32px -8px rgba(181,136,247,0.1), inset 0 1px 0 rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 220px;">
             <div style="position: relative; z-index: 2; max-width: 65%;">
-                <div style="color: #C9636A; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(201,99,106,0.1); border: 1px solid rgba(201,99,106,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Directory</div>
+                <div style="color: #B588F7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(181,136,247,0.1); border: 1px solid rgba(181,136,247,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Directory</div>
                 <div style="font-family: 'Fraunces', serif; font-size: 42px; color: #1C1917; margin-bottom: 16px; line-height: 1.1; letter-spacing: -0.5px; font-weight: 600;">Counselor Management</div>
                 <p style="font-size: 16px; color: #6B6560; margin: 0; line-height: 1.65; max-width: 480px; font-family: 'Plus Jakarta Sans', sans-serif;">Review counselor records, add new entries, and update existing profiles in one place.</p>
             </div>

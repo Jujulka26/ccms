@@ -1,10 +1,10 @@
-import base64
+﻿import base64
 import io
 from pathlib import Path
 
 _AVATAR_COLORS = [
-    "#C9636A", "#C4954A", "#4A8C6A",
-    "#1A2332", "#A84E55", "#7A9E8A",
+    "#B588F7", "#83ADF9", "#4A8C6A",
+    "#2E1065", "#9B72F5", "#7A9E8A",
 ]
 
 _IMG_DIR = Path(__file__).parent.parent / "assets" / "profile"

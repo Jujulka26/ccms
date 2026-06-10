@@ -1,4 +1,4 @@
-import time
+﻿import time
 import pandas as pd
 import streamlit as st
 from frontend.utils.api import (
@@ -88,7 +88,7 @@ def inject_styles():
             color: #1C1917 !important;
         }
         div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
-            background-color: #C9636A !important;
+            background-color: #B588F7 !important;
             height: 3px !important;
             border-radius: 3px 3px 0 0 !important;
         }
@@ -96,8 +96,8 @@ def inject_styles():
             background-color: #F0ECE8 !important;
         }
         .pm-recommend {
-            background: linear-gradient(135deg, rgba(201,99,106,0.06) 0%, #FFFFFF 100%);
-            border: 1px solid rgba(201,99,106,0.22);
+            background: linear-gradient(135deg, rgba(181,136,247,0.06) 0%, #FFFFFF 100%);
+            border: 1px solid rgba(181,136,247,0.22);
             border-radius: 16px;
             padding: 28px 32px;
             margin-top: 4px;
@@ -110,9 +110,9 @@ def inject_styles():
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #C9636A;
-            background: rgba(201,99,106,0.1);
-            border: 1px solid rgba(201,99,106,0.2);
+            color: #B588F7;
+            background: rgba(181,136,247,0.1);
+            border: 1px solid rgba(181,136,247,0.2);
             border-radius: 20px;
             padding: 4px 12px;
             margin-bottom: 14px;
@@ -158,7 +158,7 @@ def _render_performance_metrics(data):
         f"""
         <div class="pm-stat-grid">
             <div class="pm-stat-card">
-                <div class="pm-stat-eyebrow" style="color:#C9636A;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">Models compared</div>
+                <div class="pm-stat-eyebrow" style="color:#B588F7;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">Models compared</div>
                 <div class="pm-stat-value">{model_count}</div>
                 <div class="pm-stat-label">evaluated at baseline</div>
             </div>
@@ -168,7 +168,7 @@ def _render_performance_metrics(data):
                 <div class="pm-stat-label">after hyperparameter tuning</div>
             </div>
             <div class="pm-stat-card">
-                <div class="pm-stat-eyebrow" style="color:#6366F1;">Deployed model</div>
+                <div class="pm-stat-eyebrow" style="color:#83ADF9;">Deployed model</div>
                 <div class="pm-stat-value" style="font-size:26px;padding-top:6px;">{deployed_model}</div>
                 <div class="pm-stat-label">best after tuning — active in production</div>
             </div>
@@ -444,9 +444,9 @@ def show_model_performance_page():
 
     st.markdown(
         """
-        <div style="position: relative; overflow: hidden; background-color: #FFF9F7; background-image: radial-gradient(at 0% 0%, #FFEEE8 0px, transparent 60%), radial-gradient(at 100% 100%, #FFE4DC 0px, transparent 60%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(196,149,74,0.18); box-shadow: 0 16px 32px -8px rgba(196,149,74,0.1), inset 0 1px 0 rgba(255,255,255,0.9); min-height: 236px;">
+        <div style="position: relative; overflow: hidden; background-color: #F5F3FF; background-image: radial-gradient(at 0% 0%, #F0E8FF 0px, transparent 60%), radial-gradient(at 100% 100%, #E8D5FD 0px, transparent 60%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(181,136,247,0.18); box-shadow: 0 16px 32px -8px rgba(181,136,247,0.1), inset 0 1px 0 rgba(255,255,255,0.9); min-height: 236px;">
             <div style="position: relative; z-index: 2; max-width: 65%;">
-                <div style="color: #C4954A; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(196,149,74,0.1); border: 1px solid rgba(196,149,74,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Analytics</div>
+                <div style="color: #B588F7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(181,136,247,0.1); border: 1px solid rgba(181,136,247,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Analytics</div>
                 <div style="font-family: 'Fraunces', serif; font-size: 42px; font-weight: 600; color: #1C1917; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Model Management</div>
                 <p style="font-size: 16px; color: #6B6560; margin: 0; line-height: 1.65; max-width: 480px; font-family: 'Plus Jakarta Sans', sans-serif;">Accuracy, F1 and ROC-AUC across all models, plus model version management and retraining.</p>
             </div>
@@ -481,9 +481,9 @@ def show_model_performance_page():
 
             with status_box.container():
                 st.markdown(
-                    f'<div style="background:rgba(201,99,106,0.06);border:1px solid rgba(201,99,106,0.2);'
+                    f'<div style="background:rgba(181,136,247,0.06);border:1px solid rgba(181,136,247,0.2);'
                     f'border-radius:12px;padding:16px 20px;margin-bottom:4px;">'
-                    f'<div style="font-size:12px;font-weight:600;color:#C9636A;margin-bottom:6px;font-family:\'Plus Jakarta Sans\',sans-serif;letter-spacing:0.08em;">TRAINING IN PROGRESS</div>'
+                    f'<div style="font-size:12px;font-weight:600;color:#B588F7;margin-bottom:6px;font-family:\'Plus Jakarta Sans\',sans-serif;letter-spacing:0.08em;">TRAINING IN PROGRESS</div>'
                     f'<div style="font-size:13px;color:#1C1917;font-family:\'Plus Jakarta Sans\',sans-serif;">{step}</div>'
                     f'</div>',
                     unsafe_allow_html=True,

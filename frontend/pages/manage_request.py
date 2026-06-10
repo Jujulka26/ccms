@@ -1,4 +1,4 @@
-import streamlit as st
+﻿import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 from frontend.utils.api import get_requests, get_counselors, approve_request, close_request, send_approval_email
@@ -57,9 +57,9 @@ def render():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         </style>
-        <div style="position: relative; overflow: hidden; background-color: #FFF5F2; background-image: radial-gradient(at 0% 0%, #FFE0DC 0px, transparent 60%), radial-gradient(at 100% 100%, #FFDDD8 0px, transparent 60%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(201,99,106,0.15); box-shadow: 0 16px 32px -8px rgba(201,99,106,0.1), inset 0 1px 0 rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 220px;">
+        <div style="position: relative; overflow: hidden; background-color: #F5F3FF; background-image: radial-gradient(at 0% 0%, #F0E8FF 0px, transparent 60%), radial-gradient(at 100% 100%, #E8D5FD 0px, transparent 60%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(181,136,247,0.15); box-shadow: 0 16px 32px -8px rgba(181,136,247,0.1), inset 0 1px 0 rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 220px;">
             <div style="position: relative; z-index: 2; max-width: 65%;">
-                <div style="color: #C9636A; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(201,99,106,0.1); border: 1px solid rgba(201,99,106,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Approvals</div>
+                <div style="color: #B588F7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(181,136,247,0.1); border: 1px solid rgba(181,136,247,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Approvals</div>
                 <div style="font-family: 'Fraunces', serif; font-size: 42px; color: #1C1917; margin-bottom: 16px; line-height: 1.1; letter-spacing: -0.5px; font-weight: 600;">Review Requests</div>
                 <p style="font-size: 16px; color: #6B6560; margin: 0; line-height: 1.65; max-width: 480px; font-family: 'Plus Jakarta Sans', sans-serif;">Review and manage client-counselor matching requests below.</p>
             </div>
@@ -93,13 +93,13 @@ def render():
     st.markdown(
         f"""
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;">
-            <div style="background: linear-gradient(135deg, #FFF5F2 0%, #FFE8E4 100%); border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(201,99,106,0.2);">
-                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #C9636A; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">New</div>
+            <div style="background: linear-gradient(135deg, #F5F3FF 0%, #F0E8FF 100%); border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(181,136,247,0.2);">
+                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #B588F7; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">New</div>
                 <div style="font-family: 'Fraunces', serif; font-size: 40px; line-height: 1; color: #1C1917; margin-bottom: 6px; font-weight: 600;">{total_new}</div>
                 <div style="font-size: 13px; color: #9C9790; font-family: 'Plus Jakarta Sans', sans-serif;">received in last 24h</div>
             </div>
             <div style="background: #FFFFFF; border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(0,0,0,0.06);">
-                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #C4954A; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">Pending</div>
+                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #B588F7; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">Pending</div>
                 <div style="font-family: 'Fraunces', serif; font-size: 40px; line-height: 1; color: #1C1917; margin-bottom: 6px; font-weight: 600;">{total_pending}</div>
                 <div style="font-size: 13px; color: #9C9790; font-family: 'Plus Jakarta Sans', sans-serif;">awaiting your review</div>
             </div>

@@ -1,4 +1,4 @@
-import hashlib
+﻿import hashlib
 import json as _json
 import streamlit as st
 import streamlit.components.v1 as components
@@ -18,32 +18,32 @@ def inject_styles():
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
         html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .stApp { background: #FFF9F7; }
+        .stApp { background: #F5F3FF; }
 
         .page-header { padding: 24px 0 20px; border-bottom: 1px solid rgba(0,0,0,0.07); margin-bottom: 24px; }
         .page-header-eyebrow {
             display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(201,99,106,0.08); border: 1px solid rgba(201,99,106,0.18);
+            background: rgba(181,136,247,0.08); border: 1px solid rgba(181,136,247,0.18);
             border-radius: 20px; padding: 3px 12px 3px 10px; margin-bottom: 12px;
-            font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #C9636A;
+            font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #B588F7;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .page-header-title { font-family: 'Fraunces', serif; font-size: clamp(26px, 3.2vw, 38px); color: #1C1917; margin: 0 0 8px; letter-spacing: -0.4px; line-height: 1.12; display: block; font-weight: 600; }
         .page-header-sub { font-size: 14px; color: #6B6560; margin: 0; line-height: 1.6; font-family: 'Plus Jakarta Sans', sans-serif; }
         .page-header-stats { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .page-header-stat { display: inline-flex; align-items: center; gap: 7px; background: #FFF5F2; border: 1px solid rgba(201,99,106,0.15); border-radius: 20px; padding: 6px 13px; }
-        .page-header-stat-num { font-family: 'Fraunces', serif; font-size: 17px; color: #C9636A; line-height: 1; font-weight: 600; }
+        .page-header-stat { display: inline-flex; align-items: center; gap: 7px; background: #F5F3FF; border: 1px solid rgba(181,136,247,0.15); border-radius: 20px; padding: 6px 13px; }
+        .page-header-stat-num { font-family: 'Fraunces', serif; font-size: 17px; color: #B588F7; line-height: 1; font-weight: 600; }
         .page-header-stat-label { font-size: 11px; color: #A09088; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         .form-card {
-            background: radial-gradient(1200px 300px at -10% -30%, rgba(201,99,106,0.06) 0%, transparent 60%), radial-gradient(900px 260px at 110% 120%, rgba(196,149,74,0.05) 0%, transparent 55%), #FFFFFF;
+            background: radial-gradient(1200px 300px at -10% -30%, rgba(181,136,247,0.06) 0%, transparent 60%), radial-gradient(900px 260px at 110% 120%, rgba(181,136,247,0.05) 0%, transparent 55%), #FFFFFF;
             border-radius: 24px; padding: 28px 36px 24px;
             border: 1px solid rgba(0,0,0,0.06);
             box-shadow: 0 12px 32px -16px rgba(28,25,23,0.08), 0 1px 3px rgba(0,0,0,0.03);
             margin-bottom: 24px;
         }
         .step-header { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
-        .step-chip { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #1A2332 0%, #0E1823 100%); color: #FFFFFF; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(14,24,35,0.3); flex-shrink: 0; }
+        .step-chip { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #B588F7 0%, #83ADF9 100%); color: #FFFFFF; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(181,136,247,0.4); flex-shrink: 0; }
         .step-title { font-family: 'Fraunces', serif; font-size: 24px; color: #1C1917; line-height: 1.2; font-weight: 600; }
         .step-copy { font-size: 14px; color: #6B6560; margin: 4px 0 16px 48px; line-height: 1.55; font-family: 'Plus Jakarta Sans', sans-serif; }
         .section-divider { border: none; border-top: 1px solid #E5E5E5; margin: 0px 0 20px 0 !important; position: relative; z-index: 10; }
@@ -57,7 +57,7 @@ def inject_styles():
             font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 14px !important; transition: border-color 0.2s;
         }
         div[data-testid="stNumberInput"] input:focus, div[data-testid="stSelectbox"] > div > div:focus-within {
-            border-color: #C9636A !important; box-shadow: 0 0 0 3px rgba(201,99,106,0.1) !important;
+            border-color: #B588F7 !important; box-shadow: 0 0 0 3px rgba(181,136,247,0.1) !important;
         }
         label[data-testid="stWidgetLabel"] p, label[data-testid="stWidgetLabel"] div, label[data-testid="stWidgetLabel"] span {
             font-size: 14px !important; font-weight: 600 !important; color: #1C1917 !important; margin-bottom: 8px !important;
@@ -68,15 +68,15 @@ def inject_styles():
         [data-testid="block-container"] [role="radiogroup"] > label > div:first-child {
             position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; overflow: hidden !important;
         }
-        [data-testid="block-container"] [data-baseweb="radio"] { padding: 9px 22px !important; background: #FFF9F7 !important; border: 1.5px solid #E8E2DC !important; border-radius: 30px !important; cursor: pointer !important; transition: background 0.18s ease, border-color 0.18s ease !important; margin-right: 2px !important; }
-        [data-testid="block-container"] [data-baseweb="radio"]:hover { border-color: #C9636A !important; background: rgba(201,99,106,0.05) !important; }
-        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) { background: rgba(201,99,106,0.08) !important; border-color: #C9636A !important; }
+        [data-testid="block-container"] [data-baseweb="radio"] { padding: 9px 22px !important; background: #F5F3FF !important; border: 1.5px solid #F0E8FF !important; border-radius: 30px !important; cursor: pointer !important; transition: background 0.18s ease, border-color 0.18s ease !important; margin-right: 2px !important; }
+        [data-testid="block-container"] [data-baseweb="radio"]:hover { border-color: #B588F7 !important; background: rgba(181,136,247,0.05) !important; }
+        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) { background: rgba(181,136,247,0.08) !important; border-color: #B588F7 !important; }
         [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) p { font-weight: 700 !important; }
         [data-testid="block-container"] [data-baseweb="radio"] p { font-size: 14px !important; margin: 0 !important; color: #4A4540 !important; font-weight: 500 !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
 
         [data-testid="block-container"] div[data-testid="stButton"] button { border-radius: 12px !important; font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 15px !important; font-weight: 600 !important; padding: 10px 24px !important; transition: all 0.2s; width: 100% !important; }
-        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] { background: #1A2332 !important; color: #FFFFFF !important; border: none !important; box-shadow: 0 4px 14px rgba(14,24,35,0.28); }
-        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover { background: #C9636A !important; box-shadow: 0 6px 20px rgba(201,99,106,0.4) !important; transform: translateY(-1px); }
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] { background: linear-gradient(to right, #B588F7 0%, #83ADF9 48%, #2E1065 52%, #2E1065 100%) !important; background-size: 210% 100% !important; background-position: right center !important; transition: background-position 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.15s ease !important; color: #FFFFFF !important; border: none !important; box-shadow: 0 4px 16px rgba(46,16,101,0.45) !important; }
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover { background-position: left center !important; box-shadow: 0 6px 24px rgba(181,136,247,0.55) !important; transform: translateY(-1px) !important; }
 
         .result-card { position: relative; background: #FFFFFF; border-radius: 20px; padding: 28px 28px 0; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; overflow: hidden; }
         .dismiss-x { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s ease; line-height: 1; z-index: 10; }
@@ -85,13 +85,13 @@ def inject_styles():
         .dismiss-x-light:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.35); color: #EF4444; }
         .st-key-dismiss_0, .st-key-dismiss_1 { display: none !important; }
         [class*="st-key-vp_"] { display: none !important; }
-        .result-card.primary { background: #0E1823; border-color: transparent; }
-        .card-view-btn { display: block; width: calc(100% + 56px); margin: 24px -28px 0; padding: 14px 28px; background: transparent; border: none; border-top: 1px solid rgba(0,0,0,0.07); color: #C9636A; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.15s, color 0.15s; }
+        .result-card.primary { background: #2E1065; border-color: transparent; }
+        .card-view-btn { display: block; width: calc(100% + 56px); margin: 24px -28px 0; padding: 14px 28px; background: transparent; border: none; border-top: 1px solid rgba(0,0,0,0.07); color: #B588F7; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.15s, color 0.15s; }
         .result-card.primary .card-view-btn { border-top-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
-        .card-view-btn:hover { background: rgba(201,99,106,0.06); color: #A84E55; }
+        .card-view-btn:hover { background: rgba(181,136,247,0.06); color: #B588F7; }
         .result-card.primary .card-view-btn:hover { background: rgba(255,255,255,0.06); color: #FFFFFF; }
         .result-card-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 20px; padding: 4px 12px; display: inline-block; margin-bottom: 0; align-self: flex-start; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .badge-primary { background: rgba(201,99,106,0.18); color: #E8B4B8; }
+        .badge-primary { background: rgba(181,136,247,0.18); color: #D4B8FC; }
         .badge-secondary { background: #F0EDE8; color: #9C9790; }
         .card-header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
         .card-header-photo { flex-shrink: 0; }
@@ -109,8 +109,8 @@ def inject_styles():
         .info-val { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 500; font-family: 'Plus Jakarta Sans', sans-serif; }
         .info-val-secondary { font-size: 13px; color: #1C1917; font-weight: 500; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        .ai-explanation-box { background: linear-gradient(135deg, #FFF5F2 0%, #FFFAF8 100%); border: 1px solid rgba(201,99,106,0.15); border-left: 3px solid #C9636A; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
-        .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #C9636A, #A84E55); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ai-explanation-box { background: linear-gradient(135deg, #F5F3FF 0%, #F5F3FF 100%); border: 1px solid rgba(181,136,247,0.15); border-left: 3px solid #B588F7; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
+        .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #B588F7, #83ADF9); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; font-family: 'Plus Jakarta Sans', sans-serif; }
         .ai-reason-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
         .ai-reason-row:last-child { margin-bottom: 0; }
         .ai-reason-icon { flex-shrink: 0; margin-top: 2px; }
@@ -120,8 +120,8 @@ def inject_styles():
 
         [data-testid="block-container"] div[data-testid="stButton"] button:not([kind="primary"]) {
             background: transparent !important;
-            border: 1.5px solid rgba(201,99,106,0.25) !important;
-            color: #C9636A !important;
+            border: 1.5px solid rgba(181,136,247,0.25) !important;
+            color: #B588F7 !important;
             border-radius: 12px !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-size: 13px !important;
@@ -132,14 +132,14 @@ def inject_styles():
             box-shadow: none !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button:not([kind="primary"]):hover {
-            background: rgba(201,99,106,0.06) !important;
-            border-color: #C9636A !important;
-            color: #A84E55 !important;
+            background: rgba(181,136,247,0.06) !important;
+            border-color: #B588F7 !important;
+            color: #B588F7 !important;
         }
 
         div[data-testid="stExpander"] {
             background: #FFFFFF;
-            border: 1px solid rgba(201,99,106,0.14) !important;
+            border: 1px solid rgba(181,136,247,0.14) !important;
             border-radius: 16px !important;
             overflow: hidden;
             margin-bottom: 24px;
@@ -152,17 +152,17 @@ def inject_styles():
             font-weight: 700 !important;
             letter-spacing: 0.07em !important;
             text-transform: uppercase !important;
-            color: #C9636A !important;
-            background: linear-gradient(135deg, #FFF5F2 0%, #FFFAF8 100%) !important;
+            color: #B588F7 !important;
+            background: linear-gradient(135deg, #F5F3FF 0%, #F5F3FF 100%) !important;
             border-radius: 16px !important;
-            border-bottom: 1px solid rgba(201,99,106,0.08);
+            border-bottom: 1px solid rgba(181,136,247,0.08);
             list-style: none;
         }
         div[data-testid="stExpander"] summary:hover {
-            background: linear-gradient(135deg, #FFE8E4 0%, #FFF5F2 100%) !important;
-            color: #A84E55 !important;
+            background: linear-gradient(135deg, #F0E8FF 0%, #F5F3FF 100%) !important;
+            color: #B588F7 !important;
         }
-        div[data-testid="stExpander"] summary svg { color: #C9636A !important; }
+        div[data-testid="stExpander"] summary svg { color: #B588F7 !important; }
         div[data-testid="stExpander"] > details > div[data-testid="stExpanderDetails"] {
             padding: 24px !important;
             background: #FFFFFF;
@@ -201,15 +201,15 @@ def render_step_progress(step: int, total: int = 3):
     nodes_html = ""
     for i, name in enumerate(step_names, 1):
         if i < step:
-            circle_bg = "linear-gradient(135deg,#C9636A 0%,#A84E55 100%)"
-            circle_color = "#FFFFFF"; circle_border = "none"; shadow = "0 4px 12px rgba(201,99,106,0.30)"
-            label_color = "#C9636A"; weight = "600"; inner = "✓"
+            circle_bg = "linear-gradient(135deg,#B588F7 0%,#83ADF9 100%)"
+            circle_color = "#FFFFFF"; circle_border = "none"; shadow = "0 4px 12px rgba(181,136,247,0.30)"
+            label_color = "#B588F7"; weight = "600"; inner = "✓"
         elif i == step:
-            circle_bg = "linear-gradient(135deg,#1A2332 0%,#0E1823 100%)"
+            circle_bg = "linear-gradient(135deg,#B588F7 0%,#83ADF9 100%)"
             circle_color = "#FFFFFF"; circle_border = "none"; shadow = "0 6px 16px rgba(14,24,35,0.35), 0 0 0 4px rgba(26,35,50,0.12)"
             label_color = "#1C1917"; weight = "700"; inner = str(i)
         else:
-            circle_bg = "#FFFFFF"; circle_color = "#B0A9A0"; circle_border = "1.5px solid #E8E2DC"
+            circle_bg = "#FFFFFF"; circle_color = "#B0A9A0"; circle_border = "1.5px solid #F0E8FF"
             shadow = "none"; label_color = "#B0A9A0"; weight = "500"; inner = str(i)
         nodes_html += (
             f'<div style="display:flex;flex-direction:column;align-items:center;gap:8px;z-index:2;background:transparent;">'
@@ -224,7 +224,7 @@ def render_step_progress(step: int, total: int = 3):
         f"""
         <div style="position:relative;padding:4px 8px 8px;margin-bottom:30px;">
             <div style="position:absolute;left:calc(8px + 17px);right:calc(8px + 17px);top:calc(4px + 17px);height:2px;background:#EDE8E3;border-radius:2px;z-index:1;"></div>
-            <div style="position:absolute;left:calc(8px + 17px);top:calc(4px + 17px);width:calc((100% - 16px - 34px) * {fill_pct} / 100);height:2px;background:linear-gradient(90deg,#C9636A,#A84E55);border-radius:2px;z-index:1;"></div>
+            <div style="position:absolute;left:calc(8px + 17px);top:calc(4px + 17px);width:calc((100% - 16px - 34px) * {fill_pct} / 100);height:2px;background:linear-gradient(90deg,#B588F7,#83ADF9);border-radius:2px;z-index:1;"></div>
             <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;">{nodes_html}</div>
         </div>
         """,
@@ -265,11 +265,11 @@ def render_page_header():
                     <span class="page-header-stat-label">Match Factors</span>
                 </div>
                 <div class="page-header-stat">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9636A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B588F7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span class="page-header-stat-label">Personalised</span>
                 </div>
                 <div class="page-header-stat">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9636A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B588F7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     <span class="page-header-stat-label">Explainable AI</span>
                 </div>
             </div>
@@ -428,28 +428,28 @@ def show_profile_dialog(c: dict, score=None):
     .prof-header-band {
         background: linear-gradient(135deg, #F3F0FF 0%, #FFF8F3 100%);
         border-radius: 16px; padding: 20px 20px 16px; margin-bottom: 4px;
-        border: 1px solid rgba(201,99,106,0.1);
+        border: 1px solid rgba(181,136,247,0.1);
     }
     .prof-header { display:flex; align-items:center; gap:18px; }
     .prof-name { font-family:'Fraunces',serif; font-size:23px; font-weight:600; color:#1C1917; margin:0 0 3px; line-height:1.2; }
-    .prof-role { font-size:12px; color:#C9636A; font-weight:700; margin:0 0 8px; letter-spacing:0.03em; font-family:'Plus Jakarta Sans',sans-serif; }
+    .prof-role { font-size:12px; color:#B588F7; font-weight:700; margin:0 0 8px; letter-spacing:0.03em; font-family:'Plus Jakarta Sans',sans-serif; }
     .prof-meta { display:flex; flex-wrap:wrap; column-gap:12px; row-gap:4px; }
     .prof-meta-item { font-size:12px; color:#6B6560; display:flex; align-items:center; gap:3px; }
-    .prof-meta-score { font-size:18px; color:#C9636A; font-weight:700; }
-    .prof-score-chip { display:inline-flex; align-items:center; background:#FFF5F2; color:#A84E55; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:2px 10px; border-radius:20px; border:1px solid rgba(201,99,106,0.2); margin-bottom:6px; }
+    .prof-meta-score { font-size:18px; color:#B588F7; font-weight:700; }
+    .prof-score-chip { display:inline-flex; align-items:center; background:#F5F3FF; color:#B588F7; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:2px 10px; border-radius:20px; border:1px solid rgba(181,136,247,0.2); margin-bottom:6px; }
     .prof-rule { border:none; border-top:1px solid #EBEBEB; margin:14px 0 16px; }
 
     .prof-section { margin-bottom:12px; background:#FAFAFA; border-radius:12px; padding:14px 16px; border:1px solid rgba(0,0,0,0.04); }
-    .prof-label { font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#C9636A; margin:0 0 10px; font-family:'Plus Jakarta Sans',sans-serif; }
+    .prof-label { font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#B588F7; margin:0 0 10px; font-family:'Plus Jakarta Sans',sans-serif; }
     .prof-about { font-size:15px !important; color:#2D2D3F; line-height:1.8; margin:0; }
 
     .prof-pills { display:flex; flex-wrap:wrap; gap:6px; }
     .prof-pill {
-        background: linear-gradient(135deg, #FFF5F2, #FFE8E4);
-        color:#A84E55; font-size:12px; font-weight:600;
+        background: linear-gradient(135deg, #F5F3FF, #F0E8FF);
+        color:#B588F7; font-size:12px; font-weight:600;
         padding:5px 14px; border-radius:20px;
-        border:1px solid rgba(201,99,106,0.18);
-        box-shadow: 0 1px 3px rgba(201,99,106,0.08);
+        border:1px solid rgba(181,136,247,0.18);
+        box-shadow: 0 1px 3px rgba(181,136,247,0.08);
         font-family:'Plus Jakarta Sans',sans-serif;
     }
 
@@ -466,8 +466,8 @@ def show_profile_dialog(c: dict, score=None):
 
     div[data-testid="stExpander"] { background:#FFFFFF !important; border:1px solid #EBEBEB !important; border-radius:12px !important; box-shadow:none !important; margin-bottom:0 !important; }
     div[data-testid="stExpander"] summary { background:#FFFFFF !important; font-size:13px !important; font-weight:600 !important; color:#4A4A5A !important; text-transform:none !important; letter-spacing:0 !important; padding:12px 16px !important; border-radius:12px !important; }
-    div[data-testid="stExpander"] summary:hover { background:#FFF5F2 !important; color:#C9636A !important; }
-    div[data-testid="stExpander"] svg { color:#C9636A !important; }
+    div[data-testid="stExpander"] summary:hover { background:#F5F3FF !important; color:#B588F7 !important; }
+    div[data-testid="stExpander"] svg { color:#B588F7 !important; }
     div[data-testid="stDialog"] [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:first-child { margin-top:-16px !important; }
 
     div[data-testid="stDialog"] button[kind="primary"] {
@@ -896,7 +896,7 @@ def show_matching_page():
         <script>
         (function() {
             var doc = window.parent.document;
-            function applyOrange() {
+            function applyRadioColor() {
                 doc.querySelectorAll('[data-baseweb="radio"]').forEach(function(pill) {
                     if (pill.closest('[data-testid="stSidebar"]')) return;
                     var input = pill.querySelector('input[type="radio"]');
@@ -905,8 +905,8 @@ def show_matching_page():
                     var innerDot  = outerRing ? outerRing.children[0] : null;
                     if (input.checked) {
                         if (outerRing) {
-                            outerRing.style.setProperty('border-color', '#F97316', 'important');
-                            outerRing.style.setProperty('background-color', '#F97316', 'important');
+                            outerRing.style.setProperty('border-color', '#B588F7', 'important');
+                            outerRing.style.setProperty('background-color', '#B588F7', 'important');
                         }
                         if (innerDot) innerDot.style.setProperty('background-color', '#FFFFFF', 'important');
                     } else {
@@ -918,10 +918,10 @@ def show_matching_page():
                     }
                 });
             }
-            applyOrange();
-            [150, 400, 800].forEach(function(t) { setTimeout(applyOrange, t); });
-            new MutationObserver(applyOrange).observe(doc.body, { subtree: true, childList: true, attributes: true });
-            setInterval(applyOrange, 300);
+            applyRadioColor();
+            [150, 400, 800].forEach(function(t) { setTimeout(applyRadioColor, t); });
+            new MutationObserver(applyRadioColor).observe(doc.body, { subtree: true, childList: true, attributes: true });
+            setInterval(applyRadioColor, 300);
         })();
         </script>
         """,
@@ -936,22 +936,25 @@ def show_matching_page():
             """
             <style>
             div[data-testid="stButton"] button[kind="primary"] {
-                background: #1A2332 !important;
+                background: linear-gradient(to right, #B588F7 0%, #83ADF9 48%, #2E1065 52%, #2E1065 100%) !important;
+                background-size: 210% 100% !important;
+                background-position: right center !important;
+                transition: background-position 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.15s ease !important;
                 border: none !important;
-                transition: background 150ms ease-in-out, box-shadow 150ms ease-in-out, transform 100ms ease !important;
                 font-size: 16px !important;
                 letter-spacing: 0.03em !important;
                 padding: 14px 28px !important;
                 font-weight: 700 !important;
                 font-family: 'Plus Jakarta Sans', sans-serif !important;
+                box-shadow: 0 4px 16px rgba(46,16,101,0.45) !important;
             }
             div[data-testid="stButton"] button[kind="primary"]:hover {
-                background: #C9636A !important;
-                box-shadow: 0px 0px 8px 0px rgba(201,99,106,0.3), 0px 0px 24px 0px rgba(201,99,106,0.2) !important;
+                background-position: left center !important;
+                box-shadow: 0 6px 28px rgba(181,136,247,0.6) !important;
+                transform: translateY(-1px) !important;
             }
             div[data-testid="stButton"] button[kind="primary"]:active {
-                transform: scale(0.95) !important;
-                background: #A84E55 !important;
+                transform: scale(0.97) translateY(0) !important;
             }
             </style>
             """,
@@ -1101,7 +1104,7 @@ def show_matching_page():
         counselor_name = best_c.get("name", "Your Top Match").upper()
 
         # Paired header row
-        st.markdown('<p style="color:#C9636A; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'Plus Jakarta Sans\', sans-serif; font-weight:700; margin:8px 0 24px;">YOUR MATCHES</p>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#B588F7; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'Plus Jakarta Sans\', sans-serif; font-weight:700; margin:8px 0 24px;">YOUR MATCHES</p>', unsafe_allow_html=True)
 
         col1, col2 = st.columns(2, gap="large")
         with col1:
@@ -1171,7 +1174,7 @@ def show_matching_page():
 
                         st.markdown(
                             f"""
-                            <div style="font-size:11px; font-weight:600; color:#C9636A; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px; font-family:'Plus Jakarta Sans',sans-serif;">Feature contributions</div>
+                            <div style="font-size:11px; font-weight:600; color:#B588F7; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px; font-family:'Plus Jakarta Sans',sans-serif;">Feature contributions</div>
                             <div style="display:flex; align-items:center; gap:8px; padding:0 0 6px; border-bottom:2px solid #F0E8E6;">
                                 <div style="flex:2; min-width:0; font-size:11px; color:#A0A0B8; text-align:right;">Feature</div>
                                 <div style="width:32px; font-size:11px; color:#A0A0B8; text-align:right; flex-shrink:0;">Value</div>
