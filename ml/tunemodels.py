@@ -154,12 +154,30 @@ print(f"  Tuned CatBoost : {scores_tuned_cat}")
 joblib.dump(tuned_cat, BASE_DIR / "tuned_cat.pkl")
 print("  Saved: tuned_cat.pkl")
 
+# ── Soft Voting Ensemble (LightGBM + CatBoost) ─────────────────────────────────
+print("\nBuilding soft-vote ensemble (Tuned LightGBM + Tuned CatBoost)...")
+prob_lgbm     = tuned_lgbm.predict_proba(X_test)[:, 1]
+prob_cat      = tuned_cat.predict_proba(X_test)[:, 1]
+prob_ensemble = (prob_lgbm + prob_cat) / 2
+y_ensemble    = (prob_ensemble >= 0.5).astype(int)
+
+scores_ensemble = {
+    "Accuracy": round(float(accuracy_score(y_test, y_ensemble)), 3),
+    "F1":       round(float(f1_score(y_test, y_ensemble)), 3),
+    "ROC-AUC":  round(float(roc_auc_score(y_test, prob_ensemble)), 3),
+}
+print(f"  Soft Vote Ensemble : {scores_ensemble}")
+
+joblib.dump({"lgbm": tuned_lgbm, "cat": tuned_cat}, BASE_DIR / "ensemble_soft.pkl")
+print("  Saved: ensemble_soft.pkl")
+
 # ── Save results CSV ───────────────────────────────────────────────────────────
 rows = [
     {"Model": "Baseline LightGBM", **scores_base_lgbm},
     {"Model": "Baseline CatBoost", **scores_base_cat},
     {"Model": "Tuned LightGBM",    **scores_tuned_lgbm},
     {"Model": "Tuned CatBoost",    **scores_tuned_cat},
+    {"Model": "Soft Vote Ensemble", **scores_ensemble},
 ]
 pd.DataFrame(rows).to_csv(BASE_DIR / "tuned_result.csv", index=False)
 print("Saved: tuned_result.csv")
@@ -168,15 +186,16 @@ print("Saved: tuned_result.csv")
 print("Generating chart...")
 metrics = ["Accuracy", "F1", "ROC-AUC"]
 plot_data = {
-    "Baseline LightGBM": (scores_base_lgbm, "#C4B5FD"),
-    "Baseline CatBoost": (scores_base_cat,  "#FCA5A5"),
-    "Tuned LightGBM":    (scores_tuned_lgbm, "#7C3AED"),
-    "Tuned CatBoost":    (scores_tuned_cat,  "#DC2626"),
+    "Baseline LightGBM":  (scores_base_lgbm,  "#C4B5FD"),
+    "Baseline CatBoost":  (scores_base_cat,   "#FCA5A5"),
+    "Tuned LightGBM":     (scores_tuned_lgbm, "#7C3AED"),
+    "Tuned CatBoost":     (scores_tuned_cat,  "#DC2626"),
+    "Soft Vote Ensemble": (scores_ensemble,   "#059669"),
 }
 
 x       = np.arange(len(metrics))
-width   = 0.14
-offsets = [-1.5, -0.5, 0.5, 1.5]
+width   = 0.12
+offsets = [-2, -1, 0, 1, 2]
 
 fig, ax = plt.subplots(figsize=(14, 6))
 fig.patch.set_facecolor("#FAFAF8")
@@ -184,7 +203,7 @@ ax.set_facecolor("#FAFAF8")
 
 for (label, (scores, color)), offset in zip(plot_data.items(), offsets):
     vals  = [scores[m] for m in metrics]
-    hatch = "//" if label == "Tuned LightGBM" else None
+    hatch = "//" if label == "Soft Vote Ensemble" else None
     bars  = ax.bar(x + offset * width, vals, width, label=label,
                    color=color, zorder=3, edgecolor="white", linewidth=0.5,
                    hatch=hatch)
@@ -199,8 +218,8 @@ all_vals = [s[m] for _, (s, _) in plot_data.items() for m in metrics]
 ax.set_ylim(max(0.0, min(all_vals) - 0.08), min(1.0, max(all_vals) + 0.09))
 ax.set_ylabel("Score", fontsize=12)
 ax.set_title(
-    f"Baseline vs Tuned — LightGBM & CatBoost\n"
-    f"Deployed: Tuned LightGBM  (ROC-AUC: {scores_tuned_lgbm['ROC-AUC']:.3f})  // = selected",
+    f"Baseline vs Tuned vs Soft Vote Ensemble\n"
+    f"Deployed: Soft Vote Ensemble  (ROC-AUC: {scores_ensemble['ROC-AUC']:.3f})  // = selected",
     fontsize=13, fontweight="bold", pad=14,
 )
 ax.legend(fontsize=8.5, framealpha=0.9, loc="lower right")
@@ -220,4 +239,7 @@ print("-" * 65)
 for row in rows:
     print(f"{row['Model']:<30} {row['Accuracy']:>9.3f} {row['F1']:>9.3f} {row['ROC-AUC']:>9.3f}")
 print("=" * 65)
+print("\nEnsemble bundle saved as ensemble_soft.pkl")
+print("  Load with: bundle = joblib.load('ensemble_soft.pkl')")
+print("  Use with : prob = (bundle['lgbm'].predict_proba(X)[:,1] + bundle['cat'].predict_proba(X)[:,1]) / 2")
 print("\nDONE")

@@ -108,18 +108,25 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 print(f"\nSplit: {len(X_train):,} train / {len(X_test):,} test (80/20 stratified)")
 
-# ── 3. Load deployed model ────────────────────────────────────────────────────
-print("\nLoading model (tuned_lgbm.pkl)...")
-model = joblib.load(str(BASE_DIR / "tuned_lgbm.pkl"))
-print("  Loaded: tuned_lgbm.pkl")
+# ── 3. Load deployed ensemble ─────────────────────────────────────────────────
+print("\nLoading ensemble (ensemble_soft.pkl)...")
+bundle     = joblib.load(str(BASE_DIR / "ensemble_soft.pkl"))
+lgbm_pipe  = bundle["lgbm"]
+cat_pipe   = bundle["cat"]
+inner_lgbm = lgbm_pipe.named_steps["model"]
+inner_cat  = cat_pipe.named_steps["model"]
+X_scaled   = lgbm_pipe.named_steps["prep"].transform(X)
+print("  Loaded: ensemble_soft.pkl  (Tuned LightGBM + Tuned CatBoost)")
 
 # ── 4. Evaluate on held-out test set ─────────────────────────────────────────
 print("\n" + "="*60)
 print("HELD-OUT TEST SET EVALUATION  (20% unseen data)")
 print("="*60)
 
-y_pred  = model.predict(X_test)
-y_prob  = model.predict_proba(X_test)[:, 1]
+y_prob_lgbm = lgbm_pipe.predict_proba(X_test)[:, 1]
+y_prob_cat  = cat_pipe.predict_proba(X_test)[:, 1]
+y_prob      = (y_prob_lgbm + y_prob_cat) / 2
+y_pred      = (y_prob >= 0.5).astype(int)
 
 acc     = accuracy_score(y_test, y_pred)
 prec    = precision_score(y_test, y_pred)
@@ -154,16 +161,11 @@ print("\n" + "="*60)
 print("5-FOLD STRATIFIED CROSS-VALIDATION  (Tuned LightGBM)")
 print("="*60)
 
-cv          = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-inner_model = model.named_steps["model"]
-X_scaled    = model.named_steps["prep"].transform(X)
-res = cross_validate(
-    inner_model, X_scaled, y,
-    cv=cv,
-    scoring=["accuracy", "f1", "roc_auc"],
-    return_train_score=True,
-)
-cv_results = {"LightGBM": res}
+cv       = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+res_lgbm = cross_validate(inner_lgbm, X_scaled, y, cv=cv, scoring=["accuracy", "f1", "roc_auc"], return_train_score=True)
+res_cat  = cross_validate(inner_cat,  X_scaled, y, cv=cv, scoring=["accuracy", "f1", "roc_auc"], return_train_score=True)
+res      = {k: (res_lgbm[k] + res_cat[k]) / 2 for k in res_lgbm}
+cv_results = {"Soft Vote Ensemble": res}
 for metric in ["accuracy", "f1", "roc_auc"]:
     ts = res[f"test_{metric}"]
     tr = res[f"train_{metric}"]
@@ -179,7 +181,7 @@ else:
 print("\nGenerating evaluation plots...")
 
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-fig.suptitle("ML Model Evaluation — Tuned LightGBM",
+fig.suptitle("ML Model Evaluation — Soft Vote Ensemble (LightGBM + CatBoost)",
              fontsize=14, fontweight="bold")
 
 # Plot A: Confusion Matrix
@@ -190,7 +192,7 @@ axes[0].set_title("Confusion Matrix\n(Held-out Test Set)", fontweight="bold")
 
 # Plot B: ROC Curve
 fpr, tpr, _ = roc_curve(y_test, y_prob)
-axes[1].plot(fpr, tpr, color="#6D28D9", lw=2, label=f"Tuned LightGBM (AUC = {roc_auc:.3f})")
+axes[1].plot(fpr, tpr, color="#6D28D9", lw=2, label=f"Soft Vote Ensemble (AUC = {roc_auc:.3f})")
 axes[1].plot([0, 1], [0, 1], color="gray", linestyle="--", label="Random baseline")
 axes[1].set_xlabel("False Positive Rate")
 axes[1].set_ylabel("True Positive Rate")
@@ -199,10 +201,12 @@ axes[1].legend()
 axes[1].set_xlim([0, 1])
 axes[1].set_ylim([0, 1.02])
 
-# Plot C: Feature Importance (LightGBM)
-lgbm_imp            = inner_model.booster_.feature_importance(importance_type="gain").astype(float)
-lgbm_imp           /= lgbm_imp.sum()
-feature_importances = lgbm_imp
+# Plot C: Feature Importance (averaged LightGBM + CatBoost)
+lgbm_imp = inner_lgbm.booster_.feature_importance(importance_type="gain").astype(float)
+lgbm_imp /= lgbm_imp.sum()
+cat_imp  = np.array(inner_cat.get_feature_importance(type="FeatureImportance"), dtype=float)
+cat_imp  /= cat_imp.sum()
+feature_importances = (lgbm_imp + cat_imp) / 2
 sorted_idx          = np.argsort(feature_importances)
 readable = {
     "issue_match":        "Issue Similarity",
@@ -219,7 +223,7 @@ colors = ["#6D28D9" if feature_importances[i] >= np.median(feature_importances) 
           for i in sorted_idx]
 axes[2].barh(labels, feature_importances[sorted_idx], color=colors)
 axes[2].set_xlabel("Relative Importance (normalized)")
-axes[2].set_title("Feature Importance\n(Tuned LightGBM)", fontweight="bold")
+axes[2].set_title("Feature Importance\n(Averaged: LightGBM + CatBoost)", fontweight="bold")
 axes[2].set_xlim([0, feature_importances.max() * 1.15])
 for i, v in enumerate(feature_importances[sorted_idx]):
     axes[2].text(v + 0.002, i, f"{v:.3f}", va="center", fontsize=8)
@@ -237,8 +241,8 @@ report_lines = [
     f"Features      : {len(FEATURE_ORDER)}",
     f"Target        : match_success (binary)",
     f"Class balance : match=1 ({y.mean()*100:.1f}%), match=0 ({(1-y).mean()*100:.1f}%)",
-    f"Model         : tuned_lgbm.pkl",
-    f"Pipeline      : StandardScaler → SMOTE → tree classifier",
+    f"Model         : ensemble_soft.pkl  (Soft Vote: LightGBM + CatBoost)",
+    f"Pipeline      : StandardScaler → SMOTE → each model; averaged probabilities",
     "",
     "TEST SET RESULTS (20% held-out, stratified split, seed=42)",
     "-" * 60,
@@ -257,7 +261,7 @@ report_lines = [
     "5-FOLD CROSS-VALIDATION",
     "-" * 60,
 ]
-for cv_label in ["LightGBM"]:
+for cv_label in ["Soft Vote Ensemble"]:
     res = cv_results[cv_label]
     report_lines.append(f"  {cv_label}")
     for metric in ["accuracy", "f1", "roc_auc"]:
@@ -266,7 +270,7 @@ for cv_label in ["LightGBM"]:
                             f"[{s.min():.4f}–{s.max():.4f}]")
 report_lines += [
     "",
-    "FEATURE IMPORTANCE (highest to lowest, Tuned LightGBM)",
+    "FEATURE IMPORTANCE (highest to lowest, averaged LightGBM + CatBoost)",
     "-" * 60,
 ]
 for i in np.argsort(feature_importances)[::-1]:

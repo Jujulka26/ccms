@@ -3,3 +3,4 @@ Baseline LightGBM,0.797,0.772,0.901
 Baseline CatBoost,0.801,0.77,0.902
 Tuned LightGBM,0.807,0.777,0.906
 Tuned CatBoost,0.803,0.775,0.907
+Soft Vote Ensemble,0.806,0.778,0.907

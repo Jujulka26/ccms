@@ -38,9 +38,9 @@ FEATURE_ORDER = [
 
 @lru_cache(maxsize=1)
 def load_resources():
-    model = joblib.load(str(BASE_DIR / "tuned_lgbm.pkl"))
+    bundle = joblib.load(str(BASE_DIR / "ensemble_soft.pkl"))
     df_ref = pd.read_csv(str(BASE_DIR / "client_counselor_dataset.csv"))
-    return model, df_ref
+    return bundle, df_ref
 
 
 def _issue_match(client_issue: str, specialization: str) -> float:
@@ -84,7 +84,7 @@ def run_match(match_req, counselors: list[dict]) -> dict:
     preferred_time      = getattr(match_req, "preferred_time", "Any time") or "Any time"
     exclude_ids = set(getattr(match_req, "exclude_ids", []) or [])
 
-    model, _ = load_resources()
+    bundle, _ = load_resources()
 
     rows = []
     for c in counselors:
@@ -126,7 +126,7 @@ def run_match(match_req, counselors: list[dict]) -> dict:
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="X does not have valid feature names")
-        prob = model.predict_proba(X)[:, 1]
+        prob = (bundle["lgbm"].predict_proba(X)[:, 1] + bundle["cat"].predict_proba(X)[:, 1]) / 2
 
     prob = np.clip(prob, 1e-7, 1 - 1e-7)
 
@@ -225,16 +225,19 @@ def engineer_features_from_df(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-_shap_explainer = None
+_shap_explainers = None
 
 
-def _get_shap_explainer():
-    global _shap_explainer
-    if _shap_explainer is None:
+def _get_shap_explainers():
+    global _shap_explainers
+    if _shap_explainers is None:
         import shap
-        model, _ = load_resources()
-        _shap_explainer = shap.TreeExplainer(model.named_steps["model"])
-    return _shap_explainer
+        bundle, _ = load_resources()
+        _shap_explainers = (
+            shap.TreeExplainer(bundle["lgbm"].named_steps["model"]),
+            shap.TreeExplainer(bundle["cat"].named_steps["model"]),
+        )
+    return _shap_explainers
 
 
 def compute_shap(features: dict) -> dict:
@@ -244,24 +247,26 @@ def compute_shap(features: dict) -> dict:
         return {"error": "SHAP not installed.", "shap_values": [], "base_value": 0.0, "feature_names": [], "feature_values": []}
 
     try:
-        model, _  = load_resources()
-        explainer = _get_shap_explainer()
+        bundle, _        = load_resources()
+        exp_lgbm, exp_cat = _get_shap_explainers()
 
         feature_values = [features.get(f, 0.0) for f in FEATURE_ORDER]
-        x_row     = pd.DataFrame([{f: features.get(f, 0.0) for f in FEATURE_ORDER}])
-        x_scaled  = model.named_steps["prep"].transform(x_row[FEATURE_ORDER])
-        shap_vals = explainer.shap_values(x_scaled)
+        x_row    = pd.DataFrame([{f: features.get(f, 0.0) for f in FEATURE_ORDER}])
+        x_scaled = bundle["lgbm"].named_steps["prep"].transform(x_row[FEATURE_ORDER])
 
-        if isinstance(shap_vals, list):
-            row_contrib = np.array(shap_vals[1]).flatten().tolist()
-        else:
-            row_contrib = np.array(shap_vals).flatten().tolist()
+        sv_lgbm = exp_lgbm.shap_values(x_scaled)
+        sv_cat  = exp_cat.shap_values(x_scaled)
 
-        expected = explainer.expected_value
-        if isinstance(expected, (list, np.ndarray)):
-            base_value = float(np.array(expected).flat[-1])
-        else:
-            base_value = float(expected)
+        if isinstance(sv_lgbm, list): sv_lgbm = sv_lgbm[1]
+        if isinstance(sv_cat,  list): sv_cat  = sv_cat[1]
+
+        row_contrib = ((np.array(sv_lgbm) + np.array(sv_cat)) / 2).flatten().tolist()
+
+        ev_lgbm = exp_lgbm.expected_value
+        ev_cat  = exp_cat.expected_value
+        if isinstance(ev_lgbm, (list, np.ndarray)): ev_lgbm = float(np.array(ev_lgbm).flat[-1])
+        if isinstance(ev_cat,  (list, np.ndarray)): ev_cat  = float(np.array(ev_cat).flat[-1])
+        base_value = (float(ev_lgbm) + float(ev_cat)) / 2
 
         return {
             "shap_values":    row_contrib,

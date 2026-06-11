@@ -24,9 +24,9 @@ STORE_DIR    = BASE_DIR / "model_store"
 VERSIONS_DIR = STORE_DIR / "versions"
 ACTIVE_FILE  = STORE_DIR / "active_version.txt"
 
-_BEST_MODEL     = ML_DIR / "tuned_lgbm.pkl"
+_BEST_MODEL     = ML_DIR / "ensemble_soft.pkl"
 _TUNED_CSV      = ML_DIR / "tuned_result.csv"
-_BEST_MODEL_BAK = STORE_DIR / "tuned_lgbm_backup.pkl"
+_BEST_MODEL_BAK = STORE_DIR / "ensemble_soft_backup.pkl"
 _TUNED_CSV_BAK  = STORE_DIR / "tuned_result_backup.csv"
 _DATASET_CSV    = ML_DIR / "client_counselor_dataset.csv"
 _DATASET_BAK    = STORE_DIR / "client_counselor_dataset_backup.csv"
@@ -47,7 +47,7 @@ def _deployed_metrics(tuned_csv: Path) -> dict:
     if not tuned_csv.exists():
         return {}
     df      = pd.read_csv(str(tuned_csv))
-    name    = "Tuned LightGBM"
+    name    = "Soft Vote Ensemble"
     matched = df[df["Model"] == name]
     row     = matched.iloc[0] if not matched.empty else df.loc[df["ROC-AUC"].idxmax()]
     return {
@@ -100,7 +100,7 @@ def get_model_performance():
             "best_model":     str(top["Model"]),
             "best_roc_auc":   best_roc,
             "model_count":    len(df),
-            "deployed_model": "Tuned LightGBM",
+            "deployed_model": "Soft Vote Ensemble",
             "tuning_models":  tuning_models,
         }
     except Exception:
@@ -120,7 +120,7 @@ def _ensure_initial_version():
     if not _BEST_MODEL.exists():
         return
     initial_dir.mkdir(exist_ok=True)
-    shutil.copy2(str(_BEST_MODEL), str(initial_dir / "tuned_lgbm.pkl"))
+    shutil.copy2(str(_BEST_MODEL), str(initial_dir / "ensemble_soft.pkl"))
     if _TUNED_CSV.exists():
         shutil.copy2(str(_TUNED_CSV), str(initial_dir / "tuned_result.csv"))
     metrics = _deployed_metrics(_TUNED_CSV)
@@ -221,7 +221,7 @@ def _run_training(job_id: str, df: pd.DataFrame):
         job["progress"] = 0.90
         new_metrics = _deployed_metrics(_TUNED_CSV)
         if _BEST_MODEL.exists():
-            shutil.copy2(str(_BEST_MODEL), str(version_dir / "tuned_lgbm.pkl"))
+            shutil.copy2(str(_BEST_MODEL), str(version_dir / "ensemble_soft.pkl"))
         if _TUNED_CSV.exists():
             shutil.copy2(str(_TUNED_CSV), str(version_dir / "tuned_result.csv"))
 
@@ -311,10 +311,10 @@ def deploy_version(version_id: str):
     version_dir = VERSIONS_DIR / version_id
     if not version_dir.exists():
         raise HTTPException(status_code=404, detail=f"Version {version_id} not found.")
-    pkl = version_dir / "tuned_lgbm.pkl"
+    pkl = version_dir / "ensemble_soft.pkl"
     csv = version_dir / "tuned_result.csv"
     if not pkl.exists():
-        raise HTTPException(status_code=404, detail="tuned_lgbm.pkl not found in this version.")
+        raise HTTPException(status_code=404, detail="ensemble_soft.pkl not found in this version.")
     STORE_DIR.mkdir(exist_ok=True)
     if _BEST_MODEL.exists():
         shutil.copy2(str(_BEST_MODEL), str(_BEST_MODEL_BAK))
