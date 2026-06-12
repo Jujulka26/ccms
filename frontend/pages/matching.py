@@ -18,7 +18,7 @@ def inject_styles():
         html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
         .stApp { background: #F5F3FF; }
 
-        .page-header { padding: 24px 0 20px; border-bottom: 1px solid rgba(0,0,0,0.07); margin-bottom: 24px; }
+        .page-header { padding: 24px 0 20px; border-bottom: 1px solid rgba(0,0,0,0.07); margin-bottom: 8px; }
         .page-header-eyebrow {
             display: inline-flex; align-items: center; gap: 6px;
             background: rgba(181,136,247,0.08); border: 1px solid rgba(181,136,247,0.18);
@@ -109,6 +109,9 @@ def inject_styles():
         .ai-explanation-box { background: linear-gradient(135deg, #F5F3FF 0%, #F5F3FF 100%); border: 1px solid rgba(181,136,247,0.15); border-left: 3px solid #B588F7; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
         .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #B588F7, #83ADF9); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; font-family: 'Plus Jakarta Sans', sans-serif; }
 
+        .st-key-next_option_btn button { background: rgba(181,136,247,0.10) !important; color: #6D28D9 !important; border: 2px solid rgba(181,136,247,0.75) !important; border-radius: 50px !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: 0.02em !important; box-shadow: 0 2px 10px rgba(181,136,247,0.18) !important; padding: 10px 24px !important; }
+        .st-key-next_option_btn button:hover { background: rgba(181,136,247,0.20) !important; border-color: #7C3AED !important; color: #4C1D95 !important; box-shadow: 0 4px 16px rgba(181,136,247,0.30) !important; }
+
         div[data-testid="stTabs"] button { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 14px !important; font-weight: 500 !important; }
 
         [data-testid="block-container"] div[data-testid="stButton"] button:not([kind="primary"]) {
@@ -145,7 +148,7 @@ def inject_styles():
             font-weight: 700 !important;
             letter-spacing: 0.07em !important;
             text-transform: uppercase !important;
-            color: #B588F7 !important;
+            color: #7C3AED !important;
             background: linear-gradient(135deg, #F5F3FF 0%, #F5F3FF 100%) !important;
             border-radius: 16px !important;
             border-bottom: 1px solid rgba(181,136,247,0.08);
@@ -1073,7 +1076,7 @@ def show_matching_page():
         counselor_name = best_c.get("name", "Your Top Match").upper()
 
         # Paired header row
-        st.markdown('<p style="color:#B588F7; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'Plus Jakarta Sans\', sans-serif; font-weight:700; margin:8px 0 24px;">YOUR MATCHES</p>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#7C3AED; text-transform:uppercase; font-size:16px; letter-spacing:0.1em; font-family:\'Plus Jakarta Sans\', sans-serif; font-weight:700; margin:0 0 16px;">YOUR MATCHES</p>', unsafe_allow_html=True)
 
         col1, col2 = st.columns(2, gap="large")
         with col1:
@@ -1082,17 +1085,7 @@ def show_matching_page():
                 _dismiss(0)
                 st.rerun()
         with col2:
-            explanation = _get_explanation(best_c)
-            if explanation:
-                st.markdown(
-                    f'<div class="ai-explanation-box" style="margin-bottom:16px;">'
-                    f'<div class="ai-badge">✦ Why {counselor_name}?</div>'
-                    f'<p style="font-size:15.5px;color:#2D2D3F;line-height:1.7;margin:0;">{explanation}</p>'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
-
-            with st.expander("Technical details — SHAP feature contributions", expanded=False):
+            with st.expander("What influenced this match?", expanded=False):
                 _shap_cache_key = "shap_" + hashlib.md5(
                     _json.dumps(sorted(best_features.items())).encode()
                 ).hexdigest()
@@ -1161,6 +1154,16 @@ def show_matching_page():
                     except Exception as exc:
                         st.info(f"Could not render feature contributions: {exc}")
 
+            explanation = _get_explanation(best_c)
+            if explanation:
+                st.markdown(
+                    f'<div class="ai-explanation-box">'
+                    f'<div class="ai-badge">✦ Why {counselor_name}?</div>'
+                    f'<p style="font-size:15.5px;color:#2D2D3F;line-height:1.7;margin:0;">{explanation}</p>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
         components.html(
             """
             <script>
@@ -1228,23 +1231,15 @@ def show_matching_page():
         </script>
         """, height=0, width=0)
 
-        # ── 2nd option below ─────────────────────────────────────────────────
+        # ── See next option ───────────────────────────────────────────────────
         if second_c:
-            st.markdown(
-                """
-                <div style="display:flex; align-items:center; gap:16px; margin: 16px 0 32px;">
-                    <div style="flex:1; height:1px; background:rgba(0,0,0,0.10);"></div>
-                    <span style="font-size:11px; font-weight:600; color:#B0A9C0; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap;">Also consider</span>
-                    <div style="flex:1; height:1px; background:rgba(0,0,0,0.10);"></div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            sec_col, _ = st.columns([1, 1], gap="large")
-            with sec_col:
-                render_counselor_card(second_c, second_c["compatibility_score"], is_primary=False, dismiss_key="dismiss_1")
-                if st.button("__dismiss1__", key="dismiss_1", use_container_width=True):
-                    _dismiss(1)
+            alternatives = len(ranked_list) - 1
+            alt_text = f"{alternatives} more available" if alternatives > 1 else "1 more available"
+            st.markdown('<div style="height:8px;"></div>', unsafe_allow_html=True)
+            _, btn_col, _ = st.columns([1, 2, 1])
+            with btn_col:
+                if st.button(f"Not the right fit? See next option  ({alt_text})", key="next_option_btn", use_container_width=True):
+                    _dismiss(0)
                     st.rerun()
 
         # ── Start Over ───────────────────────────────────────────────────────

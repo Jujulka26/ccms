@@ -3,13 +3,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routers import counselors, auth, requests, matching, model_performance, contact
-from ml import load_resources, _get_shap_explainer
+from ml import load_resources, _get_shap_explainers
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_resources()
-    _get_shap_explainer()
+    _get_shap_explainers()
     yield
 
 

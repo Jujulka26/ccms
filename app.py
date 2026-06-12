@@ -119,7 +119,7 @@ def inject_app_styles():
         }
         section[data-testid="stSidebar"] [data-baseweb="radio"]:has(input:checked) {
             background: rgba(255,255,255,0.92) !important;
-            border-color: rgba(255,255,255,1) !important;
+            border-color: #2E1065 !important;
             box-shadow: 0 2px 12px rgba(255,255,255,0.4) !important;
         }
         section[data-testid="stSidebar"] [data-baseweb="radio"] p,
@@ -183,19 +183,23 @@ def inject_app_styles():
             transform: scale(0.97) translateY(0) !important;
         }
 
-        /* ── Logout — destructive ghost button ────────────────────────── */
+        /* ── Logout / Back to home — destructive ghost button ───────────── */
         section[data-testid="stSidebar"] button[kind="secondary"] {
-            background: rgba(196,26,22,0.12) !important;
+            background-color: rgba(255,255,255,0.82) !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C41A16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpolyline points='16 17 21 12 16 7'/%3E%3Cline x1='21' y1='12' x2='9' y2='12'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: 14px center !important;
+            background-size: 15px 15px !important;
             color: #C41A16 !important;
             border: 1.5px solid rgba(196,26,22,0.6) !important;
             border-radius: 10px !important;
             font-weight: 600 !important;
-            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
-            padding: 8px 0 !important;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+            padding: 8px 0 8px 14px !important;
             margin-bottom: 16px !important;
         }
         section[data-testid="stSidebar"] button[kind="secondary"]:hover {
-            background: rgba(196,26,22,0.12) !important;
+            background-color: #FFFFFF !important;
             border-color: #C41A16 !important;
             color: #B91C1C !important;
         }
@@ -248,7 +252,7 @@ def inject_app_styles():
         /* ── Landing page ─────────────────────────────────────────────── */
         .land-cta-btn {
             display: inline-block;
-            background: #B588F7;
+            background: #8B5CF6;
             color: #FFFFFF !important;
             font-size: 15px;
             font-weight: 700;
@@ -681,7 +685,7 @@ if role == "admin":
     if st.sidebar.button("Log out", use_container_width=True):
         _logout_dialog()
 else:
-    if st.sidebar.button("← Back to home", use_container_width=True):
+    if st.sidebar.button("Exit", use_container_width=True):
         _back_dialog()
 
 
