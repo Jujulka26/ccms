@@ -35,10 +35,10 @@ def generate_experience_years(age):
 # Henry & Crawford 2005) and PTSD comorbidity with depression/anxiety (shared-vulnerability
 # model). Anxiety-Stress is the most correlated DASS pair, hence highest.
 ISSUE_SIMILARITY = {
-    "Anxiety":    {"Anxiety":1.0,"Stress":0.7,"Trauma":0.6,"Depression":0.6},
-    "Stress":     {"Stress":1.0,"Anxiety":0.7,"Trauma":0.6,"Depression":0.6},
-    "Trauma":     {"Trauma":1.0,"Stress":0.6,"Anxiety":0.6,"Depression":0.6},
-    "Depression": {"Depression":1.0,"Anxiety":0.6,"Stress":0.6,"Trauma":0.6}
+    "Anxiety":    {"Anxiety":1.0,"Stress":0.7,"Trauma":0.6,"Depression":0.8},
+    "Stress":     {"Stress":1.0,"Anxiety":0.7,"Trauma":0.6,"Depression":0.7},
+    "Trauma":     {"Trauma":1.0,"Stress":0.6,"Anxiety":0.6,"Depression":0.8},
+    "Depression": {"Depression":1.0,"Anxiety":0.8,"Stress":0.7,"Trauma":0.8}
 }
 
 # Modality-issue clinical efficacy — CBT (Cognitive) first-line for anxiety & depression;
@@ -164,7 +164,7 @@ for client in clients:
 
         # Ethnicity (d=0.09, Cabral & Smith 2011 — smaller effect than gender)
         if client["client_ethnicity"] == counselor["counselor_ethnicity"]:
-            S += 3
+            S += 4
         else:
             S += 1
 
@@ -198,9 +198,9 @@ for merged, S in pairs:
     # Fair partial-binomial label: only clear-cut extremes (>0.70 / <0.30) are
     # deterministic; the wide middle band is drawn stochastically to encode the
     # unobserved human factors (rapport, circumstances) the model cannot see.
-    if final_prob > 0.70:
+    if final_prob > 0.68:
         match_success = 1
-    elif final_prob < 0.30:
+    elif final_prob < 0.32:
         match_success = 0
     else:
         match_success = np.random.binomial(1, final_prob)
