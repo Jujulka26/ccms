@@ -225,7 +225,7 @@ target_corr = corr["match_success"].drop("match_success").sort_values(ascending=
 
 print("\n  Correlation with match_success:")
 for feat, val in target_corr.items():
-    bar_str = ("+" if val >= 0 else "") + "▇" * int(abs(val) * 20)
+    bar_str = ("+" if val >= 0 else "") + "#" * int(abs(val) * 20)
     print(f"    {feat:<35} {val:+.3f}  {bar_str}")
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
