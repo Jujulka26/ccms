@@ -18,8 +18,8 @@ def show_contactus_page():
             transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
         }
         .cu-info-card:hover {
-            box-shadow: 0 8px 24px rgba(181,136,247,0.1);
-            border-color: rgba(181,136,247,0.25);
+            box-shadow: 0 8px 24px rgba(157,99,232,0.1);
+            border-color: rgba(157,99,232,0.25);
             transform: translateY(-2px);
         }
         .cu-info-icon {
@@ -32,7 +32,7 @@ def show_contactus_page():
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #B588F7;
+            color: #9D63E8;
             margin-bottom: 6px;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
@@ -77,7 +77,7 @@ def show_contactus_page():
 
         /* ── Hours card ───────────────────────────────────────────────── */
         .cu-hours-card {
-            background: linear-gradient(135deg, #B588F7 0%, #83ADF9 100%);
+            background: linear-gradient(135deg, #9D63E8 0%, #5E8AEE 100%);
             border-radius: 20px;
             padding: 32px 36px;
             margin-top: 8px;

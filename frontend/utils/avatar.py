@@ -3,7 +3,7 @@ import io
 from pathlib import Path
 
 _AVATAR_COLORS = [
-    "#B588F7", "#83ADF9", "#4A8C6A",
+    "#9D63E8", "#5E8AEE", "#4A8C6A",
     "#2E1065", "#9B72F5", "#7A9E8A",
 ]
 

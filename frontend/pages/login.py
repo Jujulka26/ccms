@@ -44,8 +44,8 @@ def show_login_page():
             st.markdown(
                 """
                 <div style="display:flex;justify-content:center;margin-bottom:20px;">
-                    <div style="width:64px;height:64px;border-radius:18px;background:rgba(181,136,247,0.1);border:1px solid rgba(181,136,247,0.2);display:flex;align-items:center;justify-content:center;">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B588F7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <div style="width:64px;height:64px;border-radius:18px;background:rgba(157,99,232,0.1);border:1px solid rgba(157,99,232,0.2);display:flex;align-items:center;justify-content:center;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9D63E8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                         </svg>

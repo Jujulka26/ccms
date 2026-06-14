@@ -33,8 +33,8 @@ def show_aboutus_page():
             transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
         }
         .au-card:hover {
-            box-shadow: 0 8px 24px rgba(181,136,247,0.1);
-            border-color: rgba(181,136,247,0.25);
+            box-shadow: 0 8px 24px rgba(157,99,232,0.1);
+            border-color: rgba(157,99,232,0.25);
             transform: translateY(-2px);
         }
         .au-card-icon {
@@ -68,7 +68,7 @@ def show_aboutus_page():
             flex-shrink: 0;
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #B588F7 0%, #83ADF9 100%);
+            background: linear-gradient(135deg, #9D63E8 0%, #5E8AEE 100%);
             color: #FFFFFF;
             font-size: 15px;
             font-weight: 700;
@@ -95,7 +95,7 @@ def show_aboutus_page():
 
         /* ── Mission banner ───────────────────────────────────────────── */
         .au-mission {
-            background: linear-gradient(135deg, #B588F7 0%, #83ADF9 100%);
+            background: linear-gradient(135deg, #9D63E8 0%, #5E8AEE 100%);
             border-radius: 20px;
             padding: 44px 48px;
             margin: 32px 0;
@@ -107,7 +107,7 @@ def show_aboutus_page():
             position: absolute;
             top: -60px; right: -60px;
             width: 280px; height: 280px;
-            background: radial-gradient(circle, rgba(181,136,247,0.2) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(157,99,232,0.2) 0%, transparent 70%);
             pointer-events: none;
         }
         .au-mission::after {
@@ -115,7 +115,7 @@ def show_aboutus_page():
             position: absolute;
             bottom: -40px; left: -40px;
             width: 200px; height: 200px;
-            background: radial-gradient(circle, rgba(181,136,247,0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(157,99,232,0.1) 0%, transparent 70%);
             pointer-events: none;
         }
         .au-mission-label {
@@ -274,7 +274,7 @@ def show_aboutus_page():
         """
         <div style="text-align: center; padding: 8px 0 24px;">
             <div style="font-family: 'Fraunces', serif; font-size: 22px; color: #1C1917; margin-bottom: 8px; font-weight: 600;">Ready to find your match?</div>
-            <p style="font-size: 14px; color: #9C9790; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;">Head to <strong style="color: #B588F7;">Find a Counselor</strong> in the sidebar to get started.</p>
+            <p style="font-size: 14px; color: #9C9790; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;">Head to <strong style="color: #9D63E8;">Find a Counselor</strong> in the sidebar to get started.</p>
         </div>
         """,
         unsafe_allow_html=True,

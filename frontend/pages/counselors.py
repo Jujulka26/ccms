@@ -7,7 +7,7 @@ from frontend.pages.matching import show_profile_dialog, show_request_success_di
 
 
 _SPEC_COLORS = {
-    "Anxiety":    ("#F5F3FF", "#B588F7"),
+    "Anxiety":    ("#F5F3FF", "#9D63E8"),
     "Depression": ("#FFF7ED", "#C2410C"),
     "Stress":     ("#F0FDF4", "#15803D"),
     "Trauma":     ("#FFF1F2", "#BE123C"),
@@ -30,7 +30,7 @@ def inject_styles():
         }
         .filter-label {
             font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
-            text-transform: uppercase; color: #B588F7; margin-bottom: 10px;
+            text-transform: uppercase; color: #9D63E8; margin-bottom: 10px;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
@@ -42,20 +42,20 @@ def inject_styles():
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .c-card:hover {
-            border-color: rgba(181,136,247,0.3);
-            box-shadow: 0 4px 20px rgba(181,136,247,0.1);
+            border-color: rgba(157,99,232,0.3);
+            box-shadow: 0 4px 20px rgba(157,99,232,0.1);
         }
         .card-view-btn-dir {
             display: block; width: calc(100% + 48px); margin: 18px -24px 0;
             padding: 14px 24px; background: transparent; border: none;
             border-top: 1px solid rgba(0,0,0,0.07);
-            color: #B588F7; font-size: 12px; font-weight: 700;
+            color: #9D63E8; font-size: 12px; font-weight: 700;
             letter-spacing: 0.08em; text-transform: uppercase;
             cursor: pointer; text-align: center;
             font-family: 'Plus Jakarta Sans', sans-serif;
             transition: background 0.15s, color 0.15s;
         }
-        .card-view-btn-dir:hover { background: rgba(181,136,247,0.06); color: #B588F7; }
+        .card-view-btn-dir:hover { background: rgba(157,99,232,0.06); color: #9D63E8; }
         [data-testid="stElementContainer"]:has(.c-card) { margin-bottom: 24px !important; }
         .c-avatar-wrap {
             display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
@@ -64,7 +64,7 @@ def inject_styles():
             font-family: 'Fraunces', serif;
             font-size: 17px; color: #1C1917; margin: 0 0 2px; font-weight: 600;
         }
-        .c-title { font-size: 12px; color: #B588F7; font-weight: 600; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .c-title { font-size: 12px; color: #9D63E8; font-weight: 600; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         .c-spec-badge {
             display: inline-block; font-size: 11px; font-weight: 700;
             letter-spacing: 0.05em; text-transform: uppercase;
@@ -79,7 +79,7 @@ def inject_styles():
         .c-info-icon { font-size: 14px; flex-shrink: 0; }
 
         .result-count {
-            font-size: 13px; color: #B588F7; font-weight: 600;
+            font-size: 13px; color: #9D63E8; font-weight: 600;
             margin-bottom: 20px; letter-spacing: 0.02em;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
@@ -102,7 +102,7 @@ def show_counselors_page():
         """
         <div style="padding:24px 0 20px; border-bottom:1px solid rgba(0,0,0,0.07); margin-bottom:24px;">
             <div style="font-family:'Fraunces',serif; font-size:clamp(22px,3vw,36px); color:#1C1917; margin:0 0 8px; letter-spacing:-0.4px; line-height:1.12; font-weight:600; display:flex; align-items:center; gap:16px;">
-                <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#B588F7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#9D63E8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -156,7 +156,7 @@ def show_counselors_page():
             function styleSelects() {
                 doc.querySelectorAll('[data-baseweb="select"] > div').forEach(function(el) {
                     el.style.setProperty('background-color', '#FFFFFF', 'important');
-                    el.style.setProperty('border', '1.5px solid rgba(181,136,247,0.4)', 'important');
+                    el.style.setProperty('border', '1.5px solid rgba(157,99,232,0.4)', 'important');
                     el.style.setProperty('border-radius', '10px', 'important');
                 });
             }
@@ -254,8 +254,8 @@ def show_counselors_page():
             <style>
             .st-key-dir_prev button, .st-key-dir_next button {
                 background: #FFFFFF !important;
-                border: 1.5px solid rgba(181,136,247,0.25) !important;
-                color: #B588F7 !important;
+                border: 1.5px solid rgba(157,99,232,0.25) !important;
+                color: #9D63E8 !important;
                 border-radius: 50px !important;
                 font-family: 'Plus Jakarta Sans', sans-serif !important;
                 font-size: 13px !important;
@@ -263,12 +263,12 @@ def show_counselors_page():
                 letter-spacing: 0.04em !important;
                 padding: 10px 24px !important;
                 transition: all 0.2s ease !important;
-                box-shadow: 0 1px 4px rgba(181,136,247,0.08) !important;
+                box-shadow: 0 1px 4px rgba(157,99,232,0.08) !important;
             }
             .st-key-dir_prev button:hover:not(:disabled), .st-key-dir_next button:hover:not(:disabled) {
-                background: rgba(181,136,247,0.06) !important;
-                border-color: #B588F7 !important;
-                box-shadow: 0 2px 10px rgba(181,136,247,0.15) !important;
+                background: rgba(157,99,232,0.06) !important;
+                border-color: #9D63E8 !important;
+                box-shadow: 0 2px 10px rgba(157,99,232,0.15) !important;
             }
             .st-key-dir_prev button:disabled, .st-key-dir_next button:disabled {
                 opacity: 0.35 !important;
@@ -285,7 +285,7 @@ def show_counselors_page():
                 st.rerun()
         with pcol2:
             dots = "".join(
-                f'<span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin:0 4px;background:{"#B588F7" if i == page else "#E8D5FD"};"></span>'
+                f'<span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin:0 4px;background:{"#9D63E8" if i == page else "#E8D5FD"};"></span>'
                 for i in range(total_pages)
             )
 

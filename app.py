@@ -41,6 +41,7 @@ def inject_app_styles():
 
         .block-container {
             max-width: 1200px;
+            padding-top: 2.5rem !important;
         }
 
         /* ── Form styling ─────────────────────────────────────────────── */
@@ -62,18 +63,22 @@ def inject_app_styles():
         div[data-testid="stTextInput"] input:focus,
         div[data-testid="stNumberInput"] input:focus,
         div[data-testid="stSelectbox"] > div > div:focus-within {
-            border-color: #B588F7 !important;
-            box-shadow: 0 0 0 3px rgba(181,136,247,0.12) !important;
+            border-color: #9D63E8 !important;
+            box-shadow: 0 0 0 3px rgba(157,99,232,0.12) !important;
         }
 
         div[data-testid="stModal"] > div > div {
             border-radius: 20px !important;
         }
 
+        /* Keep the help (?) icon beside the label text with a small consistent gap */
+        [data-testid="stWidgetLabel"] { width: fit-content !important; align-items: center !important; gap: 6px !important; }
+        [data-testid="stWidgetLabel"] [data-testid="stTooltipHoverTarget"] { margin: 0 !important; }
+
         /* ── Sidebar styling ──────────────────────────────────────────── */
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #B588F7 0%, #83ADF9 100%);
-            border-right: 1px solid rgba(181,136,247,0.2);
+            background: linear-gradient(180deg, #9D63E8 0%, #5E8AEE 100%);
+            border-right: 1px solid rgba(94,138,238,0.25);
         }
 
         section[data-testid="stSidebar"] .stMarkdown p,
@@ -164,7 +169,7 @@ def inject_app_styles():
 
         /* ── Primary buttons ─────────────────────────────────────────── */
         button[kind="primary"] {
-            background: linear-gradient(to right, #B588F7 0%, #83ADF9 48%, #2E1065 52%, #2E1065 100%) !important;
+            background: linear-gradient(to right, #9D63E8 0%, #5E8AEE 48%, #2E1065 52%, #2E1065 100%) !important;
             background-size: 210% 100% !important;
             background-position: right center !important;
             transition: background-position 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.15s ease !important;
@@ -176,7 +181,7 @@ def inject_app_styles():
         }
         button[kind="primary"]:hover {
             background-position: left center !important;
-            box-shadow: 0 6px 24px rgba(181,136,247,0.55) !important;
+            box-shadow: 0 6px 24px rgba(157,99,232,0.55) !important;
             transform: translateY(-1px) !important;
         }
         button[kind="primary"]:active {
@@ -221,17 +226,17 @@ def inject_app_styles():
 
         button[data-testid="collapsedControl"],
         button[aria-label="Expand sidebar"] {
-            background: #B588F7 !important;
+            background: #9D63E8 !important;
             color: #FFFFFF !important;
             border-radius: 0 10px 10px 0 !important;
             border: none !important;
-            box-shadow: 2px 0 14px rgba(181,136,247,0.45) !important;
+            box-shadow: 2px 0 14px rgba(157,99,232,0.45) !important;
             opacity: 1 !important;
         }
         button[data-testid="collapsedControl"]:hover,
         button[aria-label="Expand sidebar"]:hover {
-            background: #B588F7 !important;
-            box-shadow: 2px 0 18px rgba(181,136,247,0.7) !important;
+            background: #9D63E8 !important;
+            box-shadow: 2px 0 18px rgba(157,99,232,0.7) !important;
         }
         button[aria-label="Collapse sidebar"] svg {
             fill: #2E1065 !important;
@@ -260,13 +265,13 @@ def inject_app_styles():
             border-radius: 50px;
             text-decoration: none !important;
             transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-            box-shadow: 0 4px 20px rgba(181,136,247,0.45);
+            box-shadow: 0 4px 20px rgba(157,99,232,0.45);
             font-family: 'Plus Jakarta Sans', sans-serif;
             letter-spacing: 0.01em;
         }
         .land-cta-btn:hover {
-            background: #B588F7;
-            box-shadow: 0 8px 28px rgba(181,136,247,0.7);
+            background: #9D63E8;
+            box-shadow: 0 8px 28px rgba(157,99,232,0.7);
             transform: translateY(-2px);
         }
 
@@ -290,7 +295,7 @@ def inject_app_styles():
             position: absolute;
             top: -100px; right: -60px;
             width: 560px; height: 560px;
-            background: radial-gradient(circle, rgba(131,173,249,0.22) 0%, transparent 55%);
+            background: radial-gradient(circle, rgba(94,138,238,0.22) 0%, transparent 55%);
             pointer-events: none;
         }
         .land-hero-band::after {
@@ -307,9 +312,9 @@ def inject_app_styles():
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: rgba(181,136,247,0.9);
-            background: rgba(181,136,247,0.12);
-            border: 1px solid rgba(181,136,247,0.3);
+            color: rgba(157,99,232,0.9);
+            background: rgba(157,99,232,0.12);
+            border: 1px solid rgba(157,99,232,0.3);
             border-radius: 20px;
             padding: 5px 16px;
             margin-bottom: 28px;
@@ -344,7 +349,7 @@ def inject_app_styles():
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #B588F7;
+            color: #9D63E8;
             text-align: center;
             margin-bottom: 12px;
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -366,8 +371,8 @@ def inject_app_styles():
             padding: 36px 32px;
             background: #FFFFFF;
             border-radius: 18px;
-            box-shadow: 0 2px 16px rgba(181,136,247,0.06);
-            border: 1px solid rgba(181,136,247,0.08);
+            box-shadow: 0 2px 16px rgba(157,99,232,0.06);
+            border: 1px solid rgba(157,99,232,0.08);
         }
         .land-step-num {
             font-family: 'Fraunces', serif;
@@ -377,8 +382,8 @@ def inject_app_styles():
             font-weight: 300;
         }
         .land-step-num.n1 { color: #D4B8FC; }
-        .land-step-num.n2 { color: #B588F7; }
-        .land-step-num.n3 { color: #83ADF9; }
+        .land-step-num.n2 { color: #9D63E8; }
+        .land-step-num.n3 { color: #5E8AEE; }
         .land-step-title {
             font-size: 16px;
             font-weight: 700;
@@ -414,7 +419,7 @@ def inject_app_styles():
             margin-bottom: 20px;
             line-height: 1;
         }
-        .land-why-icon.rose { background: rgba(181,136,247,0.12); }
+        .land-why-icon.rose { background: rgba(157,99,232,0.12); }
         .land-why-icon.gold { background: rgba(59,130,246,0.12); }
         .land-why-icon.sage { background: rgba(5,150,105,0.1); }
         .land-why-title {
@@ -476,7 +481,7 @@ def inject_app_styles():
             transition: color 0.2s;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .land-staff-link a:hover { color: #B588F7 !important; }
+        .land-staff-link a:hover { color: #9D63E8 !important; }
 
         @media (max-width: 768px) {
             .land-hero-title { font-size: 36px; }
@@ -662,13 +667,13 @@ st.sidebar.markdown(
 
 if role == "admin":
     st.sidebar.markdown(
-        '<div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: rgba(167,139,250,0.9); text-transform: uppercase; margin-bottom: 10px; font-family: \'Plus Jakarta Sans\', sans-serif;">Admin</div>',
+        '<div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: rgba(255,255,255,0.85); text-transform: uppercase; margin-bottom: 10px; font-family: \'Plus Jakarta Sans\', sans-serif;">Admin</div>',
         unsafe_allow_html=True,
     )
     page = st.sidebar.radio("Navigation", ["Match a Client", "Counselor Management", "Our Counselors", "Review Requests", "Enquiries", "Model Management"], label_visibility="collapsed")
 else:
     st.sidebar.markdown(
-        '<div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: rgba(167,139,250,0.9); text-transform: uppercase; margin-bottom: 10px; font-family: \'Plus Jakarta Sans\', sans-serif;">Navigation</div>',
+        '<div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: rgba(255,255,255,0.85); text-transform: uppercase; margin-bottom: 10px; font-family: \'Plus Jakarta Sans\', sans-serif;">Navigation</div>',
         unsafe_allow_html=True,
     )
     page = st.sidebar.radio("Navigation", ["Find a Counselor", "Our Counselors", "Chat with Mira", "About Us", "Contact Us"], label_visibility="collapsed")

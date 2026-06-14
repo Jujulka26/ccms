@@ -21,27 +21,27 @@ def inject_styles():
         .page-header { padding: 24px 0 20px; border-bottom: 1px solid rgba(0,0,0,0.07); margin-bottom: 8px; }
         .page-header-eyebrow {
             display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(181,136,247,0.08); border: 1px solid rgba(181,136,247,0.18);
+            background: rgba(157,99,232,0.08); border: 1px solid rgba(157,99,232,0.18);
             border-radius: 20px; padding: 3px 12px 3px 10px; margin-bottom: 12px;
-            font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #B588F7;
+            font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9D63E8;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .page-header-title { font-family: 'Fraunces', serif; font-size: clamp(26px, 3.2vw, 38px); color: #1C1917; margin: 0 0 8px; letter-spacing: -0.4px; line-height: 1.12; display: block; font-weight: 600; }
         .page-header-sub { font-size: 14px; color: #6B6560; margin: 0; line-height: 1.6; font-family: 'Plus Jakarta Sans', sans-serif; }
         .page-header-stats { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .page-header-stat { display: inline-flex; align-items: center; gap: 7px; background: #F5F3FF; border: 1px solid rgba(181,136,247,0.15); border-radius: 20px; padding: 6px 13px; }
-        .page-header-stat-num { font-family: 'Fraunces', serif; font-size: 17px; color: #B588F7; line-height: 1; font-weight: 600; }
+        .page-header-stat { display: inline-flex; align-items: center; gap: 7px; background: #F5F3FF; border: 1px solid rgba(157,99,232,0.15); border-radius: 20px; padding: 6px 13px; }
+        .page-header-stat-num { font-family: 'Fraunces', serif; font-size: 17px; color: #9D63E8; line-height: 1; font-weight: 600; }
         .page-header-stat-label { font-size: 11px; color: #A09088; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         .form-card {
-            background: radial-gradient(1200px 300px at -10% -30%, rgba(181,136,247,0.06) 0%, transparent 60%), radial-gradient(900px 260px at 110% 120%, rgba(181,136,247,0.05) 0%, transparent 55%), #FFFFFF;
+            background: radial-gradient(1200px 300px at -10% -30%, rgba(157,99,232,0.06) 0%, transparent 60%), radial-gradient(900px 260px at 110% 120%, rgba(157,99,232,0.05) 0%, transparent 55%), #FFFFFF;
             border-radius: 24px; padding: 28px 36px 24px;
             border: 1px solid rgba(0,0,0,0.06);
             box-shadow: 0 12px 32px -16px rgba(28,25,23,0.08), 0 1px 3px rgba(0,0,0,0.03);
             margin-bottom: 24px;
         }
         .step-header { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
-        .step-chip { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #B588F7 0%, #83ADF9 100%); color: #FFFFFF; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(181,136,247,0.4); flex-shrink: 0; }
+        .step-chip { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #9D63E8 0%, #5E8AEE 100%); color: #FFFFFF; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(157,99,232,0.4); flex-shrink: 0; }
         .step-title { font-family: 'Fraunces', serif; font-size: 24px; color: #1C1917; line-height: 1.2; font-weight: 600; }
         .step-copy { font-size: 14px; color: #6B6560; margin: 4px 0 16px 48px; line-height: 1.55; font-family: 'Plus Jakarta Sans', sans-serif; }
         .section-divider { border: none; border-top: 1px solid #E5E5E5; margin: 0px 0 20px 0 !important; position: relative; z-index: 10; }
@@ -54,7 +54,7 @@ def inject_styles():
             font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 14px !important; transition: border-color 0.2s;
         }
         div[data-testid="stNumberInput"] input:focus, div[data-testid="stSelectbox"] > div > div:focus-within {
-            border-color: #B588F7 !important; box-shadow: 0 0 0 3px rgba(181,136,247,0.1) !important;
+            border-color: #9D63E8 !important; box-shadow: 0 0 0 3px rgba(157,99,232,0.1) !important;
         }
         label[data-testid="stWidgetLabel"] p, label[data-testid="stWidgetLabel"] div, label[data-testid="stWidgetLabel"] span {
             font-size: 14px !important; font-weight: 600 !important; color: #1C1917 !important; margin-bottom: 8px !important;
@@ -66,58 +66,59 @@ def inject_styles():
             position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; overflow: hidden !important;
         }
         [data-testid="block-container"] [data-baseweb="radio"] { padding: 9px 22px !important; background: #F5F3FF !important; border: 1.5px solid #F0E8FF !important; border-radius: 30px !important; cursor: pointer !important; transition: background 0.18s ease, border-color 0.18s ease !important; margin-right: 2px !important; }
-        [data-testid="block-container"] [data-baseweb="radio"]:hover { border-color: #B588F7 !important; background: rgba(181,136,247,0.05) !important; }
-        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) { background: rgba(181,136,247,0.08) !important; border-color: #B588F7 !important; }
+        [data-testid="block-container"] [data-baseweb="radio"]:hover { border-color: #9D63E8 !important; background: rgba(157,99,232,0.05) !important; }
+        [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) { background: rgba(157,99,232,0.08) !important; border-color: #9D63E8 !important; }
         [data-testid="block-container"] [data-baseweb="radio"]:has(input:checked) p { font-weight: 700 !important; }
         [data-testid="block-container"] [data-baseweb="radio"] p { font-size: 14px !important; margin: 0 !important; color: #4A4540 !important; font-weight: 500 !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
 
         [data-testid="block-container"] div[data-testid="stButton"] button { border-radius: 12px !important; font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 15px !important; font-weight: 600 !important; padding: 10px 24px !important; transition: all 0.2s; width: 100% !important; }
-        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] { background: linear-gradient(to right, #B588F7 0%, #83ADF9 48%, #2E1065 52%, #2E1065 100%) !important; background-size: 210% 100% !important; background-position: right center !important; transition: background-position 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.15s ease !important; color: #FFFFFF !important; border: none !important; box-shadow: 0 4px 16px rgba(46,16,101,0.45) !important; }
-        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover { background-position: left center !important; box-shadow: 0 6px 24px rgba(181,136,247,0.55) !important; transform: translateY(-1px) !important; }
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] { background: linear-gradient(to right, #9D63E8 0%, #5E8AEE 48%, #2E1065 52%, #2E1065 100%) !important; background-size: 210% 100% !important; background-position: right center !important; transition: background-position 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.15s ease !important; color: #FFFFFF !important; border: none !important; box-shadow: 0 4px 16px rgba(46,16,101,0.45) !important; }
+        [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover { background-position: left center !important; box-shadow: 0 6px 24px rgba(157,99,232,0.55) !important; transform: translateY(-1px) !important; }
 
         .result-card { position: relative; background: #FFFFFF; border-radius: 20px; padding: 28px 28px 0; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; overflow: hidden; }
         .dismiss-x { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s ease; line-height: 1; z-index: 10; }
         .dismiss-x:hover { background: rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.5); color: #EF4444; }
-        .dismiss-x-light { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1); color: #B0A8A0; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s ease; line-height: 1; z-index: 10; }
-        .dismiss-x-light:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.35); color: #EF4444; }
         .st-key-dismiss_0, .st-key-dismiss_1 { display: none !important; }
         [class*="st-key-vp_"] { display: none !important; }
         .result-card.primary { background: #2E1065; border-color: transparent; }
-        .card-view-btn { display: block; width: calc(100% + 56px); margin: 24px -28px 0; padding: 14px 28px; background: transparent; border: none; border-top: 1px solid rgba(0,0,0,0.07); color: #B588F7; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.15s, color 0.15s; }
+        .card-view-btn { display: block; width: calc(100% + 56px); margin: 24px -28px 0; padding: 14px 28px; background: transparent; border: none; border-top: 1px solid rgba(0,0,0,0.07); color: #9D63E8; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.15s, color 0.15s; }
         .result-card.primary .card-view-btn { border-top-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
-        .card-view-btn:hover { background: rgba(181,136,247,0.06); color: #B588F7; }
+        .card-view-btn:hover { background: rgba(157,99,232,0.06); color: #9D63E8; }
         .result-card.primary .card-view-btn:hover { background: rgba(255,255,255,0.06); color: #FFFFFF; }
         .result-card-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 20px; padding: 4px 12px; display: inline-block; margin-bottom: 0; align-self: flex-start; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .badge-primary { background: rgba(181,136,247,0.18); color: #D4B8FC; }
-        .badge-secondary { background: #F0EDE8; color: #9C9790; }
+        .badge-primary { background: rgba(157,99,232,0.18); color: #D4B8FC; }
         .card-header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
         .card-header-photo { flex-shrink: 0; }
         .card-header-info { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
         .compat-score { font-family: 'Fraunces', serif; font-size: 32px; line-height: 1; color: #FFFFFF; margin: 0; padding-left: 10px; font-weight: 600; }
-        .compat-score-secondary { font-family: 'Fraunces', serif; font-size: 32px; line-height: 1; color: #1C1917; margin: 0; padding-left: 10px; font-weight: 600; }
         .compat-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin: 0; padding-left: 10px; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .compat-label-secondary { font-size: 10px; color: #A09088; text-transform: uppercase; letter-spacing: 0.08em; margin: 0; padding-left: 10px; font-family: 'Plus Jakarta Sans', sans-serif; }
         .counselor-name { font-size: 18px; font-weight: 700; color: #FFFFFF; margin: 0; padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .counselor-name-secondary { font-size: 18px; font-weight: 700; color: #1C1917; margin: 0; padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-family: 'Plus Jakarta Sans', sans-serif; }
         .info-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
-        .info-row-secondary { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid #F0ECE8; }
         .info-key { font-size: 12px; color: rgba(255,255,255,0.4); font-family: 'Plus Jakarta Sans', sans-serif; }
-        .info-key-secondary { font-size: 12px; color: #A09088; font-family: 'Plus Jakarta Sans', sans-serif; }
         .info-val { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 500; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .info-val-secondary { font-size: 13px; color: #1C1917; font-weight: 500; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        .ai-explanation-box { background: linear-gradient(135deg, #F5F3FF 0%, #F5F3FF 100%); border: 1px solid rgba(181,136,247,0.15); border-left: 3px solid #B588F7; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
-        .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #B588F7, #83ADF9); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ai-explanation-box { background: linear-gradient(135deg, #F5F3FF 0%, #F5F3FF 100%); border: 1px solid rgba(157,99,232,0.15); border-left: 3px solid #9D63E8; border-radius: 0 16px 16px 0; padding: 24px 28px; margin-top: 4px; }
+        .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #9D63E8, #5E8AEE); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        .st-key-next_option_btn button { background: rgba(181,136,247,0.10) !important; color: #6D28D9 !important; border: 2px solid rgba(181,136,247,0.75) !important; border-radius: 50px !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: 0.02em !important; box-shadow: 0 2px 10px rgba(181,136,247,0.18) !important; padding: 10px 24px !important; }
-        .st-key-next_option_btn button:hover { background: rgba(181,136,247,0.20) !important; border-color: #7C3AED !important; color: #4C1D95 !important; box-shadow: 0 4px 16px rgba(181,136,247,0.30) !important; }
+        .st-key-next_option_btn button { background: rgba(157,99,232,0.10) !important; color: #6D28D9 !important; border: 2px solid rgba(157,99,232,0.75) !important; border-radius: 50px !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: 0.02em !important; box-shadow: 0 2px 10px rgba(157,99,232,0.18) !important; padding: 10px 24px !important; }
+        .st-key-next_option_btn button:hover { background: rgba(157,99,232,0.20) !important; border-color: #7C3AED !important; color: #4C1D95 !important; box-shadow: 0 4px 16px rgba(157,99,232,0.30) !important; }
+
+        /* Quiz Back / Next nav buttons — sized to match the form fields above */
+        .st-key-qz_back1 button, .st-key-qz_next1 button,
+        .st-key-qz_back2 button, .st-key-qz_next2 button,
+        .st-key-qz_back3 button, .st-key-qz_match button {
+            min-height: 48px !important;
+            padding-top: 12px !important;
+            padding-bottom: 12px !important;
+            border-radius: 10px !important;
+        }
 
         div[data-testid="stTabs"] button { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 14px !important; font-weight: 500 !important; }
 
         [data-testid="block-container"] div[data-testid="stButton"] button:not([kind="primary"]) {
             background: transparent !important;
-            border: 1.5px solid rgba(181,136,247,0.25) !important;
-            color: #B588F7 !important;
+            border: 1.5px solid rgba(157,99,232,0.25) !important;
+            color: #9D63E8 !important;
             border-radius: 12px !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-size: 13px !important;
@@ -128,14 +129,14 @@ def inject_styles():
             box-shadow: none !important;
         }
         [data-testid="block-container"] div[data-testid="stButton"] button:not([kind="primary"]):hover {
-            background: rgba(181,136,247,0.06) !important;
-            border-color: #B588F7 !important;
-            color: #B588F7 !important;
+            background: rgba(157,99,232,0.06) !important;
+            border-color: #9D63E8 !important;
+            color: #9D63E8 !important;
         }
 
         div[data-testid="stExpander"] {
             background: #FFFFFF;
-            border: 1px solid rgba(181,136,247,0.14) !important;
+            border: 1px solid rgba(157,99,232,0.14) !important;
             border-radius: 16px !important;
             overflow: hidden;
             margin-bottom: 24px;
@@ -151,14 +152,14 @@ def inject_styles():
             color: #7C3AED !important;
             background: linear-gradient(135deg, #F5F3FF 0%, #F5F3FF 100%) !important;
             border-radius: 16px !important;
-            border-bottom: 1px solid rgba(181,136,247,0.08);
+            border-bottom: 1px solid rgba(157,99,232,0.08);
             list-style: none;
         }
         div[data-testid="stExpander"] summary:hover {
             background: linear-gradient(135deg, #F0E8FF 0%, #F5F3FF 100%) !important;
-            color: #B588F7 !important;
+            color: #9D63E8 !important;
         }
-        div[data-testid="stExpander"] summary svg { color: #B588F7 !important; }
+        div[data-testid="stExpander"] summary svg { color: #9D63E8 !important; }
         div[data-testid="stExpander"] > details > div[data-testid="stExpanderDetails"] {
             padding: 24px !important;
             background: #FFFFFF;
@@ -192,16 +193,29 @@ def modality_help_text(modality_options):
     return "Modality is the counseling approach/style:\n\n" + "\n".join(parts)
 
 
+def issue_help_text(issue_options):
+    descriptions = {
+        "Anxiety": "Persistent worry, nervousness, or feeling on edge — racing thoughts or restlessness.",
+        "Depression": "Low mood, loss of interest, low energy, or feelings of hopelessness that linger.",
+        "Stress": "Feeling overwhelmed or under pressure from work, studies, or life demands.",
+        "Trauma": "Distressing past experiences that still affect how you feel today.",
+    }
+    if not issue_options:
+        return "The main area you'd like support with."
+    parts = [f"- {i}: {descriptions.get(str(i), 'an area you can get support with')}" for i in issue_options]
+    return "Pick the area that fits best — it's okay if more than one feels true:\n\n" + "\n".join(parts)
+
+
 def render_step_progress(step: int, total: int = 3):
     step_names = ["About You", "Your Needs", "Preferences"]
     nodes_html = ""
     for i, name in enumerate(step_names, 1):
         if i < step:
-            circle_bg = "linear-gradient(135deg,#B588F7 0%,#83ADF9 100%)"
-            circle_color = "#FFFFFF"; circle_border = "none"; shadow = "0 4px 12px rgba(181,136,247,0.30)"
-            label_color = "#B588F7"; weight = "600"; inner = "✓"
+            circle_bg = "linear-gradient(135deg,#9D63E8 0%,#5E8AEE 100%)"
+            circle_color = "#FFFFFF"; circle_border = "none"; shadow = "0 4px 12px rgba(157,99,232,0.30)"
+            label_color = "#9D63E8"; weight = "600"; inner = "✓"
         elif i == step:
-            circle_bg = "linear-gradient(135deg,#B588F7 0%,#83ADF9 100%)"
+            circle_bg = "linear-gradient(135deg,#9D63E8 0%,#5E8AEE 100%)"
             circle_color = "#FFFFFF"; circle_border = "none"; shadow = "0 6px 16px rgba(14,24,35,0.35), 0 0 0 4px rgba(26,35,50,0.12)"
             label_color = "#1C1917"; weight = "700"; inner = str(i)
         else:
@@ -220,7 +234,7 @@ def render_step_progress(step: int, total: int = 3):
         f"""
         <div style="position:relative;padding:4px 8px 8px;margin-bottom:30px;">
             <div style="position:absolute;left:calc(8px + 17px);right:calc(8px + 17px);top:calc(4px + 17px);height:2px;background:#EDE8E3;border-radius:2px;z-index:1;"></div>
-            <div style="position:absolute;left:calc(8px + 17px);top:calc(4px + 17px);width:calc((100% - 16px - 34px) * {fill_pct} / 100);height:2px;background:linear-gradient(90deg,#B588F7,#83ADF9);border-radius:2px;z-index:1;"></div>
+            <div style="position:absolute;left:calc(8px + 17px);top:calc(4px + 17px);width:calc((100% - 16px - 34px) * {fill_pct} / 100);height:2px;background:linear-gradient(90deg,#9D63E8,#5E8AEE);border-radius:2px;z-index:1;"></div>
             <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;">{nodes_html}</div>
         </div>
         """,
@@ -261,16 +275,16 @@ def render_page_header():
                     <span class="page-header-stat-label">Match Factors</span>
                 </div>
                 <div class="page-header-stat">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B588F7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9D63E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span class="page-header-stat-label">Personalised</span>
                 </div>
                 <div class="page-header-stat">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B588F7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9D63E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     <span class="page-header-stat-label">Explainable AI</span>
                 </div>
             </div>
-            <p style="font-size:12px; color:#9C9790; margin:12px 0 0; line-height:1.55; display:flex; align-items:center; gap:6px; font-family:'Plus Jakarta Sans',sans-serif;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C0B8B0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p style="font-size:12px; color:#6B6760; margin:12px 0 0; line-height:1.55; display:flex; align-items:center; gap:6px; font-family:'Plus Jakarta Sans',sans-serif;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8C857C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 AI-generated estimates only — not a clinical assessment. Always consult a qualified mental health professional.
             </p>
         </div>
@@ -279,7 +293,7 @@ def render_page_header():
     )
 
 
-def _match_badges(c: dict, primary: bool) -> str:
+def _match_badges(c: dict) -> str:
     feats = c.get("features") or {}
     badges = []
     issue = c.get("issue_match", 0)
@@ -296,80 +310,47 @@ def _match_badges(c: dict, primary: bool) -> str:
     if feats.get("ethnicity_match"):
         badges.append(("Ethnicity Match", True))
 
-    if primary:
-        def chip(label, matched):
-            if matched is True:
-                return f'<span style="background:rgba(16,185,129,0.18);color:#6EE7B7;border:1px solid rgba(16,185,129,0.3);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">✓ {label}</span>'
-            return f'<span style="background:rgba(245,158,11,0.18);color:#FCD34D;border:1px solid rgba(245,158,11,0.3);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">~ {label}</span>'
-    else:
-        def chip(label, matched):
-            if matched is True:
-                return f'<span style="background:rgba(16,185,129,0.1);color:#065F46;border:1px solid rgba(16,185,129,0.25);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">✓ {label}</span>'
-            return f'<span style="background:rgba(245,158,11,0.1);color:#92400E;border:1px solid rgba(245,158,11,0.25);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">~ {label}</span>'
+    def chip(label, matched):
+        if matched is True:
+            return f'<span style="background:rgba(16,185,129,0.18);color:#6EE7B7;border:1px solid rgba(16,185,129,0.3);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">✓ {label}</span>'
+        return f'<span style="background:rgba(245,158,11,0.18);color:#FCD34D;border:1px solid rgba(245,158,11,0.3);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">~ {label}</span>'
 
     return '<div style="display:flex;flex-wrap:wrap;gap:6px;padding:12px 0 4px;">' + "".join(chip(l, m) for l, m in badges) + "</div>"
 
 
-def render_counselor_card(c: dict, score: float, is_primary=True, dismiss_key: str | None = None):
+def render_counselor_card(c: dict, score: float, dismiss_key: str | None = None):
     langs = c.get("counselor_language") or "—"
     mods = c.get("counselor_modality") or "—"
     avail = c.get("availability") or "—"
     av = avatar_html(c['name'], c.get('image'), size=80, radius=16)
     dismiss_btn_html = f'<div class="dismiss-x" data-dismiss="{dismiss_key}">✕</div>' if dismiss_key else ""
-    dismiss_btn_light = f'<div class="dismiss-x-light" data-dismiss="{dismiss_key}">✕</div>' if dismiss_key else ""
 
-    if is_primary:
-        st.markdown(
-            f"""
-            <div class="result-card primary">
-                {dismiss_btn_html}
-                <div class="card-header">
-                    <div class="card-header-photo">{av}</div>
-                    <div class="card-header-info">
-                        <span class="result-card-badge badge-primary">Top Match</span>
-                        <div class="counselor-name">{c['name']}</div>
-                        <div class="compat-score">{score:.1f}%</div>
-                        <div class="compat-label">Compatibility score</div>
-                    </div>
+    st.markdown(
+        f"""
+        <div class="result-card primary">
+            {dismiss_btn_html}
+            <div class="card-header">
+                <div class="card-header-photo">{av}</div>
+                <div class="card-header-info">
+                    <span class="result-card-badge badge-primary">Top Match</span>
+                    <div class="counselor-name">{c['name']}</div>
+                    <div class="compat-score">{score:.1f}%</div>
+                    <div class="compat-label">Compatibility score</div>
                 </div>
-                {_match_badges(c, True)}
-                <div class="info-row"><span class="info-key">Experience</span><span class="info-val">{c['experience_years']} yrs</span></div>
-                <div class="info-row"><span class="info-key">Specialization</span><span class="info-val">{c['specialization']}</span></div>
-                <div class="info-row"><span class="info-key">Modality</span><span class="info-val">{mods}</span></div>
-                <div class="info-row"><span class="info-key">Language</span><span class="info-val">{langs}</span></div>
-                <div class="info-row" style="border:none"><span class="info-key">Availability</span><span class="info-val">{avail}</span></div>
-                <button class="card-view-btn">VIEW FULL PROFILE →</button>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            f"""
-            <div class="result-card">
-                {dismiss_btn_light}
-                <div class="card-header">
-                    <div class="card-header-photo">{av}</div>
-                    <div class="card-header-info">
-                        <span class="result-card-badge badge-secondary">2nd Option</span>
-                        <div class="counselor-name-secondary">{c['name']}</div>
-                        <div class="compat-score-secondary">{score:.1f}%</div>
-                        <div class="compat-label-secondary">Compatibility score</div>
-                    </div>
-                </div>
-                {_match_badges(c, False)}
-                <div class="info-row-secondary"><span class="info-key-secondary">Experience</span><span class="info-val-secondary">{c['experience_years']} yrs</span></div>
-                <div class="info-row-secondary"><span class="info-key-secondary">Specialization</span><span class="info-val-secondary">{c['specialization']}</span></div>
-                <div class="info-row-secondary"><span class="info-key-secondary">Modality</span><span class="info-val-secondary">{mods}</span></div>
-                <div class="info-row-secondary"><span class="info-key-secondary">Language</span><span class="info-val-secondary">{langs}</span></div>
-                <div class="info-row-secondary" style="border:none"><span class="info-key-secondary">Availability</span><span class="info-val-secondary">{avail}</span></div>
-                <button class="card-view-btn">VIEW FULL PROFILE →</button>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+            {_match_badges(c)}
+            <div class="info-row"><span class="info-key">Experience</span><span class="info-val">{c['experience_years']} yrs</span></div>
+            <div class="info-row"><span class="info-key">Specialization</span><span class="info-val">{c['specialization']}</span></div>
+            <div class="info-row"><span class="info-key">Modality</span><span class="info-val">{mods}</span></div>
+            <div class="info-row"><span class="info-key">Language</span><span class="info-val">{langs}</span></div>
+            <div class="info-row" style="border:none"><span class="info-key">Availability</span><span class="info-val">{avail}</span></div>
+            <button class="card-view-btn">VIEW FULL PROFILE →</button>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    card_id = f"{int(c.get('counselor_id', 0))}_{'p' if is_primary else 's'}"
+    card_id = f"{int(c.get('counselor_id', 0))}_p"
     if st.button("View Full Profile", key=f"vp_{card_id}", use_container_width=True, type="secondary"):
         show_profile_dialog(c, score)
 
@@ -402,26 +383,26 @@ def show_profile_dialog(c: dict, score=None):
     .prof-header-band {
         background: linear-gradient(135deg, #F3F0FF 0%, #FFF8F3 100%);
         border-radius: 16px; padding: 20px 20px 16px; margin-bottom: 4px;
-        border: 1px solid rgba(181,136,247,0.1);
+        border: 1px solid rgba(157,99,232,0.1);
     }
     .prof-header { display:flex; align-items:center; gap:18px; }
     .prof-name { font-family:'Fraunces',serif; font-size:23px; font-weight:600; color:#1C1917; margin:0 0 3px; line-height:1.2; }
-    .prof-role { font-size:12px; color:#B588F7; font-weight:700; margin:0 0 8px; letter-spacing:0.03em; font-family:'Plus Jakarta Sans',sans-serif; }
+    .prof-role { font-size:12px; color:#9D63E8; font-weight:700; margin:0 0 8px; letter-spacing:0.03em; font-family:'Plus Jakarta Sans',sans-serif; }
     .prof-meta { display:flex; flex-wrap:wrap; column-gap:12px; row-gap:4px; }
     .prof-meta-item { font-size:12px; color:#6B6560; display:flex; align-items:center; gap:3px; }
-    .prof-meta-score { font-size:18px; color:#B588F7; font-weight:700; }
+    .prof-meta-score { font-size:18px; color:#9D63E8; font-weight:700; }
 
     .prof-section { margin-bottom:12px; background:#FAFAFA; border-radius:12px; padding:14px 16px; border:1px solid rgba(0,0,0,0.04); }
-    .prof-label { font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#B588F7; margin:0 0 10px; font-family:'Plus Jakarta Sans',sans-serif; }
+    .prof-label { font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9D63E8; margin:0 0 10px; font-family:'Plus Jakarta Sans',sans-serif; }
     .prof-about { font-size:15px !important; color:#2D2D3F; line-height:1.8; margin:0; }
 
     .prof-pills { display:flex; flex-wrap:wrap; gap:6px; }
     .prof-pill {
         background: linear-gradient(135deg, #F5F3FF, #F0E8FF);
-        color:#B588F7; font-size:12px; font-weight:600;
+        color:#9D63E8; font-size:12px; font-weight:600;
         padding:5px 14px; border-radius:20px;
-        border:1px solid rgba(181,136,247,0.18);
-        box-shadow: 0 1px 3px rgba(181,136,247,0.08);
+        border:1px solid rgba(157,99,232,0.18);
+        box-shadow: 0 1px 3px rgba(157,99,232,0.08);
         font-family:'Plus Jakarta Sans',sans-serif;
     }
 
@@ -438,8 +419,8 @@ def show_profile_dialog(c: dict, score=None):
 
     div[data-testid="stExpander"] { background:#FFFFFF !important; border:1px solid #EBEBEB !important; border-radius:12px !important; box-shadow:none !important; margin-bottom:0 !important; }
     div[data-testid="stExpander"] summary { background:#FFFFFF !important; font-size:13px !important; font-weight:600 !important; color:#4A4A5A !important; text-transform:none !important; letter-spacing:0 !important; padding:12px 16px !important; border-radius:12px !important; }
-    div[data-testid="stExpander"] summary:hover { background:#F5F3FF !important; color:#B588F7 !important; }
-    div[data-testid="stExpander"] svg { color:#B588F7 !important; }
+    div[data-testid="stExpander"] summary:hover { background:#F5F3FF !important; color:#9D63E8 !important; }
+    div[data-testid="stExpander"] svg { color:#9D63E8 !important; }
     div[data-testid="stDialog"] [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:first-child { margin-top:-16px !important; }
 
     div[data-testid="stDialog"] button[kind="primary"] {
@@ -746,13 +727,14 @@ def _step1_form(ref):
     st.session_state.client_gender = st.session_state._gender_ui
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     st.selectbox("What is your cultural background or ethnicity?", ref["client_ethnicity"], key="_ethnicity_ui")
+    st.caption("This helps us match you with a counselor who shares your background, if that matters to you.")
     st.session_state.client_ethnicity = st.session_state._ethnicity_ui
     st.markdown("<br>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1])
-    if col1.button("← Back", use_container_width=True):
+    if col1.button("← Back", use_container_width=True, key="qz_back1"):
         st.session_state.quiz_step = 0
         st.rerun()
-    if col2.button("Next →", use_container_width=True, type="primary"):
+    if col2.button("Next →", use_container_width=True, type="primary", key="qz_next1"):
         st.session_state.quiz_step = 2
         st.rerun()
 
@@ -761,7 +743,8 @@ def _step1_form(ref):
 def _step2_form(ref):
     render_step_progress(2)
     render_step_header(2, "What brings you here?", "Share the main challenge you'd like support with today.")
-    st.radio("Primary focus area", ref["client_issue"], horizontal=True, key="_issue_ui")
+    st.radio("Primary focus area", ref["client_issue"], horizontal=True, key="_issue_ui",
+             help=issue_help_text(ref["client_issue"]))
     st.session_state.client_issue = st.session_state._issue_ui
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     st.radio(
@@ -773,10 +756,10 @@ def _step2_form(ref):
     st.session_state.previous_exp = 1 if st.session_state._prev_exp_ui == "Yes, I have" else 0
     st.markdown("<br>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1])
-    if col1.button("← Back", use_container_width=True):
+    if col1.button("← Back", use_container_width=True, key="qz_back2"):
         st.session_state.quiz_step = 1
         st.rerun()
-    if col2.button("Next →", use_container_width=True, type="primary"):
+    if col2.button("Next →", use_container_width=True, type="primary", key="qz_next2"):
         st.session_state.quiz_step = 3
         st.rerun()
 
@@ -803,7 +786,7 @@ def _step3_form(ref):
     render_step_progress(3)
     render_step_header(3, "Your preferences", "Almost done — let us know what works best for you.")
     st.selectbox(
-        "Preferred counseling approach (Modality)",
+        "Preferred counseling approach",
         ref["preferred_modality"],
         help=modality_help_text(ref["preferred_modality"]),
         key="preferred_modality",
@@ -813,18 +796,25 @@ def _step3_form(ref):
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
     st.radio("Preferred counselor gender", ref["preferred_counselor_gender"], horizontal=True, key="preferred_c_gender")
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    _time_labels = {
+        "Weekday Morning":   "Weekday Morning (8am-12pm)",
+        "Weekday Afternoon": "Weekday Afternoon (12-5pm)",
+        "Weekday Evening":   "Weekday Evening (5-8pm)",
+        "Weekend":           "Weekend (Sat & Sun)",
+    }
     st.selectbox(
-        "Preferred session time",
+        "Preferred session day & time",
         ref.get("preferred_time", ["Any time"]),
+        format_func=lambda t: _time_labels.get(t, t),
         help="When you'd generally like sessions. 'Any time' won't filter on availability.",
         key="preferred_time",
     )
     st.markdown("<br>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1])
-    if col1.button("← Back", use_container_width=True):
+    if col1.button("← Back", use_container_width=True, key="qz_back3"):
         st.session_state.quiz_step = 2
         st.rerun()
-    if col2.button("Find My Best Match ✨", use_container_width=True, type="primary"):
+    if col2.button("Find My Best Match", icon=":material/person_search:", use_container_width=True, type="primary", key="qz_match"):
         st.session_state["_committed_match"] = _snapshot_match_inputs()
         st.session_state.quiz_step = 4
         st.rerun()
@@ -877,8 +867,8 @@ def show_matching_page():
                     var innerDot  = outerRing ? outerRing.children[0] : null;
                     if (input.checked) {
                         if (outerRing) {
-                            outerRing.style.setProperty('border-color', '#B588F7', 'important');
-                            outerRing.style.setProperty('background-color', '#B588F7', 'important');
+                            outerRing.style.setProperty('border-color', '#9D63E8', 'important');
+                            outerRing.style.setProperty('background-color', '#9D63E8', 'important');
                         }
                         if (innerDot) innerDot.style.setProperty('background-color', '#FFFFFF', 'important');
                     } else {
@@ -908,7 +898,7 @@ def show_matching_page():
             """
             <style>
             div[data-testid="stButton"] button[kind="primary"] {
-                background: linear-gradient(to right, #B588F7 0%, #83ADF9 48%, #2E1065 52%, #2E1065 100%) !important;
+                background: linear-gradient(to right, #9D63E8 0%, #5E8AEE 48%, #2E1065 52%, #2E1065 100%) !important;
                 background-size: 210% 100% !important;
                 background-position: right center !important;
                 transition: background-position 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.15s ease !important;
@@ -919,10 +909,19 @@ def show_matching_page():
                 font-weight: 700 !important;
                 font-family: 'Plus Jakarta Sans', sans-serif !important;
                 box-shadow: 0 4px 16px rgba(46,16,101,0.45) !important;
+                animation: cta-rise 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both !important;
+            }
+            /* One-time fade + rise so motion lands the eye on the CTA, then it rests */
+            @keyframes cta-rise {
+                from { opacity: 0; transform: translateY(18px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                div[data-testid="stButton"] button[kind="primary"] { animation: none !important; opacity: 1 !important; }
             }
             div[data-testid="stButton"] button[kind="primary"]:hover {
                 background-position: left center !important;
-                box-shadow: 0 6px 28px rgba(181,136,247,0.6) !important;
+                box-shadow: 0 6px 28px rgba(157,99,232,0.6) !important;
                 transform: translateY(-1px) !important;
             }
             div[data-testid="stButton"] button[kind="primary"]:active {
@@ -1080,7 +1079,7 @@ def show_matching_page():
 
         col1, col2 = st.columns(2, gap="large")
         with col1:
-            render_counselor_card(best_c, best_c["compatibility_score"], is_primary=True, dismiss_key="dismiss_0")
+            render_counselor_card(best_c, best_c["compatibility_score"], dismiss_key="dismiss_0")
             if st.button("__dismiss0__", key="dismiss_0", use_container_width=True):
                 _dismiss(0)
                 st.rerun()
@@ -1136,7 +1135,7 @@ def show_matching_page():
 
                         st.markdown(
                             f"""
-                            <div style="font-size:11px; font-weight:600; color:#B588F7; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px; font-family:'Plus Jakarta Sans',sans-serif;">Feature contributions</div>
+                            <div style="font-size:11px; font-weight:600; color:#9D63E8; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px; font-family:'Plus Jakarta Sans',sans-serif;">Feature contributions</div>
                             <div style="display:flex; align-items:center; gap:8px; padding:0 0 6px; border-bottom:2px solid #F0E8E6;">
                                 <div style="flex:2; min-width:0; font-size:11px; color:#A0A0B8; text-align:right;">Feature</div>
                                 <div style="width:32px; font-size:11px; color:#A0A0B8; text-align:right; flex-shrink:0;">Value</div>
@@ -1206,7 +1205,7 @@ def show_matching_page():
         (function() {
             function wireDismiss() {
                 var doc = window.parent.document;
-                // Wire each .dismiss-x / .dismiss-x-light to its hidden Streamlit button
+                // Wire each .dismiss-x to its hidden Streamlit button
                 // Find the button via its container's st-key-* class (reliable, no text matching)
                 doc.querySelectorAll('[data-dismiss]').forEach(function(xBtn) {
                     if (xBtn._wired) return;

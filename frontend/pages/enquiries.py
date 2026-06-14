@@ -10,9 +10,9 @@ def render():
         """
         <style>
         </style>
-        <div style="position: relative; overflow: hidden; background-color: #F5F3FF; background-image: radial-gradient(at 0% 0%, #F0E8FF 0px, transparent 60%), radial-gradient(at 100% 100%, #E8D5FD 0px, transparent 60%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(181,136,247,0.18); box-shadow: 0 16px 32px -8px rgba(181,136,247,0.1), inset 0 1px 0 rgba(255,255,255,0.9); min-height: 200px;">
+        <div style="position: relative; overflow: hidden; background-color: #F5F3FF; background-image: radial-gradient(at 0% 0%, #F0E8FF 0px, transparent 60%), radial-gradient(at 100% 100%, #E8D5FD 0px, transparent 60%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(157,99,232,0.18); box-shadow: 0 16px 32px -8px rgba(157,99,232,0.1), inset 0 1px 0 rgba(255,255,255,0.9); min-height: 200px;">
             <div style="position: relative; z-index: 2; max-width: 65%;">
-                <div style="color: #B588F7; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(181,136,247,0.1); border: 1px solid rgba(181,136,247,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Inbox</div>
+                <div style="color: #9D63E8; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(157,99,232,0.1); border: 1px solid rgba(157,99,232,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Inbox</div>
                 <div style="font-family: 'Fraunces', serif; font-size: 42px; color: #1C1917; margin-bottom: 16px; line-height: 1.1; letter-spacing: -0.5px; font-weight: 600;">Enquiries</div>
                 <p style="font-size: 16px; color: #6B6560; margin: 0; line-height: 1.65; max-width: 480px; font-family: 'Plus Jakarta Sans', sans-serif;">Messages submitted through the Contact Us form.</p>
             </div>
@@ -31,13 +31,13 @@ def render():
     st.markdown(
         f"""
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 28px;">
-            <div style="background: linear-gradient(135deg, #F5F3FF 0%, #F0E8FF 100%); border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(181,136,247,0.2);">
-                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #B588F7; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">New</div>
+            <div style="background: linear-gradient(135deg, #F5F3FF 0%, #F0E8FF 100%); border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(157,99,232,0.2);">
+                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9D63E8; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">New</div>
                 <div style="font-family: 'Fraunces', serif; font-size: 40px; line-height: 1; color: #1C1917; font-weight: 600;">{new_count}</div>
                 <div style="font-size: 13px; color: #9C9790; margin-top: 6px; font-family: 'Plus Jakarta Sans', sans-serif;">awaiting a response</div>
             </div>
             <div style="background: #FFFFFF; border-radius: 16px; padding: 24px 28px; border: 1px solid rgba(0,0,0,0.06);">
-                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #B588F7; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">Total</div>
+                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9D63E8; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">Total</div>
                 <div style="font-family: 'Fraunces', serif; font-size: 40px; line-height: 1; color: #1C1917; font-weight: 600;">{total}</div>
                 <div style="font-size: 13px; color: #9C9790; margin-top: 6px; font-family: 'Plus Jakarta Sans', sans-serif;">enquiries received</div>
             </div>

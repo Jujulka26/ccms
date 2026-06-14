@@ -14,6 +14,27 @@ def show_chatbot_page():
         .botbox {
             background:#F5F3FF;border:1px solid #F0E8FF;border-radius:14px;padding:24px;margin-bottom:24px;
         }
+        /* User messages: align right, hide the avatar, show as a bubble */
+        [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+            flex-direction: row-reverse;
+            background: transparent;
+            gap: 0 !important;
+            padding-right: 0 !important;
+        }
+        [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageAvatarUser"] {
+            display: none;
+        }
+        [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageContent"] {
+            flex-grow: 0;
+            max-width: 80%;
+            margin-left: auto !important;
+            margin-right: 0 !important;
+            background: rgba(157,99,232,0.12);
+            border: 1px solid rgba(157,99,232,0.22);
+            border-radius: 14px;
+            padding: 10px 16px;
+            text-align: left;
+        }
         </style>
         """,
         unsafe_allow_html=True
@@ -26,9 +47,9 @@ def show_chatbot_page():
                 <svg width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
                     <defs>
                         <linearGradient id="mira-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#B588F7"/>
-                            <stop offset="50%" stop-color="#B588F7"/>
-                            <stop offset="100%" stop-color="#B588F7"/>
+                            <stop offset="0%" stop-color="#9D63E8"/>
+                            <stop offset="50%" stop-color="#9D63E8"/>
+                            <stop offset="100%" stop-color="#9D63E8"/>
                         </linearGradient>
                     </defs>
                     <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#mira-grad)"/>
@@ -86,12 +107,18 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
         with st.chat_message(msg["role"], avatar=avatar):
             st.markdown(msg["content"])
 
+    # Read the chat input up front (it stays bottom-pinned regardless of where
+    # it's called) so the suggestion pills know if a message is being submitted
+    # on this run.
+    prompt = st.chat_input("Ask a question...")
+
     # Scrolling Suggestion Pills — injected into the parent document so they
     # sit directly above the chat input box and span its exact width.
-    # They are single-use: clicking any pill fills + submits the input then
-    # removes the strip. Streamlit also stops rendering this block once
-    # messages > 1, so they never reappear.
-    if len(st.session_state.messages) == 1:
+    # They are single-use first-message helpers: only shown when the chat is
+    # still just Mira's greeting AND the user isn't submitting a message this
+    # run. The `not prompt` guard prevents them re-injecting on the submit run
+    # (when the new message hasn't been appended to history yet).
+    if len(st.session_state.messages) == 1 and not prompt:
         components.html(
             """
             <script>
@@ -162,7 +189,7 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
                             'font-family:Plus Jakarta Sans,sans-serif;' +
                             'color:#6B6560;' +
                             'white-space:nowrap;' +
-                            'box-shadow:0 2px 8px rgba(181,136,247,0.08);' +
+                            'box-shadow:0 2px 8px rgba(157,99,232,0.08);' +
                             'cursor:pointer;' +
                             'pointer-events:auto;' +
                             'transition:background 0.18s,border-color 0.18s,color 0.18s;' +
@@ -170,8 +197,8 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
                         '}' +
                         '.sugg-pill:hover{' +
                             'background:#F5F3FF;' +
-                            'border-color:#B588F7;' +
-                            'color:#B588F7;' +
+                            'border-color:#9D63E8;' +
+                            'color:#9D63E8;' +
                         '}' +
                         '@keyframes sugg-scroll{' +
                             '0%{transform:translateX(0);}' +
@@ -279,8 +306,31 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
             """,
             height=1,
         )
+    else:
+        # Reliable removal path: when the user is submitting (prompt set) or the
+        # chat has moved past Mira's greeting, strip any leftover pills from the
+        # parent document. The in-strip dismiss handlers can miss this because
+        # the component iframe gets torn down on rerun before they fire.
+        components.html(
+            """
+            <script>
+            (function() {
+                var doc = window.parent.document;
+                ['sugg-wrap', 'sugg-style', 'sugg-watcher'].forEach(function(id) {
+                    var el = doc.getElementById(id);
+                    if (el) el.remove();
+                });
+                if (window.parent.__suggWatcher) {
+                    window.parent.clearInterval(window.parent.__suggWatcher);
+                    window.parent.__suggWatcher = null;
+                }
+            })();
+            </script>
+            """,
+            height=0,
+        )
 
-    if prompt := st.chat_input("Ask a question..."):
+    if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
