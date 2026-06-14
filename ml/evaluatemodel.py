@@ -242,7 +242,7 @@ report_lines = [
     f"Target        : match_success (binary)",
     f"Class balance : match=1 ({y.mean()*100:.1f}%), match=0 ({(1-y).mean()*100:.1f}%)",
     f"Model         : ensemble_soft.pkl  (Soft Vote: LightGBM + CatBoost)",
-    f"Pipeline      : StandardScaler → SMOTE → each model; averaged probabilities",
+    f"Pipeline      : StandardScaler -> SMOTE -> each model; averaged probabilities",
     "",
     "TEST SET RESULTS (20% held-out, stratified split, seed=42)",
     "-" * 60,

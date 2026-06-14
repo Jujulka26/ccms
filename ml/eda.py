@@ -124,7 +124,7 @@ for j, col in enumerate(NUM_COLS):
 
     m0 = df[df["match_success"] == 0][col].mean()
     m1 = df[df["match_success"] == 1][col].mean()
-    print(f"  {col:<25} mean(0)={m0:.1f}  mean(1)={m1:.1f}  Δ={m1-m0:+.1f}")
+    print(f"  {col:<25} mean(0)={m0:.1f}  mean(1)={m1:.1f}  diff={m1-m0:+.1f}")
 
 fig.tight_layout()
 save(fig, "02_numerical_distributions.png")
