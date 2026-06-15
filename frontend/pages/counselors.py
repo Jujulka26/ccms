@@ -35,8 +35,8 @@ def inject_styles():
         }
 
         .c-card {
-            background: #FFFFFF; border-radius: 20px;
-            padding: 24px 24px 0; border: 1px solid rgba(0,0,0,0.06);
+            background: #FFFFFF; border-radius: 20px 20px 0 0;
+            padding: 24px 24px 16px; border: 1px solid rgba(0,0,0,0.06); border-bottom: none;
             display: flex; flex-direction: column;
             overflow: hidden;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -45,18 +45,23 @@ def inject_styles():
             border-color: rgba(157,99,232,0.3);
             box-shadow: 0 4px 20px rgba(157,99,232,0.1);
         }
-        .card-view-btn-dir {
-            display: block; width: calc(100% + 48px); margin: 18px -24px 0;
-            padding: 14px 24px; background: transparent; border: none;
-            border-top: 1px solid rgba(0,0,0,0.07);
-            color: #9D63E8; font-size: 12px; font-weight: 700;
-            letter-spacing: 0.08em; text-transform: uppercase;
-            cursor: pointer; text-align: center;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: background 0.15s, color 0.15s;
+        /* "View Full Profile" — integrated footer tucked flush to merge with the card */
+        [class*="st-key-dir_vp_"] { margin-top: -1rem !important; margin-bottom: 24px !important; }
+        [class*="st-key-dir_vp_"] button {
+            background: #FFFFFF !important;
+            border: 1px solid rgba(0,0,0,0.06) !important;
+            border-top: 1px solid rgba(0,0,0,0.07) !important;
+            border-radius: 0 0 20px 20px !important;
+            color: #F97316 !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-weight: 600 !important; font-size: 14px !important; letter-spacing: 0.01em !important;
+            padding: 13px 14px !important; box-shadow: none !important;
+            transition: background 0.15s, color 0.15s !important;
         }
-        .card-view-btn-dir:hover { background: rgba(157,99,232,0.06); color: #9D63E8; }
-        [data-testid="stElementContainer"]:has(.c-card) { margin-bottom: 24px !important; }
+        [class*="st-key-dir_vp_"] button:hover {
+            background: #FFF7ED !important; color: #EA580C !important;
+        }
+        [data-testid="stElementContainer"]:has(.c-card) { margin-bottom: 0 !important; }
         .c-avatar-wrap {
             display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
         }
@@ -83,7 +88,6 @@ def inject_styles():
             margin-bottom: 20px; letter-spacing: 0.02em;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        [class*="st-key-dir_vp_"] { display: none !important; }
         </style>
         """,
         unsafe_allow_html=True,
@@ -237,13 +241,12 @@ def show_counselors_page():
                         <div class="c-info-row"><span class="c-info-icon">💬</span>{lang}</div>
                         <div class="c-info-row"><span class="c-info-icon">🕒</span>{avail}</div>
                     </div>
-                    <button class="card-view-btn-dir">VIEW FULL PROFILE →</button>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-            if st.button("View Full Profile", key=f"dir_vp_{c.get('counselor_id')}_{i}",
-                         use_container_width=True):
+            if st.button("View Full Profile", icon=":material/account_circle:",
+                         key=f"dir_vp_{c.get('counselor_id')}_{i}", use_container_width=True):
                 show_profile_dialog(c)
 
     # ── Pagination controls ───────────────────────────────────────────────────
@@ -300,38 +303,3 @@ def show_counselors_page():
             if st.button("Next →", key="dir_next", disabled=(page >= total_pages - 1), use_container_width=True):
                 st.session_state["dir_page"] += 1
                 st.rerun()
-
-    components.html(
-        """
-        <script>
-        (function() {
-            function run() {
-                var doc = window.parent.document;
-                doc.querySelectorAll('.card-view-btn-dir').forEach(function(btn) {
-                    if (btn._ready) return;
-                    var container = btn.closest('[data-testid="stElementContainer"]');
-                    if (!container) return;
-                    var sibling = container.nextElementSibling;
-                    while (sibling) {
-                        var stBtn = sibling.querySelector('[data-testid="stButton"] button');
-                        if (stBtn) {
-                            btn._ready = true;
-                            (function(b, nb) {
-                                b.addEventListener('click', function() { nb.click(); });
-                            })(btn, stBtn);
-                            break;
-                        }
-                        sibling = sibling.nextElementSibling;
-                    }
-                });
-            }
-            [0, 150, 400, 800].forEach(function(t) { setTimeout(run, t); });
-            new MutationObserver(run).observe(
-                window.parent.document.body,
-                { subtree: true, childList: true }
-            );
-        })();
-        </script>
-        """,
-        height=0, width=0,
-    )

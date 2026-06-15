@@ -76,16 +76,15 @@ def inject_styles():
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"] { background: linear-gradient(to right, #9D63E8 0%, #5E8AEE 48%, #2E1065 52%, #2E1065 100%) !important; background-size: 210% 100% !important; background-position: right center !important; transition: background-position 0.4s ease-in-out, box-shadow 0.3s ease, transform 0.15s ease !important; color: #FFFFFF !important; border: none !important; box-shadow: 0 4px 16px rgba(46,16,101,0.45) !important; }
         [data-testid="block-container"] div[data-testid="stButton"] button[kind="primary"]:hover { background-position: left center !important; box-shadow: 0 6px 24px rgba(157,99,232,0.55) !important; transform: translateY(-1px) !important; }
 
-        .result-card { position: relative; background: #FFFFFF; border-radius: 20px; padding: 28px 28px 0; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; overflow: hidden; }
+        .result-card { position: relative; background: #FFFFFF; border-radius: 20px 20px 0 0; padding: 28px 28px 16px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 0px; overflow: hidden; }
         .dismiss-x { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s ease; line-height: 1; z-index: 10; }
         .dismiss-x:hover { background: rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.5); color: #EF4444; }
         .st-key-dismiss_0, .st-key-dismiss_1 { display: none !important; }
-        [class*="st-key-vp_"] { display: none !important; }
         .result-card.primary { background: #2E1065; border-color: transparent; }
-        .card-view-btn { display: block; width: calc(100% + 56px); margin: 24px -28px 0; padding: 14px 28px; background: transparent; border: none; border-top: 1px solid rgba(0,0,0,0.07); color: #9D63E8; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.15s, color 0.15s; }
-        .result-card.primary .card-view-btn { border-top-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
-        .card-view-btn:hover { background: rgba(157,99,232,0.06); color: #9D63E8; }
-        .result-card.primary .card-view-btn:hover { background: rgba(255,255,255,0.06); color: #FFFFFF; }
+        /* "View Full Profile" — real button styled as the dark card footer, tucked flush under the card */
+        [class*="st-key-vp_"] { margin-top: -1rem !important; }
+        [class*="st-key-vp_"] button { background: #2E1065 !important; border: none !important; border-top: 1px solid rgba(255,255,255,0.08) !important; border-radius: 0 0 20px 20px !important; color: #F97316 !important; font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 600 !important; font-size: 14px !important; letter-spacing: 0.01em !important; padding: 13px 14px !important; box-shadow: none !important; transition: background 0.15s, color 0.15s !important; }
+        [class*="st-key-vp_"] button:hover { background: #3a1a7a !important; color: #FDBA74 !important; }
         .result-card-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 20px; padding: 4px 12px; display: inline-block; margin-bottom: 0; align-self: flex-start; font-family: 'Plus Jakarta Sans', sans-serif; }
         .badge-primary { background: rgba(157,99,232,0.18); color: #D4B8FC; }
         .card-header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
@@ -345,14 +344,13 @@ def render_counselor_card(c: dict, score: float, dismiss_key: str | None = None)
             <div class="info-row"><span class="info-key">Modality</span><span class="info-val">{mods}</span></div>
             <div class="info-row"><span class="info-key">Language</span><span class="info-val">{langs}</span></div>
             <div class="info-row" style="border:none"><span class="info-key">Availability</span><span class="info-val">{avail}</span></div>
-            <button class="card-view-btn">VIEW FULL PROFILE →</button>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
     card_id = f"{int(c.get('counselor_id', 0))}_p"
-    if st.button("View Full Profile", key=f"vp_{card_id}", use_container_width=True, type="secondary"):
+    if st.button("View Full Profile", icon=":material/account_circle:", key=f"vp_{card_id}", use_container_width=True, type="secondary"):
         show_profile_dialog(c, score)
 
 
@@ -432,12 +430,20 @@ def show_profile_dialog(c: dict, score=None):
         font-weight: 700 !important;
         letter-spacing: 0.02em !important;
         border-radius: 14px !important;
-        padding: 14px 28px !important;
+        padding: 10px 28px !important;
         transition: all 0.2s ease !important;
     }
     div[data-testid="stDialog"] button[kind="primary"]:hover {
         box-shadow: 0 6px 20px rgba(249,115,22,0.45) !important;
         transform: translateY(-1px) !important;
+    }
+    /* Match the secondary (Cancel) button height to the primary — scoped to real
+       Streamlit buttons (inside stButton) so it never touches the modal close X. */
+    div[data-testid="stDialog"] [data-testid="stButton"] button:not([kind="primary"]) {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        padding: 10px 28px !important;
+        border-radius: 14px !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -657,6 +663,9 @@ def _generate_explanation(c, client_issue) -> str:
     spec_phrase_A = f"{exp_str} working with {issue_bold}" if exact else f"{exp_str} in {spec_bold}, closely related to {issue_bold}"
     spec_phrase_B = f"exactly where {first}'s focus lies" if exact else f"closely related to {first}'s expertise in {spec_bold}"
     spec_phrase_C = f"specialises in {issue_bold}" if exact else f"specialises in {spec_bold}, which closely relates to {issue_bold}"
+    spec_phrase_D = f"{exp_str} helping people with {issue_bold}" if exact else f"{exp_str} in {spec_bold}, which overlaps closely with {issue_bold}"
+    spec_phrase_E = f"a strong focus on {issue_bold}" if exact else f"deep experience in {spec_bold}, closely tied to {issue_bold}"
+    spec_phrase_F = f"works most with {issue_bold}" if exact else f"works most in {spec_bold}, a close neighbour of {issue_bold}"
 
     templates = [
         # A — experience-led
@@ -682,17 +691,45 @@ def _generate_explanation(c, client_issue) -> str:
             + f". Across what matters to you, {first} is a strong match."
             + (f" Your shared {eth_bold} background may also help you feel more at ease from the beginning." if eth_match and ethnicity else "")
         ),
+        # D — first step / gentle
+        (
+            f"Taking the first step is easier with someone who already knows the territory. "
+            f"{first} has {spec_phrase_D}, so you won't have to explain the basics."
+            + (f" The {mod_bold} approach they use is the one you leaned toward." if mod_match else "")
+            + (f" Sharing your {eth_bold} background can help the conversation feel familiar early on." if eth_match and ethnicity else "")
+        ),
+        # E — confident fit
+        (
+            f"On the things that matter most for {issue_bold}, {first} lines up well. "
+            f"They bring {spec_phrase_E}"
+            + (f", work in the {mod_bold} style you prefer" if mod_match else "")
+            + f", and have the experience to meet you where you are."
+            + (f" A shared {eth_bold} background may help you feel understood from the first session." if eth_match and ethnicity else "")
+        ),
+        # F — momentum
+        (
+            f"A good match means less time explaining and more time moving forward. "
+            f"{first} {spec_phrase_F} and brings {exp_str} of steady experience."
+            + (f" Their {mod_bold} approach matches what works best for you." if mod_match else "")
+            + (f" Your shared {eth_bold} background can add an extra layer of understanding." if eth_match and ethnicity else "")
+        ),
     ]
 
     return random.choice(templates)
 
 
-def _ai_explanation(c, client_issue) -> str:
-    """Generate the match explanation with Gemini via Vertex AI (uses GCP credits).
-    Raises on any failure so the caller can fall back to the template. On by
-    default; set env USE_AI_EXPLANATION=0 to force templates instead."""
+@st.cache_resource(show_spinner=False)
+def _vertex_client():
+    """Vertex AI client, created once and reused (avoids per-call setup lag)."""
     from google import genai  # pip install google-genai
+    return genai.Client(
+        vertexai=True,
+        project=os.environ.get("GCP_PROJECT", "ccms-499420"),
+        location=os.environ.get("GCP_LOCATION", "global"),
+    )
 
+
+def _explanation_prompt(c, client_issue) -> str:
     first     = c.get("name", "Your counselor").split()[0]
     spec      = c.get("specialization", client_issue)
     exp       = int(c.get("experience_years") or 0)
@@ -700,32 +737,66 @@ def _ai_explanation(c, client_issue) -> str:
     mod_match = c.get("modality_match") == 1
     eth_match = c.get("ethnicity_match") == 1
     ethnicity = c.get("ethnicity", "") if eth_match else ""
-
     facts = (
         f"Counselor first name: {first}. Specialises in: {spec}. "
         f"Years of experience: {exp}. Counseling approach (modality): {modality}. "
         f"Matches client's preferred modality: {'yes' if mod_match else 'no'}. "
         f"Shares client's ethnicity ({ethnicity}): {'yes' if eth_match and ethnicity else 'no'}."
     )
-    prompt = (
+    return (
         "You are Mira, a warm assistant for a counselor-matching app. In 2-3 short "
         f"sentences, explain why this counselor is a good fit for a client seeking support with {client_issue}. "
         "Use ONLY the facts provided; do not invent details. Wrap 2 to 4 key terms in <strong></strong> HTML tags. "
         "Plain prose only: no markdown, no lists, no headings. Warm and encouraging but never clinical; "
-        "never promise specific outcomes and never give a diagnosis.\n\n"
+        "never promise specific outcomes and never give a diagnosis. "
+        "Refer to the counselor by first name only; do not use he, she, or they pronouns. "
+        "Avoid absolute or guarantee words such as perfectly, guaranteed, or effective, and do not claim the counseling will work. "
+        "Vary your wording each time; do not follow a fixed template or formula.\n\n"
         f"Facts: {facts}"
     )
 
-    client = genai.Client(
-        vertexai=True,
-        project=os.environ.get("GCP_PROJECT", "ccms-499420"),
-        location=os.environ.get("GCP_LOCATION", "global"),
+
+def _explanation_box_html(counselor_name, text) -> str:
+    return (
+        f'<div class="ai-explanation-box">'
+        f'<div class="ai-badge">✦ Why {counselor_name}?</div>'
+        f'<p style="font-size:15.5px;color:#2D2D3F;line-height:1.7;margin:0;">{text}</p>'
+        f'</div>'
     )
-    resp = client.models.generate_content(model="gemini-2.5-flash-lite", contents=prompt)
-    text = (resp.text or "").strip()
-    if not text:
-        raise ValueError("empty AI response")
-    return text
+
+
+def _render_explanation(c, counselor_name, client_issue):
+    """Stream the Gemini (Vertex) explanation into the box, cache it per counselor,
+    and fall back to the template on any failure. AI is on by default; set env
+    USE_AI_EXPLANATION=0 to force templates."""
+    key = f"explanation_single_{c.get('counselor_id')}"
+    cached = st.session_state.get(key)
+    if isinstance(cached, str):
+        st.markdown(_explanation_box_html(counselor_name, cached), unsafe_allow_html=True)
+        return
+
+    placeholder = st.empty()
+    text = ""
+    if os.environ.get("USE_AI_EXPLANATION", "1") != "0":
+        try:
+            stream = _vertex_client().models.generate_content_stream(
+                model="gemini-2.5-flash-lite",
+                contents=_explanation_prompt(c, client_issue),
+            )
+            for chunk in stream:
+                if chunk.text:
+                    text += chunk.text
+                    placeholder.markdown(
+                        _explanation_box_html(counselor_name, text), unsafe_allow_html=True
+                    )
+        except Exception:
+            text = ""  # fall through to template
+
+    if not text.strip():
+        text = _generate_explanation(c, client_issue)
+        placeholder.markdown(_explanation_box_html(counselor_name, text), unsafe_allow_html=True)
+
+    st.session_state[key] = text.strip()
 
 
 @st.dialog("Start over?")
@@ -1108,19 +1179,6 @@ def show_matching_page():
             )
 
         # ── Match Explanation + SHAP ──────────────────────────────────────────
-        def _get_explanation(c):
-            key = f"explanation_single_{c.get('counselor_id')}"
-            if not isinstance(st.session_state.get(key), str):
-                text = None
-                # AI on by default; set env USE_AI_EXPLANATION=0 to force templates.
-                if os.environ.get("USE_AI_EXPLANATION", "1") != "0":
-                    try:
-                        text = _ai_explanation(c, client_issue)
-                    except Exception:
-                        text = None  # fall back to template on any failure
-                st.session_state[key] = text or _generate_explanation(c, client_issue)
-            return st.session_state[key]
-
         counselor_name = best_c.get("name", "Your Top Match").upper()
 
         # Paired header row
@@ -1202,51 +1260,7 @@ def show_matching_page():
                     except Exception as exc:
                         st.info(f"Could not render feature contributions: {exc}")
 
-            explanation = _get_explanation(best_c)
-            if explanation:
-                st.markdown(
-                    f'<div class="ai-explanation-box">'
-                    f'<div class="ai-badge">✦ Why {counselor_name}?</div>'
-                    f'<p style="font-size:15.5px;color:#2D2D3F;line-height:1.7;margin:0;">{explanation}</p>'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
-
-        components.html(
-            """
-            <script>
-            (function() {
-                function run() {
-                    var doc = window.parent.document;
-                    doc.querySelectorAll('.card-view-btn').forEach(function(btn) {
-                        if (btn._ready) return;
-                        var container = btn.closest('[data-testid="stElementContainer"]');
-                        if (!container) return;
-                        var sibling = container.nextElementSibling;
-                        while (sibling) {
-                            var stBtn = sibling.querySelector('[data-testid="stButton"] button');
-                            if (stBtn) {
-                                btn._ready = true;
-                                (function(b, nb) {
-                                    b.addEventListener('click', function() { nb.click(); });
-                                })(btn, stBtn);
-                                break;
-                            }
-                            sibling = sibling.nextElementSibling;
-                        }
-                    });
-                }
-                // Run now, after short delays, and on every DOM mutation
-                [0, 150, 400, 800].forEach(function(t) { setTimeout(run, t); });
-                new MutationObserver(run).observe(
-                    window.parent.document.body,
-                    { subtree: true, childList: true }
-                );
-            })();
-            </script>
-            """,
-            height=0, width=0,
-        )
+            _render_explanation(best_c, counselor_name, client_issue)
 
         # Wire X overlay buttons to hidden Streamlit dismiss buttons
         components.html("""

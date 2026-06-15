@@ -137,12 +137,12 @@ LIMITS: You are an AI. Never diagnose or prescribe. Redirect serious concerns to
                 }
 
                 var pills = [
-                    'How does the counselor matching work? 🤝',
-                    'What questions are in the assessment? 📝',
-                    'How do I contact a matched counselor? 📩',
-                    'What counseling modality should I choose? 🧠',
-                    'Feeling really overwhelmed today 😔',
-                    'I just need someone to talk to 💬'
+                    'How does the counselor matching work?',
+                    'What questions are in the assessment?',
+                    'How do I contact a matched counselor?',
+                    'What counseling modality should I choose?',
+                    'Feeling really overwhelmed today',
+                    'I just need someone to talk to'
                 ];
 
                 function findChatBox() {
