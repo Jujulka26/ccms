@@ -1,4 +1,5 @@
-﻿import hashlib
+﻿import os
+import hashlib
 import json as _json
 import streamlit as st
 import streamlit.components.v1 as components
@@ -26,7 +27,7 @@ def inject_styles():
             font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9D63E8;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .page-header-title { font-family: 'Fraunces', serif; font-size: clamp(26px, 3.2vw, 38px); color: #1C1917; margin: 0 0 8px; letter-spacing: -0.4px; line-height: 1.12; display: block; font-weight: 600; }
+        .page-header-title { font-family: 'Fraunces', serif; font-size: clamp(26px, 3.2vw, 38px); color: #1C1917; margin: 0 0 8px; letter-spacing: -0.4px; line-height: 1.12; display: block; font-weight: 500; }
         .page-header-sub { font-size: 14px; color: #6B6560; margin: 0; line-height: 1.6; font-family: 'Plus Jakarta Sans', sans-serif; }
         .page-header-stats { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         .page-header-stat { display: inline-flex; align-items: center; gap: 7px; background: #F5F3FF; border: 1px solid rgba(157,99,232,0.15); border-radius: 20px; padding: 6px 13px; }
@@ -686,6 +687,47 @@ def _generate_explanation(c, client_issue) -> str:
     return random.choice(templates)
 
 
+def _ai_explanation(c, client_issue) -> str:
+    """Generate the match explanation with Gemini via Vertex AI (uses GCP credits).
+    Raises on any failure so the caller can fall back to the template. On by
+    default; set env USE_AI_EXPLANATION=0 to force templates instead."""
+    from google import genai  # pip install google-genai
+
+    first     = c.get("name", "Your counselor").split()[0]
+    spec      = c.get("specialization", client_issue)
+    exp       = int(c.get("experience_years") or 0)
+    modality  = c.get("counselor_modality", "")
+    mod_match = c.get("modality_match") == 1
+    eth_match = c.get("ethnicity_match") == 1
+    ethnicity = c.get("ethnicity", "") if eth_match else ""
+
+    facts = (
+        f"Counselor first name: {first}. Specialises in: {spec}. "
+        f"Years of experience: {exp}. Counseling approach (modality): {modality}. "
+        f"Matches client's preferred modality: {'yes' if mod_match else 'no'}. "
+        f"Shares client's ethnicity ({ethnicity}): {'yes' if eth_match and ethnicity else 'no'}."
+    )
+    prompt = (
+        "You are Mira, a warm assistant for a counselor-matching app. In 2-3 short "
+        f"sentences, explain why this counselor is a good fit for a client seeking support with {client_issue}. "
+        "Use ONLY the facts provided; do not invent details. Wrap 2 to 4 key terms in <strong></strong> HTML tags. "
+        "Plain prose only: no markdown, no lists, no headings. Warm and encouraging but never clinical; "
+        "never promise specific outcomes and never give a diagnosis.\n\n"
+        f"Facts: {facts}"
+    )
+
+    client = genai.Client(
+        vertexai=True,
+        project=os.environ.get("GCP_PROJECT", "ccms-499420"),
+        location=os.environ.get("GCP_LOCATION", "global"),
+    )
+    resp = client.models.generate_content(model="gemini-2.5-flash-lite", contents=prompt)
+    text = (resp.text or "").strip()
+    if not text:
+        raise ValueError("empty AI response")
+    return text
+
+
 @st.dialog("Start over?")
 def _start_over_dialog(reset_fn):
     st.markdown("""<style>
@@ -1069,7 +1111,14 @@ def show_matching_page():
         def _get_explanation(c):
             key = f"explanation_single_{c.get('counselor_id')}"
             if not isinstance(st.session_state.get(key), str):
-                st.session_state[key] = _generate_explanation(c, client_issue)
+                text = None
+                # AI on by default; set env USE_AI_EXPLANATION=0 to force templates.
+                if os.environ.get("USE_AI_EXPLANATION", "1") != "0":
+                    try:
+                        text = _ai_explanation(c, client_issue)
+                    except Exception:
+                        text = None  # fall back to template on any failure
+                st.session_state[key] = text or _generate_explanation(c, client_issue)
             return st.session_state[key]
 
         counselor_name = best_c.get("name", "Your Top Match").upper()

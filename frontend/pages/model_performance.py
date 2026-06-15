@@ -446,7 +446,7 @@ def show_model_performance_page():
         <div style="position: relative; overflow: hidden; background-color: #F5F3FF; background-image: radial-gradient(at 0% 0%, #F0E8FF 0px, transparent 60%), radial-gradient(at 100% 100%, #E8D5FD 0px, transparent 60%); border-radius: 20px; padding: 48px 48px; margin-bottom: 32px; border: 1px solid rgba(157,99,232,0.18); box-shadow: 0 16px 32px -8px rgba(157,99,232,0.1), inset 0 1px 0 rgba(255,255,255,0.9); min-height: 236px;">
             <div style="position: relative; z-index: 2; max-width: 65%;">
                 <div style="color: #9D63E8; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(157,99,232,0.1); border: 1px solid rgba(157,99,232,0.22); border-radius: 20px; padding: 4px 14px; margin-bottom: 20px; display: inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Analytics</div>
-                <div style="font-family: 'Fraunces', serif; font-size: 42px; font-weight: 600; color: #1C1917; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Model Management</div>
+                <div style="font-family: 'Fraunces', serif; font-size: 42px; font-weight: 500; color: #1C1917; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.5px;">Model Management</div>
                 <p style="font-size: 16px; color: #6B6560; margin: 0; line-height: 1.65; max-width: 480px; font-family: 'Plus Jakarta Sans', sans-serif;">Accuracy, F1 and ROC-AUC across all models, plus model version management and retraining.</p>
             </div>
             <div style="font-size: 110px; line-height: 1; position: absolute; right: 28px; bottom: -20px; z-index: 1; opacity: 0.15; transform: rotate(-5deg); pointer-events: none;">
