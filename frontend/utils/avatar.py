@@ -7,17 +7,14 @@ _AVATAR_COLORS = [
     "#2E1065", "#9B72F5", "#7A9E8A",
 ]
 
-_IMG_DIR = Path(__file__).parent.parent / "assets" / "profile"
-
 _IMG_CACHE: dict[str, str] = {}
-_THUMB_SIZE = 160
 
 
 def _load_thumbnail(img_path: Path) -> str:
     try:
         from PIL import Image
         img = Image.open(img_path).convert("RGB")
-        img.thumbnail((_THUMB_SIZE, _THUMB_SIZE), Image.LANCZOS)
+        img.thumbnail((160, 160), Image.LANCZOS)
         buf = io.BytesIO()
         img.save(buf, format="JPEG", quality=85, optimize=True)
         b64 = base64.b64encode(buf.getvalue()).decode()
@@ -43,7 +40,7 @@ def _color(name: str) -> str:
 def avatar_html(name: str, image: str | None, size: int = 72, radius: int = 14) -> str:
     if image:
         if image not in _IMG_CACHE:
-            img_path = _IMG_DIR / image
+            img_path = Path(__file__).parent.parent / "assets" / "profile" / image
             _IMG_CACHE[image] = _load_thumbnail(img_path) if img_path.exists() else ""
         data_url = _IMG_CACHE[image]
         if data_url:

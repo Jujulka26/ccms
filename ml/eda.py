@@ -9,7 +9,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 BASE_DIR  = Path(__file__).parent
-DATA_PATH = BASE_DIR / "client_counselor_dataset.csv"
 OUT_DIR   = BASE_DIR / "artifacts" / "eda_output"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -41,7 +40,7 @@ print("=" * 62)
 print("1. DATASET OVERVIEW")
 print("=" * 62)
 
-df = pd.read_csv(DATA_PATH)
+df = pd.read_csv(BASE_DIR / "client_counselor_dataset.csv")
 total = len(df)
 
 print(f"  Shape          : {df.shape[0]:,} rows × {df.shape[1]} columns")

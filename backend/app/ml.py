@@ -10,7 +10,6 @@ import shap
 
 from db import MAX_CASELOAD
 
-TIME_BLOCKS = ["Weekday Morning", "Weekday Afternoon", "Weekday Evening", "Weekend"]
 BASE_DIR = Path(__file__).parent.parent.parent / "ml"
 sys.path.insert(0, str(BASE_DIR))
 from features import ISSUE_SIMILARITY, MODALITY_ISSUE_FIT, FEATURE_ORDER
@@ -167,7 +166,7 @@ def get_reference_data() -> dict:
         "preferred_modality":         sorted_unique("preferred_modality"),
         "preferred_language":         sorted_unique("preferred_language"),
         "preferred_counselor_gender": sorted_unique("preferred_counselor_gender"),
-        "preferred_time":             ["Any time"] + TIME_BLOCKS,
+        "preferred_time":             ["Any time", "Weekday Morning", "Weekday Afternoon", "Weekday Evening", "Weekend"],
     }
 
 
