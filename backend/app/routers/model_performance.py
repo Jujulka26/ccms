@@ -17,22 +17,19 @@ _jobs: dict[str, dict] = {}
 
 router = APIRouter(prefix="/model-performance", tags=["model-performance"])
 
-# app/routers/model_performance.py → parent.parent.parent.parent = ccms/
 BASE_DIR     = Path(__file__).parent.parent.parent.parent
 ML_DIR       = BASE_DIR / "ml"
-STORE_DIR    = BASE_DIR / "model_store"
-VERSIONS_DIR = STORE_DIR / "versions"
-ACTIVE_FILE  = STORE_DIR / "active_version.txt"
+ART_DIR      = ML_DIR / "artifacts"
+VERSIONS_DIR = ML_DIR / "versions"
+ACTIVE_FILE  = ML_DIR / "active_version.txt"
 
 _BEST_MODEL     = ML_DIR / "ensemble_soft.pkl"
-_TUNED_CSV      = ML_DIR / "tuned_result.csv"
-_BEST_MODEL_BAK = STORE_DIR / "ensemble_soft_backup.pkl"
-_TUNED_CSV_BAK  = STORE_DIR / "tuned_result_backup.csv"
+_TUNED_CSV      = ART_DIR / "tuned_result.csv"
+_BEST_MODEL_BAK = ML_DIR / "ensemble_soft_backup.pkl"
+_TUNED_CSV_BAK  = ML_DIR / "tuned_result_backup.csv"
 _DATASET_CSV    = ML_DIR / "client_counselor_dataset.csv"
-_DATASET_BAK    = STORE_DIR / "client_counselor_dataset_backup.csv"
+_DATASET_BAK    = ML_DIR / "client_counselor_dataset_backup.csv"
 
-# Raw columns the training scripts (trainmodels.py / tunemodels.py) need to
-# engineer features and the target. An uploaded dataset must contain all of these.
 REQUIRED_COLUMNS = {
     "client_age", "client_ethnicity", "client_issue",
     "preferred_modality", "preferred_counselor_gender",
@@ -79,7 +76,7 @@ def _load_meta(version_dir: Path) -> dict:
 
 @router.get("/", response_model=ModelPerformanceResponse)
 def get_model_performance():
-    csv_path = ML_DIR / "train_result.csv"
+    csv_path = ART_DIR / "train_result.csv"
     if not csv_path.exists():
         raise HTTPException(status_code=404, detail="train_result.csv not found. Run trainmodels.py first.")
     try:
@@ -110,7 +107,6 @@ def get_model_performance():
 # ── GET /history ──────────────────────────────────────────────────────────────
 
 def _ensure_initial_version():
-    STORE_DIR.mkdir(exist_ok=True)
     VERSIONS_DIR.mkdir(exist_ok=True)
     initial_dir = VERSIONS_DIR / "v_initial"
     # Gate on the metadata file, not the directory — a half-created (empty)
@@ -163,7 +159,6 @@ def _run_training(job_id: str, df: pd.DataFrame):
     job = _jobs[job_id]
     version_dir = None
     try:
-        STORE_DIR.mkdir(exist_ok=True)
         VERSIONS_DIR.mkdir(exist_ok=True)
 
         job["step"]     = "Backing up current model and dataset..."
@@ -180,7 +175,6 @@ def _run_training(job_id: str, df: pd.DataFrame):
         version_dir = VERSIONS_DIR / version_id
         version_dir.mkdir(exist_ok=True)
 
-        # The uploaded dataset becomes the training input both scripts read.
         row_count = len(df)
         df.to_csv(str(_DATASET_CSV), index=False)
 
@@ -220,13 +214,10 @@ def _run_training(job_id: str, df: pd.DataFrame):
         job["step"]     = "Saving version artifacts..."
         job["progress"] = 0.90
         new_metrics = _deployed_metrics(_TUNED_CSV)
-        if _BEST_MODEL.exists():
-            shutil.copy2(str(_BEST_MODEL), str(version_dir / "ensemble_soft.pkl"))
-        if _TUNED_CSV.exists():
-            shutil.copy2(str(_TUNED_CSV), str(version_dir / "tuned_result.csv"))
+        shutil.copy2(str(_BEST_MODEL), str(version_dir / "ensemble_soft.pkl"))
+        shutil.copy2(str(_TUNED_CSV), str(version_dir / "tuned_result.csv"))
 
-        # Leave the active model and dataset exactly as they were — the new
-        # version is only deployed when the admin explicitly chooses to.
+        # restore originals; new version is deployed only when admin chooses
         if _BEST_MODEL_BAK.exists():
             shutil.copy2(str(_BEST_MODEL_BAK), str(_BEST_MODEL))
         if _TUNED_CSV_BAK.exists():
@@ -263,7 +254,7 @@ def _run_training(job_id: str, df: pd.DataFrame):
         if _DATASET_BAK.exists():
             shutil.copy2(str(_DATASET_BAK), str(_DATASET_CSV))
         job["status"] = "error"
-        job["error"]  = str(e)
+        job["error"] = str(e)
 
 
 @router.post("/retrain")
@@ -315,7 +306,6 @@ def deploy_version(version_id: str):
     csv = version_dir / "tuned_result.csv"
     if not pkl.exists():
         raise HTTPException(status_code=404, detail="ensemble_soft.pkl not found in this version.")
-    STORE_DIR.mkdir(exist_ok=True)
     if _BEST_MODEL.exists():
         shutil.copy2(str(_BEST_MODEL), str(_BEST_MODEL_BAK))
     shutil.copy2(str(pkl), str(_BEST_MODEL))

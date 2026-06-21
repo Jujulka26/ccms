@@ -4,7 +4,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 import google.generativeai as genai
 
-# Mira's profile picture, shown next to every assistant message.
 MIRA_AVATAR = str(Path(__file__).parent.parent / "assets" / "brand" / "mira.png")
 
 def show_chatbot_page():

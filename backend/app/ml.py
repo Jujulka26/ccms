@@ -4,15 +4,11 @@ import warnings
 import numpy as np
 import pandas as pd
 import joblib
+import shap
 
-from db import MAX_CASELOAD  # single source of truth for the capacity cap
+from db import MAX_CASELOAD
 
-# Coarse availability blocks: a counselor's general working times. Used as a
-# hard pre-filter in matching (like language), NOT a model feature, so it needs
-# no retraining and is unrelated to booking.
 TIME_BLOCKS = ["Weekday Morning", "Weekday Afternoon", "Weekday Evening", "Weekend"]
-
-# app/ml.py is at backend/app/ml.py, so parent.parent.parent = ccms/
 BASE_DIR = Path(__file__).parent.parent.parent / "ml"
 
 
@@ -53,10 +49,7 @@ def _modality_fit(client_issue: str, counselor_modality: str) -> float:
 
 
 def _exp_issue_fit(exp_year) -> int:
-    try:
-        return 1 if float(exp_year) >= 8 else 0
-    except (TypeError, ValueError):
-        return 0
+    return 1 if exp_year >= 8 else 0
 
 
 def _prev_exp_value(val) -> int:
@@ -97,9 +90,6 @@ def run_match(match_req, counselors: list[dict]) -> dict:
         counselor_languages  = [v.strip() for v in str(c.get("counselor_language", "")).split(",") if v.strip()]
         if preferred_language not in counselor_languages:
             continue
-        # Availability filter (hard, like language). A counselor who hasn't
-        # declared any availability is left in (benefit of the doubt); one who
-        # has declared blocks must cover the client's chosen time.
         if preferred_time != "Any time":
             counselor_availability = [v.strip() for v in str(c.get("availability") or "").split(",") if v.strip()]
             if counselor_availability and preferred_time not in counselor_availability:
@@ -130,11 +120,7 @@ def run_match(match_req, counselors: list[dict]) -> dict:
 
     prob = np.clip(prob, 1e-7, 1 - 1e-7)
 
-    # Tier by issue-specialization fit, then let the model rank within each tier.
-    # Exact-issue specialists sit in the top band, related issues in a clearly
-    # lower band, weak or unrelated in the lowest. The bands do not overlap, so a
-    # non-specialist can never outrank a specialist; the model probability only
-    # positions counselors within their own band.
+    # tier by specialization fit; model ranks within each tier
     im = df["issue_match"].to_numpy()
     lo = np.select([im >= 1.0, im >= 0.55], [70.0, 40.0], default=10.0)
     hi = np.select([im >= 1.0, im >= 0.55], [99.0, 65.0], default=38.0)
@@ -225,27 +211,16 @@ def engineer_features_from_df(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-_shap_explainers = None
-
-
+@lru_cache(maxsize=1)
 def _get_shap_explainers():
-    global _shap_explainers
-    if _shap_explainers is None:
-        import shap
-        bundle, _ = load_resources()
-        _shap_explainers = (
-            shap.TreeExplainer(bundle["lgbm"].named_steps["model"]),
-            shap.TreeExplainer(bundle["cat"].named_steps["model"]),
-        )
-    return _shap_explainers
+    bundle, _ = load_resources()
+    return (
+        shap.TreeExplainer(bundle["lgbm"].named_steps["model"]),
+        shap.TreeExplainer(bundle["cat"].named_steps["model"]),
+    )
 
 
 def compute_shap(features: dict) -> dict:
-    try:
-        import shap
-    except ImportError:
-        return {"error": "SHAP not installed.", "shap_values": [], "base_value": 0.0, "feature_names": [], "feature_values": []}
-
     try:
         bundle, _        = load_resources()
         exp_lgbm, exp_cat = _get_shap_explainers()

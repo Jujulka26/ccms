@@ -1,14 +1,13 @@
 ﻿import os
 import hashlib
 import json as _json
+import random
 import streamlit as st
 import streamlit.components.v1 as components
 
 from frontend.utils.api import get_reference_data, post_match, post_shap, save_intro_request, check_pending_request
 from frontend.utils.avatar import avatar_html
 
-# Counselors at/over this many active clients are full: excluded from matching
-# and not applyable in the directory (kept in sync with backend ml.MAX_CASELOAD).
 MAX_CASELOAD = 5
 
 # ── Custom CSS ────────────────────────────────────────────────────────────────
@@ -643,7 +642,6 @@ def show_request_success_dialog(name: str):
 
 # ── Match explanation ─────────────────────────────────────────────────────────
 def _generate_explanation(c, client_issue) -> str:
-    import random
     first     = c.get("name", "Your counselor").split()[0]
     spec      = c.get("specialization", client_issue)
     exp       = int(c.get("experience_years") or 0)
@@ -720,8 +718,7 @@ def _generate_explanation(c, client_issue) -> str:
 
 @st.cache_resource(show_spinner=False)
 def _vertex_client():
-    """Vertex AI client, created once and reused (avoids per-call setup lag)."""
-    from google import genai  # pip install google-genai
+    from google import genai
     return genai.Client(
         vertexai=True,
         project=os.environ.get("GCP_PROJECT", "ccms-499420"),
@@ -766,9 +763,6 @@ def _explanation_box_html(counselor_name, text) -> str:
 
 
 def _render_explanation(c, counselor_name, client_issue):
-    """Stream the Gemini (Vertex) explanation into the box, cache it per counselor,
-    and fall back to the template on any failure. AI is on by default; set env
-    USE_AI_EXPLANATION=0 to force templates."""
     key = f"explanation_single_{c.get('counselor_id')}"
     cached = st.session_state.get(key)
     if isinstance(cached, str):
@@ -878,9 +872,6 @@ def _step2_form(ref):
 
 
 def _snapshot_match_inputs() -> dict:
-    """Freeze the questionnaire answers into a plain dict. Read on the results
-    page so reruns (e.g. opening a profile dialog) can't recompute the match
-    with reverted widget state — which previously dropped the time filter."""
     return {
         "client_age":         st.session_state.get("client_age"),
         "client_gender":      st.session_state.get("client_gender"),
@@ -1106,9 +1097,6 @@ def show_matching_page():
                 if k.startswith("match_") or k.startswith("shap_") or k.startswith("explanation_single_"):
                     del st.session_state[k]
 
-        # Read the FROZEN inputs captured when "Find My Best Match" was clicked,
-        # so reruns on this page (opening a profile, dismissing a card) never
-        # recompute the match with reverted widget state.
         if "_committed_match" not in st.session_state:
             st.session_state["_committed_match"] = _snapshot_match_inputs()
         mi = st.session_state["_committed_match"]

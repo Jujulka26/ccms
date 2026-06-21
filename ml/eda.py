@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 
 BASE_DIR  = Path(__file__).parent
 DATA_PATH = BASE_DIR / "client_counselor_dataset.csv"
-OUT_DIR   = BASE_DIR / "eda_output"
-OUT_DIR.mkdir(exist_ok=True)
+OUT_DIR   = BASE_DIR / "artifacts" / "eda_output"
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 MATCH_COLORS = ["#E05C5C", "#4C9BE8"]
 

@@ -36,9 +36,7 @@ def load_counselors() -> list[dict]:
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        # caseload is computed live = open cases (Pending or Approved, i.e. not
-        # Closed). A new request raises it; closing lowers it. No stored counter
-        # to drift. Availability is aggregated from the child table in one pass.
+        # caseload = live count of open cases (Pending or Approved)
         cursor.execute("""
             SELECT
                 c.*,
@@ -206,9 +204,7 @@ def save_intro_request(
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        # Backstop: never let a counselor exceed MAX_CASELOAD open cases, even if
-        # the client's view was stale or two requests race in. The front-end
-        # already hides full counselors; this guarantees the rule server-side.
+        # re-check caseload server-side to guard against race conditions
         cursor.execute(
             "SELECT COUNT(*) FROM tbl_request WHERE counselor_id=%s AND status IN ('Pending', 'Approved')",
             (counselor_id,),
@@ -259,8 +255,6 @@ def get_all_requests() -> list[dict]:
 
 
 def update_request_status(request_id: int, status: str):
-    # Caseload is derived from request status, so approving (Pending→Approved)
-    # keeps the case "open" and needs no counter bookkeeping.
     conn = get_connection()
     cursor = conn.cursor()
     try:

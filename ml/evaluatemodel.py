@@ -1,7 +1,6 @@
 import sys
 import warnings
 warnings.filterwarnings("ignore")
-sys.path.insert(0, ".")
 
 import numpy as np
 import pandas as pd
@@ -20,27 +19,9 @@ from sklearn.metrics import (
 from sklearn.dummy import DummyClassifier
 
 BASE_DIR = Path(__file__).parent
-
-
-
-ISSUE_SIMILARITY = {
-    "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.8},
-    "Stress":     {"Stress":  1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.7},
-    "Trauma":     {"Trauma":  1.0, "Stress":  0.6, "Anxiety": 0.6, "Depression": 0.8},
-    "Depression": {"Depression": 1.0, "Anxiety": 0.8, "Stress": 0.7, "Trauma": 0.8},
-}
-
-MODALITY_ISSUE_FIT = {
-    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.3},
-    "Depression": {"Cognitive": 1.0, "Behavioral": 0.8, "Humanistic": 0.7, "Psychodynamic": 0.9},
-    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.3},
-    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.4},
-}
-
-FEATURE_ORDER = [
-    "issue_match", "modality_issue_fit", "modality_match", "gender_match",
-    "exp_issue_fit", "ethnicity_match", "prev_exp", "age_gap",
-]
+ART_DIR  = BASE_DIR / "artifacts"
+sys.path.insert(0, str(BASE_DIR))
+from features import ISSUE_SIMILARITY, MODALITY_ISSUE_FIT, FEATURE_ORDER
 
 
 def _issue_match(client_issue, specialization):
@@ -229,7 +210,7 @@ for i, v in enumerate(feature_importances[sorted_idx]):
     axes[2].text(v + 0.002, i, f"{v:.3f}", va="center", fontsize=8)
 
 plt.tight_layout()
-plt.savefig(str(BASE_DIR / "evaluation_plots.png"), dpi=150, bbox_inches="tight")
+plt.savefig(str(ART_DIR / "evaluation_plots.png"), dpi=150, bbox_inches="tight")
 print("  Saved: evaluation_plots.png")
 
 # ── 8. Written report ─────────────────────────────────────────────────────────
@@ -286,7 +267,7 @@ else:
     report_lines.append("Model performance needs improvement before deployment.")
 
 report_text = "\n".join(report_lines)
-(BASE_DIR / "evaluation_report.txt").write_text(report_text, encoding="utf-8")
+(ART_DIR / "evaluation_report.txt").write_text(report_text, encoding="utf-8")
 
 print("\n" + "="*60)
 print(report_text)

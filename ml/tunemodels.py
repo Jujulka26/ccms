@@ -2,7 +2,6 @@ import sys
 import warnings
 import os
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 warnings.filterwarnings("ignore")
 os.environ["PYTHONWARNINGS"] = "ignore"
 
@@ -22,27 +21,10 @@ from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 
 BASE_DIR = Path(__file__).parent
-
-
-
-ISSUE_SIMILARITY = {
-    "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.8},
-    "Stress":     {"Stress":  1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.7},
-    "Trauma":     {"Trauma":  1.0, "Stress":  0.6, "Anxiety": 0.6, "Depression": 0.8},
-    "Depression": {"Depression": 1.0, "Anxiety": 0.8, "Stress": 0.7, "Trauma": 0.8},
-}
-
-MODALITY_ISSUE_FIT = {
-    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.3},
-    "Depression": {"Cognitive": 1.0, "Behavioral": 0.8, "Humanistic": 0.7, "Psychodynamic": 0.9},
-    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.3},
-    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.4},
-}
-
-FEATURES = [
-    'issue_match', 'modality_issue_fit', 'modality_match', 'gender_match',
-    'exp_issue_fit', 'ethnicity_match', 'prev_exp', 'age_gap',
-]
+ART_DIR  = BASE_DIR / "artifacts"
+ART_DIR.mkdir(exist_ok=True)
+sys.path.insert(0, str(BASE_DIR))
+from features import ISSUE_SIMILARITY, MODALITY_ISSUE_FIT, FEATURE_ORDER
 
 
 def engineer_features(df):
@@ -63,7 +45,7 @@ def engineer_features(df):
             MODALITY_ISSUE_FIT.get(r['client_issue'], {}).get(m.strip(), 0.5)
             for m in str(r['counselor_modality']).split(',')
         ), axis=1)
-    return df[FEATURES]
+    return df[FEATURE_ORDER]
 
 
 def evaluate(pipeline, X_t, y_t):
@@ -89,8 +71,8 @@ print(f"Split: {len(X_train):,} train / {len(X_test):,} test")
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 print("\nEvaluating baselines (LightGBM / CatBoost)...")
-base_lgbm = joblib.load(BASE_DIR / "baseline_lgbm.pkl")
-base_cat  = joblib.load(BASE_DIR / "baseline_cat.pkl")
+base_lgbm = joblib.load(ART_DIR / "baseline_lgbm.pkl")
+base_cat  = joblib.load(ART_DIR / "baseline_cat.pkl")
 scores_base_lgbm, _ = evaluate(base_lgbm, X_test, y_test)
 scores_base_cat,  _ = evaluate(base_cat,  X_test, y_test)
 print(f"  Baseline LightGBM : {scores_base_lgbm}")
@@ -123,7 +105,7 @@ tuned_lgbm = lgbm_search.best_estimator_
 scores_tuned_lgbm, _ = evaluate(tuned_lgbm, X_test, y_test)
 print(f"  Best params : {lgbm_search.best_params_}")
 print(f"  Tuned LightGBM : {scores_tuned_lgbm}")
-joblib.dump(tuned_lgbm, BASE_DIR / "tuned_lgbm.pkl")
+joblib.dump(tuned_lgbm, ART_DIR / "tuned_lgbm.pkl")
 print("  Saved: tuned_lgbm.pkl")
 
 # ── Tune CatBoost ──────────────────────────────────────────────────────────────
@@ -151,7 +133,7 @@ tuned_cat = cat_search.best_estimator_
 scores_tuned_cat, _ = evaluate(tuned_cat, X_test, y_test)
 print(f"  Best params : {cat_search.best_params_}")
 print(f"  Tuned CatBoost : {scores_tuned_cat}")
-joblib.dump(tuned_cat, BASE_DIR / "tuned_cat.pkl")
+joblib.dump(tuned_cat, ART_DIR / "tuned_cat.pkl")
 print("  Saved: tuned_cat.pkl")
 
 # ── Soft Voting Ensemble (LightGBM + CatBoost) ─────────────────────────────────
@@ -179,7 +161,7 @@ rows = [
     {"Model": "Tuned CatBoost",    **scores_tuned_cat},
     {"Model": "Soft Vote Ensemble", **scores_ensemble},
 ]
-pd.DataFrame(rows).to_csv(BASE_DIR / "tuned_result.csv", index=False)
+pd.DataFrame(rows).to_csv(ART_DIR / "tuned_result.csv", index=False)
 print("Saved: tuned_result.csv")
 
 # ── Chart ──────────────────────────────────────────────────────────────────────
@@ -229,7 +211,7 @@ for spine in ["top", "right"]:
     ax.spines[spine].set_visible(False)
 
 plt.tight_layout()
-plt.savefig(BASE_DIR / "tuned_result.png", dpi=150,
+plt.savefig(ART_DIR / "tuned_result.png", dpi=150,
             bbox_inches="tight", facecolor="#FAFAF8")
 print("Saved: tuned_result.png")
 

@@ -1,0 +1,45 @@
+ML MODEL EVALUATION REPORT
+============================================================
+Dataset       : client_counselor_dataset.csv
+Total samples : 19,699
+Features      : 8
+Target        : match_success (binary)
+Class balance : match=1 (46.8%), match=0 (53.2%)
+Model         : ensemble_soft.pkl  (Soft Vote: LightGBM + CatBoost)
+Pipeline      : StandardScaler -> SMOTE -> each model; averaged probabilities
+
+TEST SET RESULTS (20% held-out, stratified split, seed=42)
+------------------------------------------------------------
+Accuracy      : 0.8036
+Precision     : 0.7811
+Recall        : 0.8056
+F1 Score      : 0.7932
+ROC-AUC       : 0.9037
+
+BASELINE COMPARISON
+------------------------------------------------------------
+Majority-class : Accuracy=0.5325  F1=0.0000
+Tuned LightGBM : Accuracy=0.8036  F1=0.7932
+Lift over baseline: +27.11% accuracy
+
+5-FOLD CROSS-VALIDATION
+------------------------------------------------------------
+  Soft Vote Ensemble
+    ACCURACY  : mean=0.7963 ± 0.0051  [0.7891–0.8028]
+    F1        : mean=0.7791 ± 0.0060  [0.7722–0.7875]
+    ROC_AUC   : mean=0.9031 ± 0.0036  [0.8972–0.9071]
+
+FEATURE IMPORTANCE (highest to lowest, averaged LightGBM + CatBoost)
+------------------------------------------------------------
+  Issue Similarity              : 0.3920  (39.2%)
+  Preferred Modality Match      : 0.1757  (17.6%)
+  Issue-Modality Fit            : 0.1432  (14.3%)
+  Counselor Seniority           : 0.1028  (10.3%)
+  Client Previous Experience    : 0.0821  (8.2%)
+  Preferred Gender Match        : 0.0493  (4.9%)
+  Ethnicity Match               : 0.0351  (3.5%)
+  Age Gap                       : 0.0197  (2.0%)
+
+VERDICT
+------------------------------------------------------------
+Model performance is GOOD — suitable for deployment.

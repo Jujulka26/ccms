@@ -1,0 +1,13 @@
+{
+  "version_id": "v_initial",
+  "timestamp": "2026-01-01T00:00:00",
+  "display_date": "Initial model (synthetic baseline)",
+  "mode": "synthetic",
+  "rows": 0,
+  "metrics": {
+    "accuracy": 0.804,
+    "f1": 0.793,
+    "roc_auc": 0.904
+  },
+  "is_active": false
+}

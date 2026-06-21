@@ -38,8 +38,6 @@ def _row(icon_name, label, value_html, color="#9D63E8"):
 
 
 def _client_context_html(row) -> str:
-    """Compact summary of the client's questionnaire answers, shown so the
-    coordinator can sanity-check the match before approving."""
     rows_html = ""
     if row.get("client_issue"):
         rows_html += _row("tag", "Issue", row["client_issue"])

@@ -10,7 +10,7 @@ _AVATAR_COLORS = [
 _IMG_DIR = Path(__file__).parent.parent / "assets" / "profile"
 
 _IMG_CACHE: dict[str, str] = {}
-_THUMB_SIZE = 160  # px — more than enough for 84px display
+_THUMB_SIZE = 160
 
 
 def _load_thumbnail(img_path: Path) -> str:

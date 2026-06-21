@@ -1,3 +1,4 @@
+import sys
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -23,21 +24,11 @@ from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 
 BASE_DIR = Path(__file__).parent
+ART_DIR  = BASE_DIR / "artifacts"
+ART_DIR.mkdir(exist_ok=True)
+sys.path.insert(0, str(BASE_DIR))
+from features import ISSUE_SIMILARITY, MODALITY_ISSUE_FIT, FEATURE_ORDER
 df = pd.read_csv(BASE_DIR / "client_counselor_dataset.csv")
-
-ISSUE_SIMILARITY = {
-    "Anxiety":    {"Anxiety": 1.0, "Stress": 0.7, "Trauma": 0.6, "Depression": 0.8},
-    "Stress":     {"Stress":  1.0, "Anxiety": 0.7, "Trauma": 0.6, "Depression": 0.7},
-    "Trauma":     {"Trauma":  1.0, "Stress":  0.6, "Anxiety": 0.6, "Depression": 0.8},
-    "Depression": {"Depression": 1.0, "Anxiety": 0.8, "Stress": 0.7, "Trauma": 0.8},
-}
-
-MODALITY_ISSUE_FIT = {
-    "Anxiety":    {"Cognitive": 1.0, "Behavioral": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.3},
-    "Depression": {"Cognitive": 1.0, "Behavioral": 0.8, "Humanistic": 0.7, "Psychodynamic": 0.9},
-    "Stress":     {"Cognitive": 0.8, "Behavioral": 0.7, "Humanistic": 0.7, "Psychodynamic": 0.3},
-    "Trauma":     {"Behavioral": 1.0, "Cognitive": 0.9, "Humanistic": 0.2, "Psychodynamic": 0.4},
-}
 
 df['modality_match'] = df.apply(
     lambda row: int(row['preferred_modality'] in [m.strip() for m in str(row['counselor_modality']).split(',')]),
@@ -62,19 +53,14 @@ df['modality_issue_fit'] = df.apply(
     axis=1
 )
 
-features = [
-    'issue_match', 'modality_issue_fit', 'modality_match', 'gender_match',
-    'exp_issue_fit', 'ethnicity_match', 'prev_exp', 'age_gap',
-]
-
-X = df[features]
+X = df[FEATURE_ORDER]
 y = df['match_success']
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-corr = df[features + ['match_success']].corr(numeric_only=True)['match_success'].drop('match_success')
+corr = df[FEATURE_ORDER + ['match_success']].corr(numeric_only=True)['match_success'].drop('match_success')
 print("\n===== FEATURE CORRELATION WITH TARGET =====")
 print(corr.sort_values(ascending=False))
 
@@ -117,11 +103,11 @@ for name, model in models.items():
         "ROC-AUC":  round(float(roc_auc_score(y_test, y_prob)), 3),
     })
 
-    joblib.dump(pipeline, BASE_DIR / save_names[name])
+    joblib.dump(pipeline, ART_DIR / save_names[name])
     print(f"  Saved: {save_names[name]}")
 
 results_df = pd.DataFrame(results)
-results_df.to_csv(BASE_DIR / "train_result.csv", index=False)
+results_df.to_csv(ART_DIR / "train_result.csv", index=False)
 
 print("\n===== FINAL RESULTS =====")
 print(results_df)
@@ -141,7 +127,6 @@ starts = -(n - 1) / 2 * (width + gap)
 fig, axes = plt.subplots(1, 2, figsize=(20, 7))
 fig.patch.set_facecolor("#FAFAF8")
 
-# Left: grouped bar chart
 ax = axes[0]
 ax.set_facecolor("#FAFAF8")
 
@@ -179,7 +164,6 @@ for m_idx, metric in enumerate(metrics):
 ax.text(0.98, 0.02, "★ = best in metric", transform=ax.transAxes,
         ha="right", va="bottom", fontsize=8, color="#6B7280")
 
-# Right: summary table
 ax2 = axes[1]
 ax2.set_facecolor("#FAFAF8")
 ax2.axis("off")
@@ -226,7 +210,7 @@ ax2.text(0.5, 0.02, "Overall = mean(Accuracy, F1, ROC-AUC)  |  Purple = best in 
 plt.suptitle("Baseline Model Benchmark — Client-Counselor Matching System",
              fontsize=14, fontweight="bold", y=1.01)
 plt.tight_layout()
-plt.savefig(BASE_DIR / "train_result.png", dpi=150, bbox_inches="tight", facecolor="#FAFAF8")
+plt.savefig(ART_DIR / "train_result.png", dpi=150, bbox_inches="tight", facecolor="#FAFAF8")
 print("Saved: train_result.png")
 
 print("\nDONE")
