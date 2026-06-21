@@ -6,9 +6,13 @@ BASE_URL = "http://localhost:8000"
 _BACKEND_CONN_ERROR = "Cannot connect to the backend. Make sure FastAPI is running: `uvicorn backend.main:app --reload`"
 
 
-def _get(path: str) -> dict | list:
+def _request(method: str, path: str, body: dict | None = None, timeout: int = 10):
     try:
-        r = requests.get(f"{BASE_URL}{path}", timeout=10)
+        r = getattr(requests, method)(
+            f"{BASE_URL}{path}",
+            **({} if body is None else {"json": body}),
+            timeout=timeout,
+        )
         r.raise_for_status()
         return r.json()
     except requests.exceptions.ConnectionError:
@@ -23,73 +27,11 @@ def _get(path: str) -> dict | list:
         st.stop()
 
 
-def _post(path: str, body: dict) -> dict:
-    try:
-        r = requests.post(f"{BASE_URL}{path}", json=body, timeout=60)
-        r.raise_for_status()
-        return r.json()
-    except requests.exceptions.ConnectionError:
-        st.error(_BACKEND_CONN_ERROR)
-        st.stop()
-    except requests.exceptions.HTTPError as e:
-        detail = ""
-        try:
-            detail = e.response.json().get("detail", str(e))
-        except Exception:
-            detail = str(e)
-        st.error(f"Backend error: {detail}")
-        st.stop()
-
-
-def _patch(path: str, body: dict) -> dict:
-    try:
-        r = requests.patch(f"{BASE_URL}{path}", json=body, timeout=10)
-        r.raise_for_status()
-        return r.json()
-    except requests.exceptions.ConnectionError:
-        st.error(_BACKEND_CONN_ERROR)
-        st.stop()
-    except requests.exceptions.HTTPError as e:
-        try:
-            detail = e.response.json().get("detail", str(e))
-        except Exception:
-            detail = str(e)
-        st.error(f"Backend error: {detail}")
-        st.stop()
-
-
-def _put(path: str, body: dict) -> dict:
-    try:
-        r = requests.put(f"{BASE_URL}{path}", json=body, timeout=10)
-        r.raise_for_status()
-        return r.json()
-    except requests.exceptions.ConnectionError:
-        st.error(_BACKEND_CONN_ERROR)
-        st.stop()
-    except requests.exceptions.HTTPError as e:
-        try:
-            detail = e.response.json().get("detail", str(e))
-        except Exception:
-            detail = str(e)
-        st.error(f"Backend error: {detail}")
-        st.stop()
-
-
-def _delete(path: str) -> dict:
-    try:
-        r = requests.delete(f"{BASE_URL}{path}", timeout=10)
-        r.raise_for_status()
-        return r.json()
-    except requests.exceptions.ConnectionError:
-        st.error(_BACKEND_CONN_ERROR)
-        st.stop()
-    except requests.exceptions.HTTPError as e:
-        try:
-            detail = e.response.json().get("detail", str(e))
-        except Exception:
-            detail = str(e)
-        st.error(f"Backend error: {detail}")
-        st.stop()
+def _get(path: str):          return _request("get",    path)
+def _post(path: str, body):   return _request("post",   path, body, timeout=60)
+def _patch(path: str, body):  return _request("patch",  path, body)
+def _put(path: str, body):    return _request("put",    path, body)
+def _delete(path: str):       return _request("delete", path)
 
 
 # ── Counselors ─────────────────────────────────────────────────────────────────

@@ -8,7 +8,7 @@ MAX_CASELOAD = 5
 
 
 class CounselorAtCapacity(Exception):
-    """Raised when a new request would push a counselor past MAX_CASELOAD open cases."""
+    pass
 
 
 def get_connection():
@@ -88,7 +88,6 @@ def verify_admin_credentials(email: str, password: str) -> bool:
 
 
 def _set_availability(cursor, counselor_id: int, availability):
-    """Replace a counselor's availability rows with the given list of time blocks."""
     cursor.execute("DELETE FROM tbl_counselor_availability WHERE counselor_id=%s", (counselor_id,))
     for block in (availability or []):
         cursor.execute(
@@ -266,8 +265,6 @@ def update_request_status(request_id: int, status: str):
 
 
 def close_request(request_id: int):
-    """Mark an approved match as Closed. This drops it out of the counselor's
-    live caseload count, freeing a slot. Only an Approved match can be closed."""
     conn = get_connection()
     cursor = conn.cursor()
     try:

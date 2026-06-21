@@ -457,9 +457,8 @@ def show_model_performance_page():
         unsafe_allow_html=True,
     )
 
-    # ── Training progress lives at PAGE level — never inside a tab ────────────
-    # st.empty() while-loop: only placeholders update, zero full-page blink.
-    # Safe here because no tabs exist on this render path.
+    # Training progress lives at page level — no tabs exist on this render path,
+    # so st.empty() placeholders update without triggering a full-page blink.
     job_id = st.session_state.get("training_job_id")
     if job_id:
         status_box = st.empty()
