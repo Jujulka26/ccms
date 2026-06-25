@@ -3,6 +3,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tempfile
 import threading
 import uuid
 from datetime import datetime
@@ -23,12 +24,9 @@ ART_DIR      = ML_DIR / "artifacts"
 VERSIONS_DIR = ML_DIR / "versions"
 ACTIVE_FILE  = ML_DIR / "active_version.txt"
 
-_BEST_MODEL     = ML_DIR / "ensemble_soft.pkl"
-_TUNED_CSV      = ART_DIR / "tuned_result.csv"
-_BEST_MODEL_BAK = ML_DIR / "ensemble_soft_backup.pkl"
-_TUNED_CSV_BAK  = ML_DIR / "tuned_result_backup.csv"
-_DATASET_CSV    = ML_DIR / "client_counselor_dataset.csv"
-_DATASET_BAK    = ML_DIR / "client_counselor_dataset_backup.csv"
+_BEST_MODEL  = ML_DIR / "ensemble_soft.pkl"
+_TUNED_CSV   = ART_DIR / "tuned_result.csv"
+_DATASET_CSV = ML_DIR / "client_counselor_dataset.csv"
 
 REQUIRED_COLUMNS = {
     "client_age", "client_ethnicity", "client_issue",
@@ -158,19 +156,22 @@ def get_history():
 def _run_training(job_id: str, df: pd.DataFrame):
     job = _jobs[job_id]
     version_dir = None
+    tmp_model   = None
+    tmp_csv     = None
     try:
         VERSIONS_DIR.mkdir(exist_ok=True)
 
-        job["step"]     = "Backing up current model and dataset..."
         job["progress"] = 0.05
+        old_metrics = _deployed_metrics(_TUNED_CSV)
         if _BEST_MODEL.exists():
-            shutil.copy2(str(_BEST_MODEL), str(_BEST_MODEL_BAK))
+            with tempfile.NamedTemporaryFile(suffix=".pkl", delete=False) as f:
+                tmp_model = Path(f.name)
+            shutil.copy2(str(_BEST_MODEL), str(tmp_model))
         if _TUNED_CSV.exists():
-            shutil.copy2(str(_TUNED_CSV), str(_TUNED_CSV_BAK))
-        if _DATASET_CSV.exists():
-            shutil.copy2(str(_DATASET_CSV), str(_DATASET_BAK))
+            with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as f:
+                tmp_csv = Path(f.name)
+            shutil.copy2(str(_TUNED_CSV), str(tmp_csv))
 
-        old_metrics = _deployed_metrics(_TUNED_CSV_BAK)
         version_id  = "v_" + datetime.now().strftime("%Y%m%d_%H%M%S")
         version_dir = VERSIONS_DIR / version_id
         version_dir.mkdir(exist_ok=True)
@@ -218,12 +219,12 @@ def _run_training(job_id: str, df: pd.DataFrame):
         shutil.copy2(str(_TUNED_CSV), str(version_dir / "tuned_result.csv"))
 
         # restore originals; new version is deployed only when admin chooses
-        if _BEST_MODEL_BAK.exists():
-            shutil.copy2(str(_BEST_MODEL_BAK), str(_BEST_MODEL))
-        if _TUNED_CSV_BAK.exists():
-            shutil.copy2(str(_TUNED_CSV_BAK), str(_TUNED_CSV))
-        if _DATASET_BAK.exists():
-            shutil.copy2(str(_DATASET_BAK), str(_DATASET_CSV))
+        if tmp_model:
+            shutil.copy2(str(tmp_model), str(_BEST_MODEL))
+            tmp_model.unlink(missing_ok=True)
+        if tmp_csv:
+            shutil.copy2(str(tmp_csv), str(_TUNED_CSV))
+            tmp_csv.unlink(missing_ok=True)
 
         meta = {
             "version_id":   version_id,
@@ -250,9 +251,12 @@ def _run_training(job_id: str, df: pd.DataFrame):
     except Exception as e:
         if version_dir and version_dir.exists():
             shutil.rmtree(str(version_dir), ignore_errors=True)
-        # Restore the dataset if training was interrupted mid-way.
-        if _DATASET_BAK.exists():
-            shutil.copy2(str(_DATASET_BAK), str(_DATASET_CSV))
+        if tmp_model and tmp_model.exists():
+            shutil.copy2(str(tmp_model), str(_BEST_MODEL))
+            tmp_model.unlink(missing_ok=True)
+        if tmp_csv and tmp_csv.exists():
+            shutil.copy2(str(tmp_csv), str(_TUNED_CSV))
+            tmp_csv.unlink(missing_ok=True)
         job["status"] = "error"
         job["error"] = str(e)
 
@@ -306,8 +310,6 @@ def deploy_version(version_id: str):
     csv = version_dir / "tuned_result.csv"
     if not pkl.exists():
         raise HTTPException(status_code=404, detail="ensemble_soft.pkl not found in this version.")
-    if _BEST_MODEL.exists():
-        shutil.copy2(str(_BEST_MODEL), str(_BEST_MODEL_BAK))
     shutil.copy2(str(pkl), str(_BEST_MODEL))
     if csv.exists():
         shutil.copy2(str(csv), str(_TUNED_CSV))
